@@ -18,3 +18,75 @@ button{background:#fff;color:#000;border:none;padding:15px 30px;font-size:18px;b
 <button id="startBtn">Touchez pour commencer</button>
 <div id="s1" class="screen"></div>
 <div id="s2" class="screen">
+  <video id="v2" src="../courir.mp4" muted loop playsinline></video>
+</div>
+<div id="s3" class="screen"><img src="main.png" alt=""></div>
+<div id="s4" class="screen">
+  <video id="v1" src="../trounoir.webm" playsinline></video>
+</div>
+<audio id="a1" src="audio/p1-intro.mp3"></audio>
+<audio id="a2" src="audio/p2-sam.mp3"></audio>
+<audio id="a3" src="audio/p3-toc.mp3"></audio>
+<audio id="a4" src="audio/p4-absence.mp3"></audio>
+<script>
+const s1=document.getElementById('s1');
+const s2=document.getElementById('s2');
+const s3=document.getElementById('s3');
+const s4=document.getElementById('s4');
+const v1=document.getElementById('v1');
+const v2=document.getElementById('v2');
+const a1=document.getElementById('a1');
+const a2=document.getElementById('a2');
+const a3=document.getElementById('a3');
+const a4=document.getElementById('a4');
+const startBtn=document.getElementById('startBtn');
+
+startBtn.onclick=()=>{
+  startBtn.remove();
+  s1.classList.add('active');
+  a1.play().catch(e=>console.log('Audio1 error:',e));
+  a1.onended=()=>{
+    let b=document.createElement('button');
+    b.textContent='Commencer';
+    b.onclick=()=>{b.remove();step1()};
+    s1.appendChild(b);
+  }
+}
+
+function step1(){
+  s1.classList.remove('active');
+  s2.classList.add('active');
+  v2.play().catch(e=>console.log('Video courir error:',e));
+  a2.play().catch(e=>console.log('Audio2 error:',e));
+  a2.onended=()=>{
+    let b=document.createElement('button');
+    b.textContent='Continuer';
+    b.onclick=()=>{b.remove();step2()};
+    s2.appendChild(b);
+  }
+}
+
+function step2(){
+  v2.pause();
+  s2.classList.remove('active');
+  s3.classList.add('active');
+  a3.play().catch(e=>console.log('Audio3 error:',e));
+  a3.onended=()=>{
+    let b=document.createElement('button');
+    b.textContent='Voir la vidéo';
+    b.onclick=()=>{b.remove();step3()};
+    s3.appendChild(b);
+  }
+}
+
+function step3(){
+  s3.classList.remove('active');
+  s4.classList.add('active');
+  a4.play().catch(e=>console.log('Audio4 error:',e));
+  a4.onended=()=>{
+    v1.play().catch(e=>console.log('Video trounoir error:',e));
+  }
+}
+</script>
+</body>
+</html>
