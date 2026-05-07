@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>QR1</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-family:system-ui;display:flex;align-items:center;justify-content:center}
+.screen{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px}
+.screen.active{display:flex}
+img{max-width:90%;max-height:70vh;margin-bottom:20px}
+button{background:#fff;color:#000;border:none;padding:15px 30px;font-size:18px;border-radius:8px;cursor:pointer}
+#startBtn{position:absolute;z-index:10}
+video{max-width:100%;max-height:100vh}
+</style>
+</head>
+<body>
+<button id="startBtn">Touchez pour commencer</button>
+
+<div id="s1" class="screen">
+  <img src="main.png" alt="">
+</div>
+<div id="s2" class="screen">
+  <img src="main.png" alt="">
+</div>
+<div id="s3" class="screen">
+  <img src="main.png" alt="">
+</div>
+<div id="s4" class="screen">
+  <video id="v1" src="../vidéo/trou noir.webm" playsinline></video>
+</div>
+
+<audio id="a1" src="audio/p1-intro.mp3"></audio>
+<audio id="a2" src="audio/p2-sam.mp3"></audio>
+<audio id="a3" src="audio/p3-toc.mp3"></audio>
+<audio id="a4" src="audio/p4-absence.mp3"></audio>
+
+<script>
+const screens=[s1,s2,s3,s4],audios=[a1,a2,a3,a4],startBtn=document.getElementById('startBtn');
+let i=0;
+
+function show(n){
+  screens.forEach(s=>s.classList.remove('active'));
+  screens[n].classList.add('active');
+}
+
+function next(){
+  if(i<3){
+    i++;
+    show(i);
+    audios[i].play().catch(()=>{});
+    if(i<3) audios[i].onended=()=>nextBtn();
+    if(i==3) audios[3].onended=()=>v1.play();
+  }
+}
+
+function nextBtn(){
+  let b=document.createElement('button');
+  b.textContent=i==1?'Continuer':i==2?'La suite':'Voir la vidéo';
+  b.onclick=()=>{b.remove();next()};
+  screens[i].appendChild(b);
+}
+
+startBtn.onclick=()=>{
+  startBtn.remove();
+  show(0);
+  a1.play().catch(()=>{
+    let b=document.createElement('button');
+    b.textContent='Lancer l\'audio';
+    b.onclick=()=>{a1.play();b.remove()};
+    s1.appendChild(b);
+  });
+  a1.onended=()=>nextBtn();
+}
+</script>
+</body>
+</html>
