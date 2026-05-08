@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -7,20 +8,31 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-family:system-ui}
-button{background:#fff;color:#000;border:none;padding:15px 30px;font-size:18px;border-radius:8px;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%)}
+#btn{background:#fff;color:#000;border:none;padding:20px 40px;font-size:20px;border-radius:8px;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);cursor:pointer}
+#restart{background:#fff;color:#000;border:none;padding:15px 30px;font-size:18px;border-radius:8px;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);cursor:pointer;display:none}
 </style>
 </head>
 <body>
 <button id="btn">Touchez pour commencer</button>
-<audio id="a1" src="./qrcode2total.mp3"></audio>
+<button id="restart">Recommencer</button>
+<audio id="audio" src="./qrcode2total.mp3" preload="auto"></audio>
 <script>
+const btn=document.getElementById('btn');
+const restart=document.getElementById('restart');
+const audio=document.getElementById('audio');
+
 btn.onclick=()=>{
-  btn.remove();
-  document.getElementById('a1').play().then(()=>{
-    document.body.innerHTML='<div style="display:flex;height:100vh;align-items:center;justify-content:center"><button onclick=location.reload()>Recommencer</button></div>';
-  }).catch(e=>{
-    document.body.innerHTML='ERREUR: '+e.message;
-  });
+  btn.style.display='none';
+  audio.volume=1;
+  audio.play();
+}
+
+audio.onended=()=>{
+  restart.style.display='block';
+}
+
+restart.onclick=()=>{
+  location.reload();
 }
 </script>
 </body>
