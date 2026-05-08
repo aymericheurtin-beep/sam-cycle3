@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -8,9 +7,20 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-family:system-ui}
-#video{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;display:none}
 #btn{background:#fff;color:#000;border:none;padding:20px 40px;font-size:20px;border-radius:8px;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);cursor:pointer;z-index:10}
-#restart{background:#fff;color:#000;border:none;padding:15px 30px;font-size:18px;border-radius:8px;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);cursor:pointer;display:none;z-index:10}
+#restart{background:#fff;color:#000;border:none;padding:15px 30px;font-size:18px;border-radius:8px;position:fixed;bottom:30px;left:50%;transform:translateX(-50%);cursor:pointer;display:none;z-index:10}
+#video{
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  max-width:100vw;
+  max-height:100vh;
+  width:auto;
+  height:auto;
+  object-fit:contain;
+  display:none;
+}
 </style>
 </head>
 <body>
