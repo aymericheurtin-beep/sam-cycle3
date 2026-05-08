@@ -47,7 +47,7 @@ startBtn.onclick=()=>{
   a1.play().catch(e=>console.log('Audio1 error:',e));
   a1.onended=()=>{
     let b=document.createElement('button');
-    b.textContent='Commencer';
+    b.textContent='Voir la suite';
     b.onclick=()=>{b.remove();step1()};
     s1.appendChild(b);
   }
@@ -73,7 +73,7 @@ function step2(){
   a3.play().catch(e=>console.log('Audio3 error:',e));
   a3.onended=()=>{
     let b=document.createElement('button');
-    b.textContent='Voir la vidéo';
+    b.textContent='Continuer';
     b.onclick=()=>{b.remove();step3()};
     s3.appendChild(b);
   }
