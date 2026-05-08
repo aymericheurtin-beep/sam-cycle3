@@ -20,20 +20,6 @@ body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-fam
   object-fit:contain;
   display:none;
 }
-#titre{
-  position:fixed;
-  top:20px;
-  left:50%;
-  transform:translateX(-50%);
-  font-size:22px;
-  font-weight:bold;
-  text-align:center;
-  display:none;
-  z-index:5;
-  background:rgba(0,0,0,0.7);
-  padding:10px 20px;
-  border-radius:8px;
-}
 .zone{
   position:fixed;
   cursor:pointer;
@@ -42,7 +28,7 @@ body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-fam
   display:none;
 }
 .zone:hover{border-color:#fff;background:rgba(255,255,255,0.15)}
-#resultat{
+#fin{
   position:fixed;
   top:50%;
   left:50%;
@@ -55,13 +41,11 @@ body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-fam
   display:none;
   z-index:20;
 }
-#restart{background:#fff;color:#000;border:none;padding:15px 30px;font-size:18px;border-radius:8px;margin-top:20px;cursor:pointer}
 </style>
 </head>
 <body>
 <button id="btn">Touchez pour commencer</button>
-<div id="titre">Comment imaginez-vous Inès?</div>
-<img id="qcm" src="./ines_5_choix.jpg" alt="QCM Inès">
+<img id="qcm" src="./ines_5_choix.jpg" alt="Choisissez votre Inès">
 
 <div class="zone" id="z1"></div>
 <div class="zone" id="z2"></div>
@@ -70,38 +54,34 @@ body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-fam
 <div class="zone" id="z5"></div>
 <div class="zone" id="z6"></div>
 
-<div id="resultat">
-  <div id="texteResultat"></div>
-  <button id="restart">Recommencer</button>
-</div>
+<div id="fin">Choix enregistré.<br>Direction le QR suivant...</div>
 
 <audio id="intro" src="./ines_question.mp3" preload="auto"></audio>
+<audio id="consigne" src="./ines_consigne.mp3" preload="auto"></audio>
 
 <script>
 const btn=document.getElementById('btn');
 const qcm=document.getElementById('qcm');
-const titre=document.getElementById('titre');
 const intro=document.getElementById('intro');
-const resultat=document.getElementById('resultat');
-const texteResultat=document.getElementById('texteResultat');
-const restart=document.getElementById('restart');
+const consigne=document.getElementById('consigne');
+const fin=document.getElementById('fin');
 const zones=document.querySelectorAll('.zone');
-
-const choix=[
-  "Inès n°1","Inès n°2","Inès n°3",
-  "Inès n°4","Inès n°5","Le Mystère"
-];
 
 btn.onclick=()=>{
   btn.style.display='none';
-  intro.play().catch(e=>alert('Erreur audio : activez le son'));
+  intro.play().catch(e=>alert('Activez le son'));
 }
 
 intro.onended=()=>{
   qcm.style.display='block';
-  titre.style.display='block';
-  qcm.onload=placerZones;
-  if(qcm.complete)placerZones();
+  qcm.onload=()=>{
+    placerZones();
+    consigne.play();
+  }
+  if(qcm.complete){
+    placerZones();
+    consigne.play();
+  }
 }
 
 function placerZones(){
@@ -122,19 +102,18 @@ function placerZones(){
     z.style.width=zonesPos[i][2]+'px';
     z.style.height=zonesPos[i][3]+'px';
     z.style.display='block';
-    z.onclick=()=>validerChoix(i);
+    z.onclick=()=>validerChoix();
   });
 }
 
-function validerChoix(i){
+function validerChoix(){
+  consigne.pause();
   qcm.style.display='none';
-  titre.style.display='none';
   zones.forEach(z=>z.style.display='none');
-  texteResultat.textContent='Vous avez choisi : '+choix[i];
-  resultat.style.display='block';
+  fin.style.display='block';
+  setTimeout(()=>location.reload(),3000); // Auto restart après 3s
 }
 
-restart.onclick=()=>location.reload();
 window.onresize=()=>{if(qcm.style.display=='block')placerZones();}
 </script>
 </body>
