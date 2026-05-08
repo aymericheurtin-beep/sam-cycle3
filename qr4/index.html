@@ -8,6 +8,7 @@
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-family:system-ui}
 #btn{background:#fff;color:#000;border:none;padding:20px 40px;font-size:20px;border-radius:8px;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);cursor:pointer;z-index:10}
+#restart{background:#fff;color:#000;border:none;padding:15px 30px;font-size:18px;border-radius:8px;position:fixed;bottom:30px;left:50%;transform:translateX(-50%);cursor:pointer;display:none;z-index:10}
 #qcm{
   position:fixed;
   top:50%;
@@ -28,23 +29,11 @@ body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-fam
   display:none;
 }
 .zone:hover{border-color:#fff;background:rgba(255,255,255,0.15)}
-#fin{
-  position:fixed;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  font-size:28px;
-  background:rgba(0,0,0,0.95);
-  padding:40px;
-  border-radius:12px;
-  text-align:center;
-  display:none;
-  z-index:20;
-}
 </style>
 </head>
 <body>
 <button id="btn">Touchez pour commencer</button>
+<button id="restart">Recommencer</button>
 <img id="qcm" src="./ines_5_choix.jpg" alt="Choisissez votre Inès">
 
 <div class="zone" id="z1"></div>
@@ -54,17 +43,15 @@ body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-fam
 <div class="zone" id="z5"></div>
 <div class="zone" id="z6"></div>
 
-<div id="fin">Choix enregistré.<br>Direction le QR suivant...</div>
-
 <audio id="intro" src="./ines_question.mp3" preload="auto"></audio>
 <audio id="consigne" src="./ines_consigne.mp3" preload="auto"></audio>
 
 <script>
 const btn=document.getElementById('btn');
+const restart=document.getElementById('restart');
 const qcm=document.getElementById('qcm');
 const intro=document.getElementById('intro');
 const consigne=document.getElementById('consigne');
-const fin=document.getElementById('fin');
 const zones=document.querySelectorAll('.zone');
 
 btn.onclick=()=>{
@@ -110,10 +97,10 @@ function validerChoix(){
   consigne.pause();
   qcm.style.display='none';
   zones.forEach(z=>z.style.display='none');
-  fin.style.display='block';
-  setTimeout(()=>location.reload(),3000); // Auto restart après 3s
+  restart.style.display='block';
 }
 
+restart.onclick=()=>location.reload();
 window.onresize=()=>{if(qcm.style.display=='block')placerZones();}
 </script>
 </body>
