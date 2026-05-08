@@ -77,10 +77,10 @@ bruit.onended=()=>{
   photo.style.display='block';
   setTimeout(()=>{
     photo.style.opacity='1';
-    // Attend 4 secondes avant de lancer la voix
+    // Photo seule pendant 7 secondes avant la voix
     setTimeout(()=>{
       voix.play();
-    },4000);
+    },7000);
   },100);
 }
 
