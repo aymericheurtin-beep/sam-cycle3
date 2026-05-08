@@ -1,1 +1,41 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>QR3</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-family:system-ui}
+#video{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;display:none}
+#btn{background:#fff;color:#000;border:none;padding:20px 40px;font-size:20px;border-radius:8px;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);cursor:pointer;z-index:10}
+#restart{background:#fff;color:#000;border:none;padding:15px 30px;font-size:18px;border-radius:8px;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);cursor:pointer;display:none;z-index:10}
+</style>
+</head>
+<body>
+<button id="btn">Touchez pour commencer</button>
+<button id="restart">Recommencer</button>
+<video id="video" src="./video.mp4" playsinline preload="auto"></video>
+<script>
+const btn=document.getElementById('btn');
+const restart=document.getElementById('restart');
+const video=document.getElementById('video');
 
+btn.onclick=()=>{
+  btn.style.display='none';
+  video.style.display='block';
+  video.play().catch(e=>{
+    alert('Erreur lecture: '+e.message);
+  });
+}
+
+video.onended=()=>{
+  restart.style.display='block';
+}
+
+restart.onclick=()=>{
+  location.reload();
+}
+</script>
+</body>
+</html>
