@@ -35,16 +35,16 @@
     bottom: 8vmin;
     display: none;
     opacity: 0;
-    transition: opacity 1s;
+    transition: opacity 1.5s;
   }
   #texte {
     position: absolute;
     text-align: center;
-    font-size: 5vmin;
-    line-height: 1.6;
-    max-width: 80vw;
+    font-size: 4.5vmin;
+    line-height: 1.8;
+    max-width: 85vw;
     opacity: 0;
-    transition: opacity 1s;
+    transition: opacity 1.2s;
   }
   .flash { animation: flashWhite 0.05s; }
   @keyframes flashWhite { 0%,100%{background:#000} 50%{background:#fff} }
@@ -59,24 +59,22 @@
   <button id="restartBtn" class="btn">Recommencer</button>
 </div>
 
-<audio id="noe1" src="noé_1.mp3" preload="auto"></audio>
+<audio id="noe" src="noé.mp3" preload="auto"></audio>
 <audio id="pas" src="pas.mp3" preload="auto"></audio>
 <audio id="bar" src="bar.mp3" preload="auto"></audio>
 <audio id="gifle" src="gifle.mp3" preload="auto"></audio>
 <audio id="respi" src="respiration.mp3" preload="auto"></audio>
-<audio id="pasDepart" src="pas_depart.mp3" preload="auto"></audio>
 
 <script>
 const startBtn = document.getElementById('startBtn');
 const restartBtn = document.getElementById('restartBtn');
 const texte = document.getElementById('texte');
 
-const noe1 = document.getElementById('noe1');
+const noe = document.getElementById('noe');
 const pas = document.getElementById('pas');
 const bar = document.getElementById('bar');
 const gifle = document.getElementById('gifle');
 const respi = document.getElementById('respi');
-const pasDepart = document.getElementById('pasDepart');
 
 let started = false;
 
@@ -91,53 +89,61 @@ async function startExperience() {
 }
 
 async function playSafe(audio) {
-  try { await audio.play(); } 
-  catch(e) { console.log('Audio error:', audio.src, e); }
+  try { 
+    audio.currentTime = 0;
+    await audio.play(); 
+  } catch(e) { 
+    console.log('Audio error:', audio.src, e); 
+  }
 }
 
-async function showText(txt, duration = 2000) {
+async function showText(txt, fadeIn = 1200, hold = 2000, fadeOut = 1200) {
   texte.innerHTML = txt;
+  texte.style.transition = `opacity ${fadeIn}ms`;
   texte.style.opacity = '1';
-  await sleep(duration);
+  await sleep(hold);
+  texte.style.transition = `opacity ${fadeOut}ms`;
   texte.style.opacity = '0';
-  await sleep(1000);
+  await sleep(fadeOut);
+}
+
+async function showTextStay(txt, fadeIn = 1500) {
+  texte.innerHTML = txt;
+  texte.style.transition = `opacity ${fadeIn}ms`;
+  texte.style.opacity = '1';
 }
 
 async function runSequence() {
   // 1. Texte intro
-  await showText('La voix traverse la piste.', 1500);
-  await showText('Forte. Trop forte.', 1500);
+  await showText('La voix traverse la piste.', 1200, 1500, 1000);
+  await showText('Forte. Trop forte.', 1200, 1500, 1000);
   
-  // 2. "NOÉÉ !"
-  await playSafe(noe1);
-  await sleep(1500);
+  // 2. Audio "Noé"
+  await playSafe(noe);
+  await sleep(1800);
   
   // 3. Bruit de pas
   await playSafe(pas);
-  await sleep(2500);
+  await sleep(2800);
   
-  // 4. "La Nationale, c'est le nouveau nom de ton bar ?"
+  // 4. Audio "La Nationale..."
   await playSafe(bar);
-  await sleep(2000);
+  await sleep(2200);
   
-  // 5. GIFLE
+  // 5. GIFLE + Flash
   document.body.classList.add('flash');
   await playSafe(gifle);
   await sleep(50);
   document.body.classList.remove('flash');
+  await sleep(800);
   
-  // 6. 5s de silence + respiration de Noé
-  await playSafe(respi);
-  await sleep(5000);
+  // 6. 10s de respiration + texte final qui apparaît pendant
+  playSafe(respi);
+  await sleep(1500); // Laisse 1.5s de respi seule
+  await showTextStay("C'est ça qui est insupportable.<br>Pas la gifle.<br>Le fait que Noé n'est pas surpris.", 2000);
+  await sleep(8500); // Le reste des 10s
   
-  // 7. Pas qui s'éloignent
-  await playSafe(pasDepart);
-  await sleep(3000);
-  
-  // 8. Texte final
-  await showText("C'est ça qui est insupportable.<br>Pas la gifle.<br>Le fait que Noé n'est pas surpris.", 5000);
-  
-  // 9. Bouton recommencer
+  // 7. Bouton recommencer
   restartBtn.style.display = 'block';
   setTimeout(() => restartBtn.style.opacity = '1', 50);
 }
