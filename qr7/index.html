@@ -1,1 +1,150 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QR7 - VIDAL</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { 
+    width: 100%; height: 100%; 
+    background: #000; 
+    overflow: hidden; 
+    font-family: 'Courier New', monospace;
+    color: #fff;
+  }
+  #stage {
+    position: relative;
+    width: 100vw; height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    background: #000;
+  }
+  .btn {
+    background: #fff;
+    color: #000;
+    border: none;
+    padding: 12px 24px;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    z-index: 10;
+    font-family: Arial, sans-serif;
+  }
+  #restartBtn {
+    position: absolute;
+    bottom: 8vmin;
+    display: none;
+    opacity: 0;
+    transition: opacity 1s;
+  }
+  #texte {
+    position: absolute;
+    text-align: center;
+    font-size: 5vmin;
+    line-height: 1.6;
+    max-width: 80vw;
+    opacity: 0;
+    transition: opacity 1s;
+  }
+  .flash { animation: flashWhite 0.05s; }
+  @keyframes flashWhite { 0%,100%{background:#000} 50%{background:#fff} }
+</style>
+</head>
+<body>
+<div id="stage">
+  <button id="startBtn" class="btn">Touchez pour commencer</button>
+  
+  <div id="texte"></div>
+  
+  <button id="restartBtn" class="btn">Recommencer</button>
+</div>
 
+<audio id="noe1" src="noé_1.mp3" preload="auto"></audio>
+<audio id="pas" src="pas.mp3" preload="auto"></audio>
+<audio id="bar" src="bar.mp3" preload="auto"></audio>
+<audio id="gifle" src="gifle.mp3" preload="auto"></audio>
+<audio id="respi" src="respiration.mp3" preload="auto"></audio>
+<audio id="pasDepart" src="pas_depart.mp3" preload="auto"></audio>
+
+<script>
+const startBtn = document.getElementById('startBtn');
+const restartBtn = document.getElementById('restartBtn');
+const texte = document.getElementById('texte');
+
+const noe1 = document.getElementById('noe1');
+const pas = document.getElementById('pas');
+const bar = document.getElementById('bar');
+const gifle = document.getElementById('gifle');
+const respi = document.getElementById('respi');
+const pasDepart = document.getElementById('pasDepart');
+
+let started = false;
+
+startBtn.addEventListener('click', startExperience);
+restartBtn.addEventListener('click', () => location.reload());
+
+async function startExperience() {
+  if (started) return;
+  started = true;
+  startBtn.style.display = 'none';
+  runSequence();
+}
+
+async function playSafe(audio) {
+  try { await audio.play(); } 
+  catch(e) { console.log('Audio error:', audio.src, e); }
+}
+
+async function showText(txt, duration = 2000) {
+  texte.innerHTML = txt;
+  texte.style.opacity = '1';
+  await sleep(duration);
+  texte.style.opacity = '0';
+  await sleep(1000);
+}
+
+async function runSequence() {
+  // 1. Texte intro
+  await showText('La voix traverse la piste.', 1500);
+  await showText('Forte. Trop forte.', 1500);
+  
+  // 2. "NOÉÉ !"
+  await playSafe(noe1);
+  await sleep(1500);
+  
+  // 3. Bruit de pas
+  await playSafe(pas);
+  await sleep(2500);
+  
+  // 4. "La Nationale, c'est le nouveau nom de ton bar ?"
+  await playSafe(bar);
+  await sleep(2000);
+  
+  // 5. GIFLE
+  document.body.classList.add('flash');
+  await playSafe(gifle);
+  await sleep(50);
+  document.body.classList.remove('flash');
+  
+  // 6. 5s de silence + respiration de Noé
+  await playSafe(respi);
+  await sleep(5000);
+  
+  // 7. Pas qui s'éloignent
+  await playSafe(pasDepart);
+  await sleep(3000);
+  
+  // 8. Texte final
+  await showText("C'est ça qui est insupportable.<br>Pas la gifle.<br>Le fait que Noé n'est pas surpris.", 5000);
+  
+  // 9. Bouton recommencer
+  restartBtn.style.display = 'block';
+  setTimeout(() => restartBtn.style.opacity = '1', 50);
+}
+
+function sleep(ms) {
+  return new Promise(r => setTimeout(r, ms));
+}
+</script>
+</body>
+</html>
