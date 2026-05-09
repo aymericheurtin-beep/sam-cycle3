@@ -26,7 +26,7 @@
     font-size: 16px;
     border-radius: 8px;
     cursor: pointer;
-    box-shadow: 0 2px 8px rgba(255,255,255,0.2);
+    box-shadow: 0 2px 8px rgba(255,255,0.2);
     -webkit-tap-highlight-color: transparent;
     z-index: 10;
   }
@@ -42,12 +42,12 @@
   
   #oeil {
     position: absolute;
-    width: 100vmin; height: 100vmin;
-    max-width: 100vw; max-height: 100vh;
+    width: 80vmin; height: 80vmin;
+    max-width: 90vw; max-height: 70vh;
     object-fit: contain;
     opacity: 0; transition: opacity 0.3s;
     display: none;
-    top: 52%;
+    top: 58%;
     left: 50%;
     transform: translate(-50%, -50%);
   }
@@ -57,19 +57,19 @@
     border: 2px solid #00E5FF; opacity: 0;
     transition: opacity 0.2s; display: none;
   }
-  .tl { top: 12vmin; left: 10vmin; border-right:0; border-bottom:0; }
-  .tr { top: 12vmin; right: 10vmin; border-left:0; border-bottom:0; }
+  .tl { top: 18vmin; left: 10vmin; border-right:0; border-bottom:0; }
+  .tr { top: 18vmin; right: 10vmin; border-left:0; border-bottom:0; }
   .bl { bottom: 8vmin; left: 10vmin; border-right:0; border-top:0; }
   .br { bottom: 8vmin; right: 10vmin; border-left:0; border-top:0; }
   
   #irisGlow {
     position: absolute;
-    width: 14vmin; height: 14vmin;
+    width: 12vmin; height: 12vmin;
     border-radius: 50%;
     background: radial-gradient(circle, #00E5FF 0%, #00B8D4 40%, transparent 70%);
     opacity: 0; pointer-events: none;
     mix-blend-mode: screen;
-    left: 50%; top: 47%;
+    left: 50%; top: 53%;
     transform: translate(-50%, -50%);
     display: none;
   }
