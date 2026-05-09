@@ -47,6 +47,9 @@
     object-fit: contain;
     opacity: 0; transition: opacity 0.3s;
     display: none;
+    top: 52%;
+    left: 50%;
+    transform: translate(-50%, -50%);
   }
   
   .corner {
@@ -54,10 +57,10 @@
     border: 2px solid #00E5FF; opacity: 0;
     transition: opacity 0.2s; display: none;
   }
-  .tl { top: 10vmin; left: 10vmin; border-right:0; border-bottom:0; }
-  .tr { top: 10vmin; right: 10vmin; border-left:0; border-bottom:0; }
-  .bl { bottom: 10vmin; left: 10vmin; border-right:0; border-top:0; }
-  .br { bottom: 10vmin; right: 10vmin; border-left:0; border-top:0; }
+  .tl { top: 12vmin; left: 10vmin; border-right:0; border-bottom:0; }
+  .tr { top: 12vmin; right: 10vmin; border-left:0; border-bottom:0; }
+  .bl { bottom: 8vmin; left: 10vmin; border-right:0; border-top:0; }
+  .br { bottom: 8vmin; right: 10vmin; border-left:0; border-top:0; }
   
   #irisGlow {
     position: absolute;
@@ -66,7 +69,7 @@
     background: radial-gradient(circle, #00E5FF 0%, #00B8D4 40%, transparent 70%);
     opacity: 0; pointer-events: none;
     mix-blend-mode: screen;
-    left: 50%; top: 45%;
+    left: 50%; top: 47%;
     transform: translate(-50%, -50%);
     display: none;
   }
@@ -85,7 +88,7 @@
 <div id="stage">
   <button id="startBtn" class="btn">Touchez pour commencer</button>
   
-  <img id="oeil" src="imageoeil.jpeg" alt="">
+  <img id="oeil" src="imageoeil.jpg" alt="">
   <div id="irisGlow"></div>
   
   <div class="corner tl"></div>
@@ -128,19 +131,16 @@ function startExperience() {
 }
 
 function resetAndStart() {
-  // Reset visuels
   oeil.style.opacity = '0';
   irisGlow.classList.remove('pulse');
   corners.forEach(c => c.style.opacity = '0');
   restartBtn.style.opacity = '0';
   setTimeout(() => restartBtn.style.display = 'none', 500);
   
-  // Reset audio
   tictac.currentTime = 0;
   scan.currentTime = 0;
   voix.currentTime = 0;
   
-  // Relance
   setTimeout(startExperience, 300);
 }
 
@@ -168,7 +168,6 @@ async function runSequence() {
   
   voix.onended = () => {
     corners.forEach(c => c.style.opacity = '0');
-    // Affiche le bouton Recommencer
     setTimeout(() => {
       restartBtn.style.display = 'block';
       setTimeout(() => restartBtn.style.opacity = '1', 50);
