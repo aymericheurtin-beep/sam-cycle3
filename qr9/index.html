@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -95,8 +96,8 @@
             // Écran noir 1s
             await sleep(1000);
             
-            // Transition texte "aux vestiaires"
-            text.textContent = 'Aux vestiaires.';
+            // Transition texte "Aux vestiaires..."
+            text.textContent = 'Aux vestiaires...';
             text.classList.add('visible');
             await sleep(2000);
             text.classList.remove('visible');
@@ -117,9 +118,9 @@
             await sleep(1500);
             
             // Fin : Texte papier Noé
-            text.textContent = 'Inès ramasse le papier que Noé a fait tomber.';
+            text.textContent = 'Noé rentre dans le vestiaire et fait tomber un morceau de papier, sans s\'en apercevoir.\nInès le ramasse discrètement.';
             text.classList.add('visible');
-            await sleep(3000);
+            await sleep(4000);
             
             restart.classList.add('visible');
         }
@@ -129,4 +130,3 @@
     </script>
 </body>
 </html>
-
