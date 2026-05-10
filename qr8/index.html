@@ -30,9 +30,7 @@
             position: relative;
             z-index: 9999;
         }
-        #start {
-            animation: blink 1.5s infinite;
-        }
+        #start { animation: blink 1.5s infinite; }
         @keyframes blink {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.6; }
@@ -87,18 +85,15 @@
         async function sequence() {
             start.classList.add('hidden');
             
-            // 1. Texte intro
             text.textContent = 'vendredi 8h27\ncollège les Peupliers Blancs';
             text.classList.add('visible');
             await sleep(2500);
             
-            // 2. Audio annonce Mme Arnaud
             text.classList.remove('visible');
             await sleep(500);
-            annonce.play().catch(e => console.log('Erreur annonce:', e));
+            annonce.play().catch(e => console.log('Erreur audio:', e));
             await sleep(4200);
             
-            // 3. SILENCE LONG
             await sleep(1500);
             text.textContent = 'Silence.';
             text.classList.add('visible');
@@ -106,34 +101,32 @@
             text.classList.remove('visible');
             await sleep(800);
             
-            // 4. Nouveau texte direct sans brouhaha
             text.textContent = '8h30. Bureau de Mme Arnaud.';
             text.classList.add('visible');
             await sleep(2000);
             text.classList.remove('visible');
             await sleep(500);
             
-            // 5. CAMERA 6s - caméra.png
+            // CAM 6s
             image.style.transition = 'opacity 1s';
-            image.src = 'caméra.png';
+            image.src = 'cam.png';
             image.classList.add('visible');
             await sleep(6000);
             
-            // 6. FONDU VERS FUMEE 4s
+            // FUMEE 4s
             image.classList.remove('visible');
             await sleep(1000);
             image.src = 'fumee.png';
             image.classList.add('visible');
             await sleep(4000);
             
-            // 7. FONDU VERS CARNET
+            // CARNET 4s
             image.classList.remove('visible');
             await sleep(1000);
             image.src = 'carnet.png';
             image.classList.add('visible');
             await sleep(4000);
             
-            // 8. Bouton recommencer
             restart.classList.add('visible');
         }
 
