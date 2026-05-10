@@ -82,6 +82,22 @@
 
         const sleep = ms => new Promise(r => setTimeout(r, ms));
 
+        async function showImage(src, duration) {
+            image.style.transition = 'none';
+            image.classList.remove('visible');
+            image.src = '';
+            await sleep(50);
+            
+            image.src = src;
+            image.style.transition = 'opacity 1s';
+            await sleep(50);
+            image.classList.add('visible');
+            await sleep(duration);
+            
+            image.classList.remove('visible');
+            await sleep(1000);
+        }
+
         async function sequence() {
             start.classList.add('hidden');
             
@@ -94,12 +110,8 @@
             annonce.play().catch(e => console.log('Erreur audio:', e));
             await sleep(4200);
             
+            // Plus de "Silence" - on passe direct
             await sleep(1500);
-            text.textContent = 'Silence.';
-            text.classList.add('visible');
-            await sleep(1500);
-            text.classList.remove('visible');
-            await sleep(800);
             
             text.textContent = '8h30. Bureau de Mme Arnaud.';
             text.classList.add('visible');
@@ -107,25 +119,14 @@
             text.classList.remove('visible');
             await sleep(500);
             
-            // CAM 6s
-            image.style.transition = 'opacity 1s';
-            image.src = 'cam.png';
-            image.classList.add('visible');
-            await sleep(6000);
+            // CAM 6s - 1 SEULE FOIS
+            await showImage('cam.png', 6000);
             
-            // FUMEE 4s
-            image.classList.remove('visible');
-            await sleep(1000);
-            image.src = 'fumee.png';
-            image.classList.add('visible');
-            await sleep(4000);
+            // FUMEE 4s - 1 SEULE FOIS
+            await showImage('fumee.png', 4000);
             
             // CARNET 4s
-            image.classList.remove('visible');
-            await sleep(1000);
-            image.src = 'carnet.png';
-            image.classList.add('visible');
-            await sleep(4000);
+            await showImage('carnet.png', 4000);
             
             restart.classList.add('visible');
         }
