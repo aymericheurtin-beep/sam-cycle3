@@ -1,1 +1,151 @@
 
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR8 - Sam</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #000;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+        #start {
+            font-size: 5vmin;
+            text-align: center;
+            opacity: 0.8;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 0.3; }
+        }
+        #text {
+            position: absolute;
+            font-size: 6vmin;
+            text-align: center;
+            padding: 5vmin;
+            line-height: 1.4;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        #image {
+            position: absolute;
+            width: 100vmin;
+            height: 100vmin;
+            object-fit: contain;
+            opacity: 0;
+            transition: opacity 1s;
+        }
+        #restart {
+            position: absolute;
+            bottom: 10vmin;
+            font-size: 4vmin;
+            padding: 3vmin 6vmin;
+            background: transparent;
+            border: 1px solid #fff;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 1s;
+        }
+        #restart:hover { opacity: 1 !important; }
+        .visible { opacity: 1 !important; }
+    </style>
+</head>
+<body>
+    <div id="start">TOUCHEZ POUR COMMENCER</div>
+    <div id="text"></div>
+    <img id="image" src="">
+    <button id="restart">RECOMMENCER</button>
+
+    <audio id="annonce" src="message_arnaud.mp3"></audio>
+    <audio id="brouhaha" src="brouhaha2.mp3"></audio>
+
+    <script>
+        const start = document.getElementById('start');
+        const text = document.getElementById('text');
+        const image = document.getElementById('image');
+        const restart = document.getElementById('restart');
+        const annonce = document.getElementById('annonce');
+        const brouhaha = document.getElementById('brouhaha');
+
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+        async function sequence() {
+            start.style.display = 'none';
+            
+            // 1. Texte intro
+            text.textContent = 'vendredi 8h27\ncollège les Peupliers Blancs';
+            text.classList.add('visible');
+            await sleep(2000);
+            
+            // 2. Audio annonce Mme Arnaud
+            text.classList.remove('visible');
+            await sleep(500);
+            annonce.play();
+            await sleep(4200); // durée de ton mp3
+            
+            // 3. Silence
+            text.textContent = 'Silence.';
+            text.classList.add('visible');
+            await sleep(1000);
+            text.classList.remove('visible');
+            await sleep(300);
+            
+            // 4. Brouhaha
+            brouhaha.play();
+            await sleep(2000);
+            
+            // 5. Nouveau texte
+            text.textContent = '8h30. Bureau de Mme Arnaud.';
+            text.classList.add('visible');
+            await sleep(2000);
+            text.classList.remove('visible');
+            await sleep(500);
+            
+            // 6. Image CCTV 144p 5s
+            image.src = 'appareil photo.jpeg';
+            image.classList.add('visible');
+            await sleep(5000);
+            
+            // 7. Fondu fumée
+            image.style.transition = 'opacity 1.5s';
+            image.classList.remove('visible');
+            await sleep(1500);
+            image.src = 'fumee.png';
+            image.classList.add('visible');
+            await sleep(3000);
+            
+            // 8. Fondu carnet
+            image.classList.remove('visible');
+            await sleep(1500);
+            image.src = 'carnet.png';
+            image.classList.add('visible');
+            await sleep(4000);
+            
+            // 9. Bouton recommencer
+            restart.classList.add('visible');
+        }
+
+        document.body.addEventListener('click', () => {
+            if (start.style.display !== 'none') sequence();
+        }, { once: true });
+
+        restart.addEventListener('click', (e) => {
+            e.stopPropagation();
+            location.reload();
+        });
+    </script>
+</body>
+</html>
