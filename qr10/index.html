@@ -2,12 +2,18 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR10 - Rémy</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>QR10</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            background: #000;
+        html, body, div, span, img, button { 
+            all: unset; 
+            display: revert; 
+            box-sizing: border-box;
+        }
+        body > div:not(#text):not(#start):not(#restart) { display: none !important; }
+        
+        html, body {
+            background: #000 !important;
             color: #fff;
             font-family: 'Courier New', monospace;
             overflow: hidden;
@@ -16,7 +22,9 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            position: relative;
+            position: fixed;
+            top: 0;
+            left: 0;
         }
         .btn {
             font-size: 4vmin;
@@ -36,7 +44,7 @@
             50% { opacity: 0.6; }
         }
         #text {
-            position: absolute;
+            position: fixed;
             font-size: 4vmin;
             text-align: center;
             padding: 5vmin;
@@ -48,16 +56,17 @@
             z-index: 9998;
         }
         #image {
-            position: absolute;
+            position: fixed;
             width: 100vmin;
             height: 100vmin;
             object-fit: contain;
             opacity: 0;
             transition: opacity 1.2s;
             z-index: 9997;
+            background: #000;
         }
         #restart {
-            position: absolute;
+            position: fixed;
             bottom: 10vmin;
             opacity: 0;
             transition: opacity 1s;
@@ -76,7 +85,7 @@
 <body>
     <button id="start" class="btn">Touchez pour entrer</button>
     <div id="text"></div>
-    <img id="image" src="">
+    <img id="image" src="" onerror="this.style.display='none'">
     <button id="restart" class="btn">Recommencer</button>
 
     <audio id="audio1" src="couloirhopital2.mp3" preload="auto"></audio>
@@ -104,6 +113,21 @@
             });
         };
 
+        const showImage = (src) => {
+            return new Promise((resolve) => {
+                image.onload = () => {
+                    image.style.display = 'block';
+                    image.classList.add('visible');
+                    resolve();
+                };
+                image.onerror = () => {
+                    console.error('Image introuvable:', src);
+                    resolve();
+                };
+                image.src = src;
+            });
+        };
+
         const clearScene = async () => {
             text.classList.remove('visible');
             image.classList.remove('visible', 'vibrating');
@@ -115,44 +139,41 @@
         async function sequence() {
             start.classList.add('hidden');
             
-            // 1. Couloir + chuchotement Inès
-            await playAndWait(audio1);
-            await sleep(500);
-            
-            // 2. Porte chambre 214 + main Inès + Rémy dans le lit
-            image.src = 'portechambre.png';
-            image.classList.add('visible');
-            await sleep(4000);
-            await clearScene();
-            
-            // 3. Rémy râpe "...Je l'ai trouvé... jeudi..."
-            await playAndWait(audio2);
-            await sleep(500);
-            
-            // 4. Winamax + vibreur, puis on laisse l'image pour lire
-            image.src = 'winamax.png';
-            image.classList.add('visible');
-            image.classList.add('vibrating');
-            await playAndWait(audio3); // Attend fin du Bzz + notif
-            image.classList.remove('vibrating'); // Stop vibration
-            await sleep(3000); // Laisse 3s pour lire la notif Winamax
-            await clearScene();
-            
-            // 5. Texte : Inès, elle, voit tout...
-            text.textContent = 'Inès, elle, voit tout.\nLe téléphone de Rémy — écran allumé, pas verrouillé,\nun onglet ouvert sur un navigateur.\nElle lit en deux secondes :';
-            text.classList.add('visible');
-            await sleep(5000); // Temps de lecture du texte
-            text.classList.remove('visible');
-            await sleep(1000);
-            
-            // 6. Image : Onglet ITT accident travail - SANS vibration
-            image.src = 'ittversement.png';
-            image.classList.add('visible');
-            await sleep(5000); // 5s pour lire l'écran ITT
-            await clearScene();
-            
-            // 7. Bouton recommencer
-            restart.classList.add('visible');
+            try {
+                await playAndWait(audio1);
+                await sleep(500);
+                
+                await showImage('portechambre.png');
+                await sleep(4000);
+                await clearScene();
+                
+                await playAndWait(audio2);
+                await sleep(500);
+                
+                await showImage('winamax.png');
+                image.classList.add('vibrating');
+                await playAndWait(audio3);
+                image.classList.remove('vibrating');
+                await sleep(3000);
+                await clearScene();
+                
+                text.textContent = 'Inès, elle, voit tout.\nLe téléphone de Rémy — écran allumé, pas verrouillé,\nun onglet ouvert sur un navigateur.\nElle lit en deux secondes :';
+                text.classList.add('visible');
+                await sleep(5000);
+                text.classList.remove('visible');
+                await sleep(1000);
+                
+                await showImage('ittversement.png');
+                await sleep(5000);
+                await clearScene();
+                
+                restart.classList.add('visible');
+            } catch(e) {
+                console.error('Erreur:', e);
+                text.textContent = 'Erreur. Rechargez la page.';
+                text.classList.add('visible');
+                restart.classList.add('visible');
+            }
         }
 
         start.onclick = () => sequence();
