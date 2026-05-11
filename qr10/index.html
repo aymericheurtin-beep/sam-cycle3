@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <title>QR10</title>
     <style>
         html, body, div, span, img, button { 
@@ -25,6 +26,8 @@
             position: fixed;
             top: 0;
             left: 0;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
         }
         .btn {
             font-size: 4vmin;
@@ -37,6 +40,7 @@
             cursor: pointer;
             position: relative;
             z-index: 9999;
+            -webkit-tap-highlight-color: transparent;
         }
         #start { animation: blink 1.5s infinite; }
         @keyframes blink {
@@ -88,9 +92,9 @@
     <img id="image" src="" onerror="this.style.display='none'">
     <button id="restart" class="btn">Recommencer</button>
 
-    <audio id="audio1" src="couloirhopital2.mp3" preload="auto"></audio>
-    <audio id="audio2" src="Remy.mp3" preload="auto"></audio>
-    <audio id="audio3" src="vibreur.mp3" preload="auto"></audio>
+    <audio id="audio1" src="couloirhopital2.mp3" preload="auto" playsinline webkit-playsinline></audio>
+    <audio id="audio2" src="Remy.mp3" preload="auto" playsinline webkit-playsinline></audio>
+    <audio id="audio3" src="vibreur.mp3" preload="auto" playsinline webkit-playsinline></audio>
 
     <script>
         const start = document.getElementById('start');
