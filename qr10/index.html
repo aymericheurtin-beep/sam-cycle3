@@ -6,7 +6,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <title>QR10</title>
     <style>
-        html, body, div, span, img, button { 
+        html, body, div, span, img, video, button { 
             all: unset; 
             display: revert; 
             box-sizing: border-box;
@@ -49,17 +49,17 @@
         }
         #text {
             position: fixed;
-            font-size: 4vmin;
+            font-size: 3.8vmin;
             text-align: center;
             padding: 5vmin;
-            line-height: 1.6;
+            line-height: 1.7;
             opacity: 0;
             transition: opacity 1s;
             white-space: pre-line;
             max-width: 90vw;
             z-index: 9998;
         }
-        #image {
+        #media {
             position: fixed;
             width: 100vmin;
             height: 100vmin;
@@ -89,7 +89,8 @@
 <body>
     <button id="start" class="btn">Touchez pour entrer</button>
     <div id="text"></div>
-    <img id="image" src="" onerror="this.style.display='none'">
+    <img id="media" src="" style="display:none;">
+    <video id="video" playsinline webkit-playsinline style="display:none;" preload="auto"></video>
     <button id="restart" class="btn">Recommencer</button>
 
     <audio id="audio1" src="couloirhopital2.mp3" preload="auto" playsinline webkit-playsinline></audio>
@@ -99,7 +100,8 @@
     <script>
         const start = document.getElementById('start');
         const text = document.getElementById('text');
-        const image = document.getElementById('image');
+        const media = document.getElementById('media');
+        const video = document.getElementById('video');
         const restart = document.getElementById('restart');
         const audio1 = document.getElementById('audio1');
         const audio2 = document.getElementById('audio2');
@@ -119,24 +121,48 @@
 
         const showImage = (src) => {
             return new Promise((resolve) => {
-                image.onload = () => {
-                    image.style.display = 'block';
-                    image.classList.add('visible');
+                video.style.display = 'none';
+                media.style.display = 'block';
+                media.onload = () => {
+                    media.classList.add('visible');
                     resolve();
                 };
-                image.onerror = () => {
+                media.onerror = () => {
                     console.error('Image introuvable:', src);
                     resolve();
                 };
-                image.src = src;
+                media.src = src;
+            });
+        };
+
+        const showVideo = (src) => {
+            return new Promise((resolve) => {
+                media.style.display = 'none';
+                video.style.display = 'block';
+                video.onended = () => {
+                    resolve();
+                };
+                video.onerror = () => {
+                    console.error('Vidéo introuvable:', src);
+                    resolve();
+                };
+                video.src = src;
+                video.classList.add('visible');
+                video.play().catch(e => {
+                    console.log('Erreur vidéo:', e);
+                    resolve();
+                });
             });
         };
 
         const clearScene = async () => {
             text.classList.remove('visible');
-            image.classList.remove('visible', 'vibrating');
+            media.classList.remove('visible', 'vibrating');
+            video.classList.remove('visible');
+            video.pause();
             await sleep(1200);
-            image.src = '';
+            media.src = '';
+            video.src = '';
             text.textContent = '';
         };
 
@@ -144,33 +170,51 @@
             start.classList.add('hidden');
             
             try {
+                // 1. Couloir + chuchotement Inès
                 await playAndWait(audio1);
                 await sleep(500);
                 
+                // 2. Porte chambre 214
                 await showImage('portechambre.png');
                 await sleep(4000);
                 await clearScene();
                 
+                // 3. Rémy
                 await playAndWait(audio2);
                 await sleep(500);
                 
+                // 4. VIDÉO CASIO - Le vol
+                await showVideo('montre_poche.mp4');
+                await sleep(500);
+                await clearScene();
+                
+                // 5. Winamax + vibreur
                 await showImage('winamax.png');
-                image.classList.add('vibrating');
+                media.classList.add('vibrating');
                 await playAndWait(audio3);
-                image.classList.remove('vibrating');
+                media.classList.remove('vibrating');
                 await sleep(3000);
                 await clearScene();
                 
+                // 6. Texte Inès voit tout
                 text.textContent = 'Inès, elle, voit tout.\nLe téléphone de Rémy — écran allumé, pas verrouillé,\nun onglet ouvert sur un navigateur.\nElle lit en deux secondes :';
                 text.classList.add('visible');
                 await sleep(5000);
                 text.classList.remove('visible');
                 await sleep(1000);
                 
+                // 7. ITT
                 await showImage('ittversement.png');
                 await sleep(5000);
                 await clearScene();
                 
+                // 8. Texte final Casio
+                text.textContent = 'Puis elle se penche vers le sac plastique de Rémy.\nDedans : une Casio noire. Bracelet usé. Écran fissuré. Arrêtée à 19 h 42.\n\nInès se fige. Une demi-seconde. Comme un bug.\n\nElle jette un coup d\'œil à Rémy — il dort. À Sam — il regarde le plafond,\nvérifiant peut-être la présence des alarmes incendie.\n\nEt puis, sans un mot, geste propre, geste rapide,\nelle glisse la montre dans sa poche.\n\nSam n\'a rien vu.';
+                text.classList.add('visible');
+                await sleep(12000);
+                await clearScene();
+                
+                // 9. Bouton recommencer
                 restart.classList.add('visible');
             } catch(e) {
                 console.error('Erreur:', e);
