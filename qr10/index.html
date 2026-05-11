@@ -1,1 +1,139 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR10 - Rémy</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        .btn {
+            font-size: 4vmin;
+            padding: 3vmin 6vmin;
+            background: #fff;
+            border: none;
+            border-radius: 8px;
+            color: #000;
+            font-family: Arial, sans-serif;
+            cursor: pointer;
+            position: relative;
+            z-index: 9999;
+        }
+        #start { animation: blink 1.5s infinite; }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        #text {
+            position: absolute;
+            font-size: 4.5vmin;
+            text-align: center;
+            padding: 5vmin;
+            line-height: 1.5;
+            opacity: 0;
+            transition: opacity 1s;
+            white-space: pre-line;
+            font-family: 'Courier New', monospace;
+            z-index: 9998;
+        }
+        #image {
+            position: absolute;
+            width: 100vmin;
+            height: 100vmin;
+            object-fit: contain;
+            opacity: 0;
+            transition: opacity 1.2s;
+            z-index: 9997;
+        }
+        #restart {
+            position: absolute;
+            bottom: 10vmin;
+            opacity: 0;
+            transition: opacity 1s;
+        }
+        .visible { opacity: 1 !important; }
+        .hidden { display: none !important; }
+        
+        /* Effet vibreur sur l'image du téléphone */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-3px); }
+            75% { transform: translateX(3px); }
+        }
+        .vibrating { animation: shake 0.1s infinite; }
+    </style>
+</head>
+<body>
+    <button id="start" class="btn">Touchez pour entrer</button>
+    <div id="text"></div>
+    <img id="image" src="">
+    <button id="restart" class="btn">Recommencer</button>
 
+    <audio id="audio1" src="couloirhopital2.mp3" preload="auto"></audio>
+    <audio id="audio2" src="Remy.mp3" preload="auto"></audio>
+    <audio id="audio3" src="vibreur.mp3" preload="auto"></audio>
+
+    <script>
+        const start = document.getElementById('start');
+        const text = document.getElementById('text');
+        const image = document.getElementById('image');
+        const restart = document.getElementById('restart');
+        const audio1 = document.getElementById('audio1');
+        const audio2 = document.getElementById('audio2');
+        const audio3 = document.getElementById('audio3');
+
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+        async function sequence() {
+            start.classList.add('hidden');
+            
+            // 1. Écran noir + couloir + chuchotement Inès
+            audio1.play().catch(e => console.log('Erreur audio1:', e));
+            await sleep(4000);
+            
+            // 2. Image : Porte chambre 214 + main Inès + Rémy dans le lit
+            image.src = 'portechambre.png';
+            image.classList.add('visible');
+            await sleep(3500);
+            image.classList.remove('visible');
+            await sleep(800);
+            
+            // 3. Audio : Rémy râpe "...Je l'ai trouvé... jeudi..."
+            audio2.play().catch(e => console.log('Erreur audio2:', e));
+            await sleep(5000);
+            
+            // 4. Image : Téléphone + vibreur Winamax intégré
+            image.src = 'téléphone.png';
+            image.classList.add('visible');
+            image.classList.add('vibrating'); // Effet tremblement
+            audio3.play().catch(e => console.log('Erreur audio3:', e));
+            await sleep(3000);
+            image.classList.remove('vibrating');
+            image.classList.remove('visible');
+            await sleep(800);
+            
+            // 5. Fondu texte révélation Inès
+            text.textContent = 'Inès, elle, voit tout.\nLe téléphone de Rémy — écran allumé, pas verrouillé,\nun onglet ouvert sur un navigateur.\nElle lit en deux secondes :\n\nITT accident travail — montant indemnisation — délai versement.';
+            text.classList.add('visible');
+            await sleep(8000);
+            
+            // 6. Bouton recommencer
+            restart.classList.add('visible');
+        }
+
+        start.onclick = () => sequence();
+        restart.onclick = () => location.reload();
+    </script>
+</body>
+</html>
