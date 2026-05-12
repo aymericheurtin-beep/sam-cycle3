@@ -125,7 +125,7 @@
 
         const hideImage = async () => {
             media.classList.remove('visible');
-            await sleep(1200); // temps du fade out
+            await sleep(1200);
             media.src = '';
         };
 
@@ -142,17 +142,22 @@
                 await showImage('vidal_jeune.png');
                 await sleep(3000);
                 
-                // 3. Bruit clés : on lance le son ET on attend qu'il finisse
-                // Pendant que le son joue, vidal_jeune.png est toujours là
-                await playAudio(audioKey);
-                // Dès que le son finit, on fade out direct vidal_jeune.png
-                await hideImage();
+                // 3. Bruit clés : on lance et on calcule quand changer d'image
+                audioKey.play();
                 
-                // 4. Photo carnet + son page photo : synchro parfaite
+                // Attend que le son ait joué jusqu'à 2s de la fin
+                const keyDuration = audioKey.duration * 1000; // en ms
+                const waitBeforeSwitch = keyDuration - 2000; // on garde 2s
+                await sleep(waitBeforeSwitch > 0 ? waitBeforeSwitch : 0);
+                
+                // 4. À 2s de la fin de bruitkey.mp3 : on passe à phot_carnet + on lance bruit_pagephoto.mp3
+                // Les 2 sons se chevauchent pendant 2s
+                await hideImage();
                 await showImage('phot_carnet.png');
-                // On lance le son ET on attend qu'il finisse avant de clear
-                await playAudio(audioPage); 
-                // Le son est fini, maintenant on peut fade out
+                audioPage.play();
+                
+                // On attend que bruit_pagephoto.mp3 finisse
+                await playAudio(audioPage);
                 await hideImage();
                 
                 // 5. Sous le bureau - FIN
