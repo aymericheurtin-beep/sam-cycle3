@@ -72,7 +72,7 @@
     <img id="media" src="" style="display:none;">
     <button id="restart" class="btn">Recommencer</button>
 
-    <audio id="audioNarrateur" src="audio_narrateur.mp3" preload="auto" playsinline webkit-playsinline></audio>
+    <audio id="audioNarrateur" src="narrateur.mp3" preload="auto" playsinline webkit-playsinline></audio>
 
     <script>
         const start = document.getElementById('start');
@@ -107,18 +107,11 @@
             start.classList.add('hidden');
             
             try {
-                // 1. Image + Audio en même temps
                 await showImage('touslessuspects.png');
                 audioNarrateur.play();
-                
-                // 2. On attend la fin de l'audio
                 await new Promise(r => audioNarrateur.onended = r);
-                
                 await hideImage();
-                
-                // 3. Bouton recommencer
                 restart.classList.add('visible');
-                
             } catch(e) {
                 console.error('Erreur:', e);
                 restart.classList.add('visible');
