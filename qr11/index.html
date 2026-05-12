@@ -1,1 +1,201 @@
 
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR14 - Le bureau de Vidal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #000;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #start-screen {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            transition: opacity 1s ease-out;
+        }
+
+        #enter-btn {
+            background: #ddd;
+            color: #000;
+            border: none;
+            padding: 15px 40px;
+            font-size: 18px;
+            font-family: 'Courier New', monospace;
+            cursor: pointer;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(255,255,255,0.1);
+            transition: transform 0.1s;
+        }
+
+        #enter-btn:active {
+            transform: scale(0.98);
+        }
+
+        .scene {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+        }
+
+        .scene.active {
+            opacity: 1;
+        }
+
+        .scene img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        #end-text {
+            position: absolute;
+            bottom: 8%;
+            width: 100%;
+            text-align: center;
+            font-size: 16px;
+            color: #aaa;
+            opacity: 0;
+            transition: opacity 2s ease-in;
+            letter-spacing: 2px;
+        }
+
+        #end-text.visible {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <!-- Écran noir + bouton -->
+        <div id="start-screen">
+            <button id="enter-btn">Touchez pour entrer</button>
+        </div>
+
+        <!-- Scène 1 : Crochetage -->
+        <div class="scene" id="scene1">
+            <img src="crochetage_vidal.png" alt="Crochetage">
+        </div>
+
+        <!-- Scène 2 : Photo Vidal jeune -->
+        <div class="scene" id="scene2">
+            <img src="vidal_jeune.png" alt="Vidal jeune">
+        </div>
+
+        <!-- Scène 3 : Photo carnet -->
+        <div class="scene" id="scene3">
+            <img src="phot_carnet.png" alt="Photo carnet">
+        </div>
+
+        <!-- Scène 4 : Sous le bureau -->
+        <div class="scene" id="scene4">
+            <img src="souslatable.png" alt="Sous le bureau">
+            <div id="end-text">Ils retiennent leur souffle.</div>
+        </div>
+    </div>
+
+    <!-- Audios -->
+    <audio id="bruit-key" src="bruitkey.mp3" preload="auto"></audio>
+    <audio id="bruit-page" src="bruit_pagephoto.mp3" preload="auto"></audio>
+
+    <script>
+        const enterBtn = document.getElementById('enter-btn');
+        const startScreen = document.getElementById('start-screen');
+        const scenes = [
+            document.getElementById('scene1'),
+            document.getElementById('scene2'),
+            document.getElementById('scene3'),
+            document.getElementById('scene4')
+        ];
+        const bruitKey = document.getElementById('bruit-key');
+        const bruitPage = document.getElementById('bruit-page');
+        const endText = document.getElementById('end-text');
+
+        let currentScene = 0;
+
+        function showScene(index) {
+            scenes.forEach((scene, i) => {
+                if (i === index) {
+                    scene.classList.add('active');
+                } else {
+                    scene.classList.remove('active');
+                }
+            });
+        }
+
+        function runSequence() {
+            // 1. Fondu crochetage 2s
+            setTimeout(() => {
+                showScene(0);
+            }, 100);
+
+            // 2. Après 4s : photo vidal jeune
+            setTimeout(() => {
+                showScene(1);
+            }, 4000);
+
+            // 3. Après 7s : bruit clés + reste sur vidal_jeune
+            setTimeout(() => {
+                bruitKey.play();
+            }, 7000);
+
+            // 4. Après 10s : photo carnet + bruit page photo
+            setTimeout(() => {
+                showScene(2);
+                bruitPage.play();
+            }, 10000);
+
+            // 5. Après 13s : sous le bureau + texte fin
+            setTimeout(() => {
+                showScene(3);
+                setTimeout(() => {
+                    endText.classList.add('visible');
+                }, 1500);
+            }, 13000);
+        }
+
+        enterBtn.addEventListener('click', () => {
+            startScreen.style.opacity = '0';
+            setTimeout(() => {
+                startScreen.style.display = 'none';
+                runSequence();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
