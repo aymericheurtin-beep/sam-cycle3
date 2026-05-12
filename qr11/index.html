@@ -98,7 +98,7 @@
 
         const sleep = ms => new Promise(r => setTimeout(r, ms));
         
-        const playAndWait = (audio) => {
+        const playAudio = (audio) => {
             return new Promise(resolve => {
                 audio.onended = resolve;
                 audio.play().catch(e => {
@@ -123,44 +123,44 @@
             });
         };
 
-        const clearScene = async () => {
-            text.classList.remove('visible');
+        const hideImage = async () => {
             media.classList.remove('visible');
-            await sleep(1200);
+            await sleep(1200); // temps du fade out
             media.src = '';
-            text.textContent = '';
         };
 
         async function sequence() {
             start.classList.add('hidden');
             
             try {
-                // 1. Crochetage
+                // 1. Crochetage - 4s
                 await showImage('crochetage_vidal.png');
                 await sleep(4000);
-                await clearScene();
+                await hideImage();
                 
-                // 2. Vidal jeune - on reste LONGTEMPS
+                // 2. Vidal jeune - 3s seule
                 await showImage('vidal_jeune.png');
-                await sleep(3000); // 3s sur l'image seule
+                await sleep(3000);
                 
-                // 3. Bruit des clés arrive PENDANT vidal_jeune
-                await playAndWait(audioKey); // attend la fin du son
-                await sleep(2000); // reste encore 2s sur l'image après le son
-                await clearScene();
+                // 3. Bruit clés : on lance le son ET on attend qu'il finisse
+                // Pendant que le son joue, vidal_jeune.png est toujours là
+                await playAudio(audioKey);
+                // Dès que le son finit, on fade out direct vidal_jeune.png
+                await hideImage();
                 
-                // 4. Photo carnet + son page photo SYNCHRONE
+                // 4. Photo carnet + son page photo : synchro parfaite
                 await showImage('phot_carnet.png');
-                audioPage.play(); // lance en même temps que l'image
-                await sleep(4000);
-                await clearScene();
+                // On lance le son ET on attend qu'il finisse avant de clear
+                await playAudio(audioPage); 
+                // Le son est fini, maintenant on peut fade out
+                await hideImage();
                 
-                // 5. Sous le bureau - FIN, pas de sous-titre
+                // 5. Sous le bureau - FIN
                 await showImage('souslatable.png');
                 await sleep(4000);
-                await clearScene();
+                await hideImage();
                 
-                // 6. Bouton recommencer direct
+                // 6. Bouton recommencer
                 restart.classList.add('visible');
             } catch(e) {
                 console.error('Erreur:', e);
