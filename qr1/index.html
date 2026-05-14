@@ -43,6 +43,8 @@ const a4=document.getElementById('a4');
 const startBtn=document.getElementById('startBtn');
 const restartBtn=document.getElementById('restartBtn');
 
+const PAUSE = 1200; // 1.2s de noir entre les séquences
+
 startBtn.onclick=()=>{
   startBtn.remove();
   step1();
@@ -61,7 +63,7 @@ function step1(){
   
   a2.onended=()=>{
     s2.classList.remove('active','fadeout');
-    step2();
+    setTimeout(step2, PAUSE); // pause avant suite
   }
 }
 
@@ -70,7 +72,7 @@ function step2(){
   a3.play().catch(e=>console.log('Audio3 error:',e));
   a3.onended=()=>{
     s3.classList.remove('active');
-    step3();
+    setTimeout(step3, PAUSE); // pause avant suite
   }
 }
 
@@ -78,12 +80,16 @@ function step3(){
   s4.classList.add('active');
   a4.play().catch(e=>console.log('Audio4 error:',e));
   a4.onended=()=>{
-    v1.play().catch(e=>console.log('Video trounoir error:',e));
+    setTimeout(()=>{
+      v1.play().catch(e=>console.log('Video trounoir error:',e));
+    }, 800); // petite pause avant la vidéo finale
   }
 }
 
 v1.onended=()=>{
-  restartBtn.style.display='block';
+  setTimeout(()=>{
+    restartBtn.style.display='block';
+  }, 1000); // pause avant bouton recommencer
 }
 
 restartBtn.onclick=()=>{location.reload()};
