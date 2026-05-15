@@ -58,7 +58,14 @@ const restartBtn=document.getElementById('restartBtn');
 
 const PAUSE = 1200;
 
+// Comptage autonomisation
+let t=parseInt(localStorage.getItem('scans_total')||0)+1;
+localStorage.setItem('scans_total',t);
+
 startBtn.onclick=()=>{
+  let u=parseInt(localStorage.getItem('scans_used')||0)+1;
+  localStorage.setItem('scans_used',u);
+  
   startBtn.remove();
   meta.classList.add('active');
   setTimeout(()=>{
