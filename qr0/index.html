@@ -6,32 +6,33 @@
 <title>QR0 - Mode d'emploi</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-family:system-ui}
-#btn{background:#fff;color:#000;border:none;padding:20px 40px;font-size:20px;border-radius:8px;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);cursor:pointer;z-index:10}
-#restart{background:#fff;color:#000;border:none;padding:15px 30px;font-size:18px;border-radius:8px;position:fixed;bottom:30px;left:50%;transform:translateX(-50%);cursor:pointer;display:none;z-index:10}
+body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-family:system-ui;display:flex;align-items:center;justify-content:center;text-align:center}
+#btn{background:#fff;color:#000;border:none;padding:20px 40px;font-size:20px;border-radius:8px;cursor:pointer}
+#rule{display:none;font-size:22px;line-height:1.4;padding:40px;max-width:600px}
 </style>
 </head>
 <body>
 <button id="btn">Touchez pour commencer</button>
-<button id="restart">Recommencer</button>
+<div id="rule">Règle : ferme les yeux 5 secondes avant chaque scan. Imagine d'abord. Scan ensuite si besoin.<br><br><button id="btn2" style="margin-top:30px;background:#fff;color:#000;border:none;padding:15px 30px;font-size:18px;border-radius:8px;cursor:pointer">Continuer lecture</button></div>
 
 <audio id="intro" src="./intro.mp3" preload="auto"></audio>
 
 <script>
 const btn=document.getElementById('btn');
-const restart=document.getElementById('restart');
+const rule=document.getElementById('rule');
 const intro=document.getElementById('intro');
+const btn2=document.getElementById('btn2');
 
 btn.onclick=()=>{
   btn.style.display='none';
-  intro.play().catch(e=>alert('Activez le son'));
+  intro.play().catch(()=>alert('Activez le son'));
 }
 
 intro.onended=()=>{
-  restart.style.display='block';
+  rule.style.display='block';
 }
 
-restart.onclick=()=>location.reload();
+btn2.onclick=()=>window.close();
 </script>
 </body>
-</html
+</html>
