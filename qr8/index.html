@@ -1,133 +1,176 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR8 - Sam</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            background: #000;
-            color: #fff;
-            font-family: Arial, sans-serif;
-            overflow: hidden;
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-        }
-        .btn {
-            font-size: 4vmin;
-            padding: 3vmin 6vmin;
-            background: #fff;
-            border: none;
-            border-radius: 8px;
-            color: #000;
-            font-family: Arial, sans-serif;
-            cursor: pointer;
-            position: relative;
-            z-index: 9999;
-        }
-        #start { animation: blink 1.5s infinite; }
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.6; }
-        }
-        #text {
-            position: absolute;
-            font-size: 6vmin;
-            text-align: center;
-            padding: 5vmin;
-            line-height: 1.4;
-            opacity: 0;
-            transition: opacity 0.5s;
-            white-space: pre-line;
-            font-family: 'Courier New', monospace;
-            z-index: 9998;
-        }
-        #image {
-            position: absolute;
-            width: 100vmin;
-            height: 100vmin;
-            object-fit: contain;
-            opacity: 0;
-            z-index: 9997;
-        }
-        #restart {
-            position: absolute;
-            bottom: 10vmin;
-            opacity: 0;
-            transition: opacity 1s;
-        }
-        .visible { opacity: 1 !important; }
-        .hidden { display: none !important; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>QR8 - Sam</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#000;color:#fff;font-family:Arial,sans-serif;overflow:hidden;width:100vw;height:100vh;display:flex;justify-content:center;align-items:center;position:relative}
+.btn{font-size:4vmin;padding:3vmin 6vmin;background:#fff;border:none;border-radius:8px;color:#000;cursor:pointer;z-index:9999}
+#start{animation:blink 1.5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.6}}
+#text{position:absolute;font-size:6vmin;text-align:center;padding:5vmin;line-height:1.4;opacity:0;transition:opacity.5s;white-space:pre-line;font-family:'Courier New',monospace;z-index:9998}
+#image{position:absolute;width:100vmin;height:100vmin;object-fit:contain;opacity:0;z-index:9997;transition:opacity 1s;pointer-events:none}
+#restart{position:absolute;bottom:10vmin;opacity:0;transition:opacity 1s}
+.visible{opacity:1!important}
+.hidden{display:none!important}
+.screen{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;background:#000;z-index:10000}
+.screen.active{display:flex}
+.screen p{font-size:22px;margin-bottom:20px}
+.choice{display:flex;gap:20px;flex-wrap:wrap;justify-content:center}
+#thumbs{position:absolute;display:none;gap:4vmin;z-index:9998}
+.thumb{width:26vmin;height:26vmin;background:#111;border:2px solid #333;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:3vmin;cursor:pointer;transition:transform.2s}
+.thumb:active{transform:scale(.95)}
+#overlay{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none;z-index:9996;transition:opacity.3s}
+#overlay.show{opacity:1;pointer-events:auto}
+.blur{filter:blur(12px)}
+</style>
 </head>
 <body>
-    <button id="start" class="btn">Touchez pour commencer</button>
-    <div id="text"></div>
-    <img id="image" src="">
-    <button id="restart" class="btn">Recommencer</button>
+<button id="start" class="btn">Touchez pour commencer</button>
+<div id="text"></div>
+<img id="image" src="">
+<div id="overlay"></div>
 
-    <audio id="annonce" src="message_arnaud.mp3" preload="auto"></audio>
+<div id="thumbs">
+  <div class="thumb" data-id="cam">Cam</div>
+  <div class="thumb" data-id="fumee">Fumée</div>
+  <div class="thumb" data-id="carnet">Carnet</div>
+</div>
 
-    <script>
-        const start = document.getElementById('start');
-        const text = document.getElementById('text');
-        const image = document.getElementById('image');
-        const restart = document.getElementById('restart');
-        const annonce = document.getElementById('annonce');
+<button id="restart" class="btn">Recommencer</button>
 
-        const sleep = ms => new Promise(r => setTimeout(r, ms));
+<div id="pre" class="screen">
+  <p>Sam entre dans le bureau. Que ressent-il?</p>
+  <div class="choice">
+    <button class="btn choiceBtn" data-val="la peur">La peur</button>
+    <button class="btn choiceBtn" data-val="l'indifférence">L'indifférence</button>
+    <button class="btn choiceBtn" data-val="autre">Autre</button>
+  </div>
+</div>
 
-        async function showImage(src, duration) {
-            image.style.transition = 'none';
-            image.classList.remove('visible');
-            image.src = '';
-            await sleep(50);
-            
-            image.src = src;
-            image.style.transition = 'opacity 1s';
-            await sleep(50);
-            image.classList.add('visible');
-            await sleep(duration);
-            
-            image.classList.remove('visible');
-            await sleep(1000);
-        }
+<audio id="annonce" src="message_arnaud.mp3" preload="auto"></audio>
 
-        async function sequence() {
-            start.classList.add('hidden');
-            
-            text.textContent = 'vendredi 8h27\ncollège les Peupliers Blancs';
-            text.classList.add('visible');
-            await sleep(2500);
-            
-            text.classList.remove('visible');
-            await sleep(500);
-            annonce.play().catch(e => console.log('Erreur audio:', e));
-            await sleep(4200);
-            
-            // Pause silencieuse sans texte
-            await sleep(3000);
-            
-            text.textContent = '8h30. Bureau de Mme Arnaud.';
-            text.classList.add('visible');
-            await sleep(2000);
-            text.classList.remove('visible');
-            await sleep(500);
-            
-            await showImage('cam.png', 6000);
-            await showImage('fumee.png', 4000);
-            await showImage('carnet.png', 4000);
-            
-            restart.classList.add('visible');
-        }
+<script>
+const start=document.getElementById('start');
+const text=document.getElementById('text');
+const image=document.getElementById('image');
+const restart=document.getElementById('restart');
+const pre=document.getElementById('pre');
+const annonce=document.getElementById('annonce');
+const thumbs=document.getElementById('thumbs');
+const overlay=document.getElementById('overlay');
 
-        start.onclick = () => sequence();
-        restart.onclick = () => location.reload();
-    </script>
+let choix='';
+let order=[];
+let opened={cam:false,fumee:false,carnet:false};
+
+let t=parseInt(localStorage.getItem('scans_total')||0)+1;
+localStorage.setItem('scans_total',t);
+
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+
+start.onclick=()=>{
+  let u=parseInt(localStorage.getItem('scans_used')||0)+1;
+  localStorage.setItem('scans_used',u);
+  start.classList.add('hidden');
+  pre.classList.add('active');
+};
+
+document.querySelectorAll('.choiceBtn').forEach(b=>{
+  b.onclick=()=>{
+    choix=b.dataset.val;
+    pre.classList.remove('active');
+    sequence();
+  };
+});
+
+restart.onclick=()=>location.reload();
+
+async function showText(txt,hold=2000){
+  text.textContent=txt;
+  text.classList.add('visible');
+  await sleep(hold);
+  text.classList.remove('visible');
+  await sleep(500);
+}
+
+async function sequence(){
+  await showText('vendredi 8h27\ncollège les Peupliers Blancs',2500);
+  annonce.play().catch(()=>{});
+  await sleep(4200);
+  await sleep(3000);
+  await showText('8h30. Bureau de Mme Arnaud.',2000);
+
+  thumbs.style.display='flex';
+  thumbs.classList.add('visible');
+}
+
+thumbs.addEventListener('click',async e=>{
+  const thumb=e.target.closest('.thumb');
+  if(!thumb) return;
+  const id=thumb.dataset.id;
+  if(!order.includes(id)) order.push(id);
+  thumbs.style.display='none';
+
+  if(id==='cam'){
+    await openCam();
+  }else if(id==='fumee'){
+    await openFumee();
+  }else if(id==='carnet'){
+    await openCarnet();
+  }
+
+  opened[id]=true;
+
+  if(opened.cam && opened.fumee && opened.carnet){
+    await final();
+  }else{
+    thumbs.style.display='flex';
+  }
+});
+
+async function openCam(){
+  image.src='cam.png';
+  image.classList.remove('blur');
+  image.classList.add('visible');
+  await sleep(6000);
+  image.classList.remove('visible');
+  await sleep(500);
+}
+
+async function openFumee(){
+  overlay.classList.add('show');
+  await sleep(800);
+  overlay.classList.remove('show');
+  image.src='fumee.png';
+  image.classList.remove('blur');
+  image.classList.add('visible');
+  await sleep(4000);
+  image.classList.remove('visible');
+  await sleep(500);
+}
+
+async function openCarnet(){
+  image.src='carnet.png';
+  image.classList.add('blur');
+  image.classList.add('visible');
+  await sleep(3000);
+  image.classList.remove('blur');
+  await sleep(3000);
+  image.classList.remove('visible');
+  await sleep(500);
+}
+
+async function final(){
+  const first=order[0];
+  const firstTxt = first==='cam'? 'la caméra' : first==='fumee'? 'la fumée' : 'le carnet';
+  text.innerHTML=`Vous aviez dit ${choix}.<br>Toujours ok avec ça?<br><br>Vous avez regardé ${firstTxt} en premier.`;
+  text.classList.add('visible');
+  await sleep(4000);
+  restart.classList.add('visible');
+}
+</script>
 </body>
 </html>
