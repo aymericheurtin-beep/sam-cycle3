@@ -11,18 +11,18 @@ body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-fam
 .screen.active{display:flex}
 #btn{background:#fff;color:#000;border:none;padding:20px 40px;font-size:20px;border-radius:8px;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);cursor:pointer;z-index:100}
 #restart{background:#fff;color:#000;border:none;padding:15px 30px;font-size:18px;border-radius:8px;cursor:pointer;margin-top:30px}
-p{font-size:22px;line-height:1.4;max-width:600px}
+p{font-size:22px;line-height:1.4;max-width:650px}
 </style>
 </head>
 <body>
 <button id="btn">Touchez pour commencer</button>
 
 <div id="meta" class="screen">
-  <p>Fermez les yeux 5 secondes. Imaginez la voix de Sam dans le couloir.</p>
+  <p>Fermez les yeux 5 secondes. Imaginez la cantine bruyante, la bousculade, le plateau qui vole, et Noé qui lance : « T'as une tête à courir plus vite que tu réfléchis ».</p>
 </div>
 
 <div id="post" class="screen">
-  <p>Comparez avec ce que vous aviez imaginé.</p>
+  <p>Comparez les sons que vous aviez imaginés avec ceux entendus.</p>
   <button id="restart">Recommencer</button>
 </div>
 
@@ -35,7 +35,6 @@ const audio=document.getElementById('audio');
 const meta=document.getElementById('meta');
 const post=document.getElementById('post');
 
-// Comptage
 let t=parseInt(localStorage.getItem('scans_total')||0)+1;
 localStorage.setItem('scans_total',t);
 
