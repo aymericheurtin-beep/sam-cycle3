@@ -74,7 +74,13 @@ const consigne=document.getElementById('consigne');
 const zones=document.querySelectorAll('.zone');
 const messageFin=document.getElementById('messageFin');
 
+let t=parseInt(localStorage.getItem('scans_total')||0)+1;
+localStorage.setItem('scans_total',t);
+
 btn.onclick=()=>{
+  let u=parseInt(localStorage.getItem('scans_used')||0)+1;
+  localStorage.setItem('scans_used',u);
+
   btn.style.display='none';
   intro.play().catch(e=>alert('Activez le son'));
 }
