@@ -9,9 +9,9 @@ html,body{margin:0;height:100%;background:#000;color:#fff;font-family:Courier Ne
 #start,#restart{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:5vmin;padding:4vmin 8vmin;background:#fff;color:#000;border:none;border-radius:10px;cursor:pointer;z-index:100}
 #restart{display:none}
 #text{position:absolute;left:50%;transform:translateX(-50%);width:92%;text-align:center;font-size:5vmin;line-height:1.35;z-index:30;display:none;white-space:pre-line;text-shadow:0 0 6px #000}
-#text.center{top:18%}
+#text.center{top:8%} /* <-- remonté */
 #text.bottom{bottom:6%;font-size:3.8vmin;background:rgba(0,0,0,.75);padding:1.8vmin 2.5vmin;border-radius:8px;max-width:85%}
-#choices{position:absolute;top:52%;left:50%;transform:translate(-50%,-50%);display:none;flex-direction:column;gap:2vmin;width:86%;z-index:30}
+#choices{position:absolute;top:28%;left:50%;transform:translateX(-50%);display:none;flex-direction:column;gap:2.2vmin;width:88%;z-index:30} /* <-- descendu */
 .btn{font-size:4vmin;padding:3vmin;background:#111;color:#fff;border:1px solid #fff;border-radius:8px;cursor:pointer;text-align:center}
 .btn.validate{background:#fff;color:#000;margin-top:2vmin}
 .choice{display:flex;align-items:center;gap:2vmin;background:#111;border:1px solid #fff;border-radius:8px;padding:2.5vmin;font-size:4vmin;cursor:pointer}
@@ -86,52 +86,41 @@ async function play(a){ try{ await a.play(); }catch{} }
 async function run(){
   hide(start); hide(restart);
 
-  // Autonomisation
   let used = parseInt(localStorage.getItem('scans_used')||'0')+1;
   localStorage.setItem('scans_used', used);
   localStorage.setItem('qr10_done','1');
 
-  // Phase 1 : son couloir 8s
   await play(a1); await sleep(8000); a1.pause(); a1.currentTime=0;
 
-  // Phase 2 : métacognition pré-image - vouvoiement
   const repCouloir = await askSingle("Qu'est-ce que vous avez vu dans votre tête ?", ["Un couloir blanc","Quelque chose de plus sombre","Rien de précis"]);
   localStorage.setItem('qr10_couloir', repCouloir);
 
-  // Phase 3 : porte + imagination guidée
   image.src='portechambre.webp'; show(image);
   await showText('Chambre 214. Inès et Sam entrent.',2500,'bottom');
-  hide(image); // on libère le visuel pour lire
+  hide(image);
   await showText('Vous avez 10 secondes pour imaginer ce qu’Inès et Sam vont voir et découvrir dans cette chambre',6500,'center');
-  show(image);
-  show(count);
+  show(image); show(count);
   for(let i=10;i>=1;i--){ count.textContent=i; await sleep(1000); }
   hide(count); hide(image);
 
-  // Phase 4 : Rémy
   await play(a2); await sleep(8000); a2.pause(); a2.currentTime=0;
 
-  // Phase 5 : geste montre
   video.src='montre_poche.mp4'; show(video);
   try{ await video.play(); }catch{}
   await sleep(4000); video.pause(); hide(video);
 
-  // Phase 6 : téléphone 1 - vu par les deux
   image.src='winamax.webp'; show(image);
   text.className='bottom'; text.textContent='Message lu par Sam et Inès'; show(text);
   await play(a3); await sleep(3500);
   hide(image); hide(text); a3.pause(); a3.currentTime=0;
 
-  // Transition entre les 2 téléphones
   await sleep(800);
 
-  // Phase 7 : téléphone 2 - Inès seule
   image.src='ittversement.webp'; show(image);
   text.className='bottom'; text.textContent='Message lu uniquement par Inès'; show(text);
   await sleep(4000);
   hide(image); hide(text);
 
-  // Phase 8 : question métacognitive de fin
   const vu = await askMulti('Durant le décompte des 10 secondes, vous aviez vu :', [
     'La montre qu’Inès emporte',
     'Le sweat que Rémy montre',
@@ -140,12 +129,13 @@ async function run(){
   ]);
   localStorage.setItem('qr10_vu_decompte', JSON.stringify(vu));
 
-  // Bouton recommencer, pas de mot Fin
   show(restart);
 }
 
 start.onclick = run;
 restart.onclick = ()=> location.reload();
 </script>
+</body>
+</html>
 </body>
 </html>
