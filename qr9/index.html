@@ -13,8 +13,6 @@ html,body{margin:0;height:100%;background:#000;color:#fff;font-family:Courier Ne
 #text.bottom{bottom:6%;font-size:3.8vmin;background:rgba(0,0,0,.75);padding:1.8vmin 2.5vmin;border-radius:8px;max-width:85%}
 #choices{position:absolute;top:28%;left:50%;transform:translateX(-50%);display:none;flex-direction:column;gap:2.2vmin;width:88%;z-index:30}
 .btn{font-size:4vmin;padding:3vmin;background:#111;color:#fff;border:1px solid #fff;border-radius:8px;cursor:pointer;text-align:center}
-.choice{display:flex;align-items:center;gap:2vmin;background:#111;border:1px solid #fff;border-radius:8px;padding:2.5vmin;font-size:4vmin;cursor:pointer}
-.choice input{width:4vmin;height:4vmin}
 #image{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-width:90vmin;max-height:78vmin;z-index:10;display:none}
 </style>
 </head>
@@ -26,14 +24,14 @@ html,body{margin:0;height:100%;background:#000;color:#fff;font-family:Courier Ne
 <div id="choices"></div>
 <img id="image" alt="">
 
-<audio id="a1" src="cadenas_troisfois.mp3" preload="auto"></audio>
-<audio id="a2" src="audio_inesnoe.mp3" preload="auto"></audio>
-<audio id="a3" src="audio_vidal.mp3" preload="auto"></audio>
+<audio id="aLavelot" src="audio_inesnoe.mp3" preload="auto"></audio>
+<audio id="aCadenas" src="cadenas_troisfois.mp3" preload="auto"></audio>
+<audio id="aNarrateur" src="audio_vidal.mp3" preload="auto"></audio>
 
 <script>
 const $ = id => document.getElementById(id);
 const start = $('start'), restart = $('restart'), text = $('text'), choices = $('choices'), image = $('image');
-const a1 = $('a1'), a2 = $('a2'), a3 = $('a3');
+const aLavelot = $('aLavelot'), aCadenas = $('aCadenas'), aNarrateur = $('aNarrateur');
 
 const show = el => el.style.display = 'block';
 const hide = el => el.style.display = 'none';
@@ -70,22 +68,42 @@ async function run(){
   localStorage.setItem('scans_used', used);
   localStorage.setItem('qr9_done','1');
 
-  // Phase 1 : son seul + consigne
-  await showText('Fermez les yeux.\nÉcoutez.',2500,'center');
-  await play(a1); await sleep(8000); a1.pause(); a1.currentTime=0;
+  // 1. Audio Lavelot
+  await play(aLavelot);
+  await sleep(8000);
+  aLavelot.pause(); aLavelot.currentTime=0;
 
-  // Phase 2 : métacognition vestiaire
-  const repVestiaire = await askSingle("Qu'est-ce que vous avez vu dans votre tête ?", ["Un vestiaire propre","Sombre et humide","Rien de précis"]);
+  // 2. Texte + Q1 vestiaire
+  await showText('Les élèves rentrent dans le vestiaire.',2500,'center');
+  
+  const repVestiaire = await askSingle('Comment imaginez-vous ce vestiaire ?', [
+    'Vestiaire propre et ordonné',
+    'Désordonné et sale',
+    'Petit étroit aux casiers serrés',
+    'Vaste et vide qui résonne',
+    'Rien de précis'
+  ]);
   localStorage.setItem('qr9_vestiaire', repVestiaire);
 
-  // Phase 3 : confrontation image globale
+  // 3. Image vestiaire + audio cadenas
   image.src='vestiaire.jpg'; show(image);
-  text.className='bottom'; text.textContent='Voici le vestiaire'; show(text);
-  await sleep(5000);
+  text.className='bottom'; text.textContent='voici un vestiaire'; show(text);
+  await play(aCadenas);
+  await sleep(4000);
+
+  // 4. Image mains = arrêt cadenas
+  image.src='mains.webp';
+  aCadenas.pause(); aCadenas.currentTime=0;
+  await sleep(2000);
   hide(image); hide(text);
 
-  // Phase 4 : question cadenas
-  const repCadenas = await askSingle('Le cadenas — vous aviez imaginé quoi ?', [
+  // 5. Inter-QR cadenas
+  const qr1 = localStorage.getItem('qr1_cadenas');
+  if(qr1){
+    await showText(`La dernière fois vous l’aviez imaginé : ${qr1}`,3500,'center');
+  }
+  
+  const repCadenas = await askSingle('Le cadenas, vous l’aviez imaginé comment ?', [
     'Un cadenas à chiffres',
     'Un cadenas à clé',
     'Rien de précis',
@@ -93,24 +111,10 @@ async function run(){
   ]);
   localStorage.setItem('qr9_cadenas', repCadenas);
 
-  // Phase 5 : détail mains / cadenas
-  image.src='mains.webp'; show(image);
-  await sleep(3000);
-  hide(image);
-
-  // Inter-QR avec QR1
-  const qr1 = localStorage.getItem('qr1_cadenas');
-  if(qr1){
-    await showText(`Dans le QR1 vous aviez choisi : ${qr1}`,3500,'center');
-  }
-
-  // Phase 6 : Inès / Noé
-  await showText('Écoutez.',1500,'center');
-  await play(a2); await sleep(8000); a2.pause(); a2.currentTime=0;
-
-  // Phase 7 : Vidal
-  await showText('Puis.',1500,'center');
-  await play(a3); await sleep(8000); a3.pause(); a3.currentTime=0;
+  // 6. Fin audio narrateur
+  await play(aNarrateur);
+  await sleep(8000);
+  aNarrateur.pause(); aNarrateur.currentTime=0;
 
   show(restart);
 }
