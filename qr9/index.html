@@ -63,7 +63,6 @@ async function play(a){ try{ await a.play(); }catch{} }
 async function run(){
   hide(start); hide(restart);
 
-  // Autonomisation
   let used = parseInt(localStorage.getItem('scans_used')||'0')+1;
   localStorage.setItem('scans_used', used);
   localStorage.setItem('qr9_done','1');
@@ -85,23 +84,22 @@ async function run(){
   ]);
   localStorage.setItem('qr9_vestiaire', repVestiaire);
 
-  // 3. Image vestiaire + audio cadenas
+  // 3. Image vestiaire sans bruit
   image.src='vestiaire.jpg'; show(image);
   text.className='bottom'; text.textContent='voici un vestiaire'; show(text);
-  await play(aCadenas);
   await sleep(4000);
-
-  // 4. Image mains = arrêt cadenas
-  image.src='mains.webp';
-  aCadenas.pause(); aCadenas.currentTime=0;
-  await sleep(2000);
   hide(image); hide(text);
 
-  // 5. Inter-QR cadenas
+  // 4. Bruit cadenas puis main
+  await play(aCadenas);
+  await sleep(3000); // laisse le son tourner
+  aCadenas.pause(); aCadenas.currentTime=0;
+  image.src='mains.webp'; show(image);
+  await sleep(2500);
+  hide(image);
+
+  // 5. Question cadenas avec rappel QR1
   const qr1 = localStorage.getItem('qr1_cadenas');
-  if(qr1){
-    await showText(`La dernière fois vous l’aviez imaginé : ${qr1}`,3500,'center');
-  }
   
   const repCadenas = await askSingle('Le cadenas, vous l’aviez imaginé comment ?', [
     'Un cadenas à chiffres',
@@ -110,6 +108,15 @@ async function run(){
     'Autre chose'
   ]);
   localStorage.setItem('qr9_cadenas', repCadenas);
+
+  // Feedback mémoire
+  if(qr1){
+    if(qr1 === repCadenas){
+      await showText(`C’est bien, vous vous en souvenez.\nLa dernière fois : ${qr1}`,3500,'center');
+    }else{
+      await showText(`Étonnant.\nLa dernière fois vous aviez dit : ${qr1}`,3500,'center');
+    }
+  }
 
   // 6. Fin audio narrateur
   await play(aNarrateur);
