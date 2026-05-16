@@ -76,10 +76,10 @@ async function sequence(){
   audio3.play().catch(()=>{});
   await sleep(5000);
 
-  // blanc supplémentaire avant la question
-  await sleep(1200);
+  // pause 1.8s avant la question
+  await sleep(1800);
 
-  await show('Qu’est-ce que vous avez vu, vous ?',4500);
+  await show('Avez-vous imaginé la scène différemment ?',4500);
 
   restart.classList.add('visible');
 }
