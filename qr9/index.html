@@ -52,37 +52,33 @@ async function show(txt,hold=2000,pos='center'){
 async function sequence(){
   start.classList.add('hidden');
 
-  // Mémoire inter-QR
   let used=parseInt(localStorage.getItem('scans_used')||0)+1;
   localStorage.setItem('scans_used',used);
   localStorage.setItem('qr9_done','1');
 
-  // 1. Amorce sonore Vidal + pluie
   audio1.play().catch(()=>{});
   await sleep(5000);
   await sleep(1000);
 
-  // 2. Consigne d'imagerie
   await show('Fermez les yeux.\nVestiaires. Métal froid.\nCorps mouillé et frigorifié.',4000);
 
-  // 3. Rituel cadenas, texte en bas
   text.className='bottom visible';
   text.textContent='Il vérifie. Une fois. Deux fois. Trois fois.';
   audio2.play().catch(()=>{});
   await sleep(4000);
   text.classList.remove('visible');
 
-  // 4. Mains après le cadenas
   image.classList.add('visible');
   await sleep(6000);
   image.classList.remove('visible');
   await sleep(800);
 
-  // 5. Indice narrateur
   audio3.play().catch(()=>{});
   await sleep(5000);
 
-  // 6. Question métacognitive finale
+  // blanc supplémentaire avant la question
+  await sleep(1200);
+
   await show('Qu’est-ce que vous avez vu, vous ?',4500);
 
   restart.classList.add('visible');
@@ -92,4 +88,4 @@ start.onclick=()=>sequence();
 restart.onclick=()=>location.reload();
 </script>
 </body>
-</htm
+</html>
