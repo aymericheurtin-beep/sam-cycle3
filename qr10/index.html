@@ -1,225 +1,158 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>QR10</title>
-    <style>
-        html, body, div, span, img, video, button { 
-            all: unset; 
-            display: revert; 
-            box-sizing: border-box;
-        }
-        body > div:not(#text):not(#start):not(#restart) { display: none !important; }
-        
-        html, body {
-            background: #000 !important;
-            color: #fff;
-            font-family: 'Courier New', monospace;
-            overflow: hidden;
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: fixed;
-            top: 0;
-            left: 0;
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-        }
-        .btn {
-            font-size: 4vmin;
-            padding: 3vmin 6vmin;
-            background: #fff;
-            border: none;
-            border-radius: 8px;
-            color: #000;
-            font-family: Arial, sans-serif;
-            cursor: pointer;
-            position: relative;
-            z-index: 9999;
-            -webkit-tap-highlight-color: transparent;
-        }
-        #start { animation: blink 1.5s infinite; }
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.6; }
-        }
-        #text {
-            position: fixed;
-            font-size: 3.8vmin;
-            text-align: center;
-            padding: 5vmin;
-            line-height: 1.7;
-            opacity: 0;
-            transition: opacity 1s;
-            white-space: pre-line;
-            max-width: 90vw;
-            z-index: 9998;
-        }
-        #media {
-            position: fixed;
-            width: 100vmin;
-            height: 100vmin;
-            object-fit: contain;
-            opacity: 0;
-            transition: opacity 1.2s;
-            z-index: 9997;
-            background: #000;
-        }
-        #restart {
-            position: fixed;
-            bottom: 10vmin;
-            opacity: 0;
-            transition: opacity 1s;
-        }
-        .visible { opacity: 1 !important; }
-        .hidden { display: none !important; }
-        
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-3px); }
-            75% { transform: translateX(3px); }
-        }
-        .vibrating { animation: shake 0.1s infinite; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>QR10 - Sam</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#000;color:#fff;font-family:Arial,sans-serif;overflow:hidden;width:100vw;height:100vh;display:flex;justify-content:center;align-items:center;position:relative}
+.btn{font-size:4vmin;padding:3vmin 6vmin;background:#222;border:1px solid #fff;border-radius:8px;color:#fff;cursor:pointer;margin:1vmin;z-index:9999}
+#start{animation:blink 1.5s infinite;background:#fff;color:#000;border:none}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.6}}
+#text{position:absolute;font-size:5.5vmin;text-align:center;padding:5vmin;line-height:1.4;opacity:0;transition:opacity .6s;white-space:pre-line;font-family:'Courier New',monospace;z-index:9998}
+#text.bottom{bottom:8vmin;top:auto;font-size:4.2vmin;padding:3vmin}
+#choices{position:absolute;display:flex;flex-direction:column;gap:2vmin;opacity:0;transition:opacity .6s;z-index:9998}
+#image,#video{position:absolute;max-width:90vmin;max-height:90vmin;object-fit:contain;opacity:0;transition:opacity .8s;z-index:9997}
+#count{position:absolute;bottom:6vmin;right:6vmin;font-size:6vmin;font-family:monospace;opacity:0;z-index:9998}
+.visible{opacity:1!important}
+.hidden{display:none!important}
+</style>
 </head>
 <body>
-    <button id="start" class="btn">Touchez pour entrer</button>
-    <div id="text"></div>
-    <img id="media" src="" style="display:none;">
-    <video id="video" playsinline webkit-playsinline muted style="display:none;" preload="auto"></video>
-    <button id="restart" class="btn">Recommencer</button>
+<button id="start" class="btn">Touchez pour entrer</button>
+<div id="text"></div>
+<div id="choices" class="hidden"></div>
+<img id="image" alt="">
+<video id="video" playsinline muted></video>
+<div id="count"></div>
 
-    <audio id="audio1" src="couloirhopital2.mp3" preload="auto" playsinline webkit-playsinline></audio>
-    <audio id="audio2" src="Remy.mp3" preload="auto" playsinline webkit-playsinline></audio>
-    <audio id="audio3" src="vibreur.mp3" preload="auto" playsinline webkit-playsinline></audio>
+<audio id="a1" src="couloirhopital2.mp3" preload="auto"></audio>
+<audio id="a2" src="Remy.mp3" preload="auto"></audio>
+<audio id="a3" src="vibreur.mp3" preload="auto"></audio>
 
-    <script>
-        const start = document.getElementById('start');
-        const text = document.getElementById('text');
-        const media = document.getElementById('media');
-        const video = document.getElementById('video');
-        const restart = document.getElementById('restart');
-        const audio1 = document.getElementById('audio1');
-        const audio2 = document.getElementById('audio2');
-        const audio3 = document.getElementById('audio3');
+<script>
+const start=document.getElementById('start');
+const text=document.getElementById('text');
+const choices=document.getElementById('choices');
+const image=document.getElementById('image');
+const video=document.getElementById('video');
+const count=document.getElementById('count');
+const a1=document.getElementById('a1');
+const a2=document.getElementById('a2');
+const a3=document.getElementById('a3');
 
-        const sleep = ms => new Promise(r => setTimeout(r, ms));
-        
-        const playAndWait = (audio) => {
-            return new Promise(resolve => {
-                audio.onended = resolve;
-                audio.play().catch(e => {
-                    console.log('Erreur audio:', e);
-                    resolve();
-                });
-            });
-        };
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 
-        const showImage = (src) => {
-            return new Promise((resolve) => {
-                video.style.display = 'none';
-                media.style.display = 'block';
-                media.onload = () => {
-                    media.classList.add('visible');
-                    resolve();
-                };
-                media.onerror = () => {
-                    console.error('Image introuvable:', src);
-                    resolve();
-                };
-                media.src = src;
-            });
-        };
+function showText(t,hold=2000,pos='center'){
+  text.className='';
+  if(pos!=='center') text.classList.add(pos);
+  text.textContent=t;
+  text.classList.add('visible');
+  return sleep(hold).then(()=>{
+    text.classList.remove('visible');
+    return sleep(300);
+  });
+}
 
-        const showVideo = (src) => {
-            return new Promise((resolve) => {
-                media.style.display = 'none';
-                video.style.display = 'block';
-                video.onended = () => {
-                    resolve();
-                };
-                video.onerror = () => {
-                    console.error('Vidéo introuvable:', src);
-                    resolve();
-                };
-                video.src = src;
-                video.classList.add('visible');
-                video.play().catch(e => {
-                    console.log('Erreur vidéo:', e);
-                    resolve();
-                });
-            });
-        };
+function ask(question, options){
+  return new Promise(resolve=>{
+    text.className='';
+    text.textContent=question;
+    text.classList.add('visible');
+    choices.innerHTML='';
+    options.forEach(opt=>{
+      const b=document.createElement('button');
+      b.className='btn';
+      b.textContent=opt;
+      b.onclick=()=>{
+        text.classList.remove('visible');
+        choices.classList.add('hidden');
+        choices.style.opacity=0;
+        resolve(opt);
+      };
+      choices.appendChild(b);
+    });
+    choices.classList.remove('hidden');
+    choices.classList.add('visible');
+  });
+}
 
-        const clearScene = async () => {
-            text.classList.remove('visible');
-            media.classList.remove('visible', 'vibrating');
-            video.classList.remove('visible');
-            video.pause();
-            await sleep(1200);
-            media.src = '';
-            video.src = '';
-            text.textContent = '';
-        };
+async function sequence(){
+  start.classList.add('hidden');
 
-        async function sequence() {
-            start.classList.add('hidden');
-            
-            try {
-                // 1. Couloir + chuchotement Inès
-                await playAndWait(audio1);
-                await sleep(500);
-                
-                // 2. Porte chambre 214
-                await showImage('portechambre.png');
-                await sleep(4000);
-                await clearScene();
-                
-                // 3. Rémy
-                await playAndWait(audio2);
-                await sleep(500);
-                
-                // 4. VIDÉO CASIO - Le vol, c'est le climax
-                await showVideo('montre_poche.mp4');
-                await sleep(1500); // Laisse 1.5s de noir après la vidéo pour digérer
-                await clearScene();
-                
-                // 5. Winamax + vibreur
-                await showImage('winamax.png');
-                media.classList.add('vibrating');
-                await playAndWait(audio3);
-                media.classList.remove('vibrating');
-                await sleep(3000);
-                await clearScene();
-                
-                // 6. Texte Inès voit tout
-                text.textContent = 'Inès, elle, voit tout.\nLe téléphone de Rémy — écran allumé, pas verrouillé,\nun onglet ouvert sur un navigateur.\nElle lit en deux secondes :';
-                text.classList.add('visible');
-                await sleep(5000);
-                text.classList.remove('visible');
-                await sleep(1000);
-                
-                // 7. ITT - FIN
-                await showImage('ittversement.png');
-                await sleep(5000);
-                await clearScene();
-                
-                // 8. Bouton recommencer direct, pas de texte
-                restart.classList.add('visible');
-            } catch(e) {
-                console.error('Erreur:', e);
-                text.textContent = 'Erreur. Rechargez la page.';
-                text.classList.add('visible');
-                restart.classList.add('visible');
-            }
-        }
+  // Autonomisation + mémoire inter-QR
+  let used=parseInt(localStorage.getItem('scans_used')||0)+1;
+  localStorage.setItem('scans_used',used);
+  localStorage.setItem('qr10_done','1');
 
-        start.onclick = () => sequence();
-        restart.onclick = () => location.reload();
-    </script>
+  // Phase 1 : son seul 8s
+  a1.play().catch(()=>{});
+  await sleep(8000);
+  a1.pause();
+
+  // Phase 2 : métacognition pré-image
+  const repCouloir = await ask("T'as imaginé quoi ?",[
+    "Un couloir blanc",
+    "Quelque chose de plus sombre",
+    "Rien de précis"
+  ]);
+  localStorage.setItem('qr10_couloir', repCouloir);
+
+  // Phase 3 : la porte
+  image.src='portechambre.webp';
+  image.classList.add('visible');
+  await sleep(3000);
+  text.className='bottom visible';
+  text.textContent='Chambre 214. Inès entre.\nElle a 8 secondes.\nRegarde.';
+  count.classList.add('visible');
+  for(let i=8;i>=6;i--){
+    count.textContent=i;
+    await sleep(1000);
+  }
+  count.classList.remove('visible');
+  text.classList.remove('visible');
+
+  // Phase 4 : question active
+  image.classList.remove('visible');
+  await sleep(300);
+  await ask("T'as retenu quoi dans cette pièce ?",[
+    "Je sais pas encore",
+    "Quelque chose de précis"
+  ]);
+
+  // Phase 5 : Rémy
+  a2.play().catch(()=>{});
+  await sleep(8000);
+  a2.pause();
+
+  // Phase 6 : le vol
+  video.src='montre_poche.mp4';
+  video.classList.add('visible');
+  video.play().catch(()=>{});
+  await sleep(4000);
+  video.classList.remove('visible');
+  video.pause();
+
+  image.src='winamax.webp';
+  image.classList.add('visible');
+  a3.play().catch(()=>{});
+  await sleep(3000);
+  image.classList.remove('visible');
+
+  image.src='ittversement.webp';
+  image.classList.add('visible');
+  await sleep(4000);
+  image.classList.remove('visible');
+
+  // Phase 7 : retournement métacognitif
+  await showText("T'avais imaginé un couloir comment, déjà ?",2500);
+  const rep = localStorage.getItem('qr10_couloir') || '...';
+  await showText(`Tu avais dit : ${rep}.`,3500);
+  await showText('Inès, elle, avait déjà vu la montre.',3500);
+}
+
+start.onclick=()=>sequence();
+</script>
 </body>
 </html>
