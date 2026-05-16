@@ -100,8 +100,6 @@ async function showText(txt,hold=2000){
 async function sequence(){
   await showText('vendredi 8h27<br>collège les Peupliers Blancs',2500);
   annonce.play().catch(()=>{});
-  // préchargement webp
-  ['cam.webp','fumee.webp','carnet.webp'].forEach(s=>{const i=new Image();i.src=s;});
   await sleep(4200);
   await sleep(3000);
   await showText('8h30. Bureau de Mme Arnaud.',2000);
