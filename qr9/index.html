@@ -24,9 +24,9 @@ html,body{margin:0;height:100%;background:#000;color:#fff;font-family:Courier Ne
 <div id="choices"></div>
 <img id="image" alt="">
 
-<audio id="aLavelot" src="audio_inesnoe.mp3" preload="auto"></audio>
+<audio id="aLavelot" src="audio_vidal.mp3" preload="auto"></audio>
 <audio id="aCadenas" src="cadenas_troisfois.mp3" preload="auto"></audio>
-<audio id="aNarrateur" src="audio_vidal.mp3" preload="auto"></audio>
+<audio id="aNarrateur" src="audio_inesnoe.mp3" preload="auto"></audio>
 
 <script>
 const $ = id => document.getElementById(id);
@@ -92,7 +92,7 @@ async function run(){
 
   // 4. Bruit cadenas puis main
   await play(aCadenas);
-  await sleep(3000); // laisse le son tourner
+  await sleep(3000);
   aCadenas.pause(); aCadenas.currentTime=0;
   image.src='mains.webp'; show(image);
   await sleep(2500);
@@ -109,7 +109,6 @@ async function run(){
   ]);
   localStorage.setItem('qr9_cadenas', repCadenas);
 
-  // Feedback mémoire
   if(qr1){
     if(qr1 === repCadenas){
       await showText(`C’est bien, vous vous en souvenez.\nLa dernière fois : ${qr1}`,3500,'center');
