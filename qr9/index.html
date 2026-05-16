@@ -121,6 +121,9 @@ async function run(){
   await sleep(8000);
   aNarrateur.pause(); aNarrateur.currentTime=0;
 
+  // 7. Consigne finale
+  await showText('Gardez cette image en tête, elle va vous être utile pour comprendre la suite...',4000,'center');
+
   show(restart);
 }
 
