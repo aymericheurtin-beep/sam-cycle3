@@ -1,132 +1,101 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR9 - Sam</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            background: #000;
-            color: #fff;
-            font-family: Arial, sans-serif;
-            overflow: hidden;
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-        }
-        .btn {
-            font-size: 4vmin;
-            padding: 3vmin 6vmin;
-            background: #fff;
-            border: none;
-            border-radius: 8px;
-            color: #000;
-            font-family: Arial, sans-serif;
-            cursor: pointer;
-            position: relative;
-            z-index: 9999;
-        }
-        #start { animation: blink 1.5s infinite; }
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.6; }
-        }
-        #text {
-            position: absolute;
-            font-size: 5.5vmin;
-            text-align: center;
-            padding: 5vmin;
-            line-height: 1.4;
-            opacity: 0;
-            transition: opacity 0.8s;
-            white-space: pre-line;
-            font-family: 'Courier New', monospace;
-            z-index: 9998;
-        }
-        #image {
-            position: absolute;
-            width: 100vmin;
-            height: 100vmin;
-            object-fit: contain;
-            opacity: 0;
-            transition: opacity 1.5s;
-            z-index: 9997;
-        }
-        #restart {
-            position: absolute;
-            bottom: 10vmin;
-            opacity: 0;
-            transition: opacity 1s;
-        }
-        .visible { opacity: 1 !important; }
-        .hidden { display: none !important; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>QR9 - Sam</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#000;color:#fff;font-family:Arial,sans-serif;overflow:hidden;width:100vw;height:100vh;display:flex;justify-content:center;align-items:center;position:relative}
+.btn{font-size:4vmin;padding:3vmin 6vmin;background:#fff;border:none;border-radius:8px;color:#000;cursor:pointer;z-index:9999}
+#start{animation:blink 1.5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.6}}
+#text{position:absolute;font-size:5.5vmin;text-align:center;padding:5vmin;line-height:1.4;opacity:0;transition:opacity .8s;white-space:pre-line;font-family:'Courier New',monospace;z-index:9998}
+#image{position:absolute;width:100vmin;height:100vmin;object-fit:contain;opacity:0;transition:opacity 1.5s;z-index:9997}
+#restart{position:absolute;bottom:10vmin;opacity:0;transition:opacity 1s}
+.visible{opacity:1!important}
+.hidden{display:none!important}
+</style>
 </head>
 <body>
-    <button id="start" class="btn">Touchez pour commencer</button>
-    <div id="text"></div>
-    <img id="image" src="mains.png">
-    <button id="restart" class="btn">Recommencer</button>
+<button id="start" class="btn">Touchez pour commencer</button>
+<div id="text"></div>
+<img id="image" src="mains.webp" alt="Mains d'Inès, baskets trouées de Dubois en arrière-plan">
+<button id="restart" class="btn">Recommencer</button>
 
-    <audio id="audio1" src="audio_vidal.mp3" preload="auto"></audio>
-    <audio id="audio2" src="cadenas_troisfois.mp3" preload="auto"></audio>
-    <audio id="audio3" src="audio_inesnoe.mp3" preload="auto"></audio>
+<audio id="audio1" src="audio_vidal.mp3" preload="auto"></audio>
+<audio id="audio2" src="cadenas_troisfois.mp3" preload="auto"></audio>
+<audio id="audio3" src="audio_inesnoe.mp3" preload="auto"></audio>
 
-    <script>
-        const start = document.getElementById('start');
-        const text = document.getElementById('text');
-        const image = document.getElementById('image');
-        const restart = document.getElementById('restart');
-        const audio1 = document.getElementById('audio1');
-        const audio2 = document.getElementById('audio2');
-        const audio3 = document.getElementById('audio3');
+<script>
+const start=document.getElementById('start');
+const text=document.getElementById('text');
+const image=document.getElementById('image');
+const restart=document.getElementById('restart');
+const audio1=document.getElementById('audio1');
+const audio2=document.getElementById('audio2');
+const audio3=document.getElementById('audio3');
 
-        const sleep = ms => new Promise(r => setTimeout(r, ms));
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 
-        async function sequence() {
-            start.classList.add('hidden');
-            
-            // Audio 1 : Pluie + Vidal
-            audio1.play().catch(e => console.log('Erreur audio1:', e));
-            await sleep(5000); // Durée de audio_vidal.mp3
-            
-            // Écran noir 1s
-            await sleep(1000);
-            
-            // Transition texte "Aux vestiaires..."
-            text.textContent = 'Aux vestiaires...';
-            text.classList.add('visible');
-            await sleep(2000);
-            text.classList.remove('visible');
-            await sleep(800);
-            
-            // Audio 2 : Cadenas 3 fois + texte incrusté
-            text.textContent = 'Il vérifie. Une fois. Deux fois. Trois fois.';
-            text.classList.add('visible');
-            audio2.play().catch(e => console.log('Erreur audio2:', e));
-            await sleep(4000); // Durée de cadenas_troisfois.mp3
-            text.classList.remove('visible');
-            await sleep(1000);
-            
-            // Image : mains + baskets Chloé floues
-            image.classList.add('visible');
-            await sleep(6000);
-            image.classList.remove('visible');
-            await sleep(1500);
-            
-            // Fin : Audio Inès/Noé au lieu du texte
-            audio3.play().catch(e => console.log('Erreur audio3:', e));
-            await sleep(5000); // Mets ici la durée exacte de audio_inesnoe.mp3
-            
-            restart.classList.add('visible');
-        }
+async function show(txt,hold=2000){
+  text.textContent=txt;
+  text.classList.add('visible');
+  await sleep(hold);
+  text.classList.remove('visible');
+  await sleep(400);
+}
 
-        start.onclick = () => sequence();
-        restart.onclick = () => location.reload();
-    </script>
+async function sequence(){
+  start.classList.add('hidden');
+
+  // Autonomisation : mémoire inter-QR
+  let used=parseInt(localStorage.getItem('scans_used')||0)+1;
+  localStorage.setItem('scans_used',used);
+  localStorage.setItem('qr9_done','1');
+
+  // 1. Amorce sonore Vidal + pluie
+  audio1.play().catch(()=>{});
+  await sleep(5000);
+
+  await sleep(1000);
+
+  // 2. Consigne d'imagerie + lieu fusionnée
+  await show('Fermez les yeux.\nVestiaire. Métal froid.',3000);
+
+  // 3. Rituel + synchro main d'Inès
+  text.textContent='Il vérifie. Une fois. Deux fois. Trois fois.';
+  text.classList.add('visible');
+  audio2.play().catch(()=>{});
+  
+  // Fade-in de l'image sur le 2e clic
+  await sleep(1300);
+  image.classList.add('visible');
+  
+  await sleep(2700);
+  text.classList.remove('visible');
+  await sleep(1000);
+
+  // Image reste 6s au total
+  await sleep(2000);
+  image.classList.remove('visible');
+  await sleep(800);
+
+  // 4. Miroir métacognitif
+  await show('Vous comptez aussi ?',2000);
+
+  // 5. Indice narrateur : Noé + papier
+  audio3.play().catch(()=>{});
+  await sleep(5000);
+
+  // 6. Distanciation centrée sur Sam
+  await show('Trois fois.\nC’est comme ça qu’il se rassure.',3500);
+
+  restart.classList.add('visible');
+}
+
+start.onclick=()=>sequence();
+restart.onclick=()=>location.reload();
+</script>
 </body>
 </html>
