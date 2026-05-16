@@ -31,13 +31,12 @@ p{font-size:22px;line-height:1.4;max-width:600px}
   <video id="v0" src="audio/courir.mp4" playsinline muted></video>
 </div>
 
-<!-- Question méta cadenas ajoutée avant l'image -->
 <div id="qCadenas" class="screen">
   <p>Comment voyez-vous le cadenas ?</p>
   <div style="display:flex;flex-direction:column;gap:15px;margin-top:20px">
     <button class="choiceBtn" data-val="Un cadenas à chiffres">Un cadenas à chiffres</button>
     <button class="choiceBtn" data-val="Un cadenas à clé">Un cadenas à clé</button>
-    <button class="choiceBtn" data-val="Je ne m’en souviens pas">Je ne m’en souviens pas</button>
+    <button class="choiceBtn" data-val="Un autre type de cadenas">Un autre type de cadenas</button>
   </div>
 </div>
 
@@ -72,7 +71,6 @@ const restartBtn=document.getElementById('restartBtn');
 
 const PAUSE = 1200;
 
-// Comptage autonomisation
 let t=parseInt(localStorage.getItem('scans_total')||0)+1;
 localStorage.setItem('scans_total',t);
 
