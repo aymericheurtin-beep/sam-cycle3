@@ -8,11 +8,14 @@
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#000;color:#fff;font-family:Arial,sans-serif;overflow:hidden;width:100vw;height:100vh;display:flex;justify-content:center;align-items:center;position:relative}
 .btn{font-size:4vmin;padding:3vmin 6vmin;background:#222;border:1px solid #fff;border-radius:8px;color:#fff;cursor:pointer;margin:1vmin;z-index:9999}
+.btn.validate{background:#fff;color:#000}
 #start{animation:blink 1.5s infinite;background:#fff;color:#000;border:none}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.6}}
 #text{position:absolute;font-size:5.5vmin;text-align:center;padding:5vmin;line-height:1.4;opacity:0;transition:opacity .6s;white-space:pre-line;font-family:'Courier New',monospace;z-index:9998}
 #text.bottom{bottom:8vmin;top:auto;font-size:4.2vmin;padding:3vmin}
-#choices{position:absolute;top:60%;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:2vmin;opacity:0;transition:opacity .6s;z-index:9998}
+#choices{position:absolute;top:55%;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:2vmin;opacity:0;transition:opacity .6s;z-index:9998;width:80vmin}
+.choice{display:flex;align-items:center;gap:2vmin;background:#111;border:1px solid #fff;border-radius:8px;padding:2.5vmin 3vmin;font-size:4vmin;cursor:pointer}
+.choice input{width:4vmin;height:4vmin}
 #image,#video{position:absolute;max-width:90vmin;max-height:90vmin;object-fit:contain;opacity:0;transition:opacity .8s;z-index:9997}
 #count{position:absolute;bottom:6vmin;right:6vmin;font-size:6vmin;font-family:monospace;opacity:0;z-index:9998}
 .visible{opacity:1!important}
@@ -55,14 +58,12 @@ function showText(t,hold=2000,pos='center'){
   });
 }
 
-function ask(question, options){
+function askSingle(question, options){
   return new Promise(async resolve=>{
-    // 1. Affiche la question seule
     text.className='';
     text.textContent=question;
     text.classList.add('visible');
     await sleep(600);
-    // 2. Affiche les choix en dessous
     choices.innerHTML='';
     options.forEach(opt=>{
       const b=document.createElement('button');
@@ -81,6 +82,39 @@ function ask(question, options){
   });
 }
 
+function askMulti(question, options){
+  return new Promise(async resolve=>{
+    text.className='';
+    text.textContent=question;
+    text.classList.add('visible');
+    await sleep(600);
+    choices.innerHTML='';
+    options.forEach(opt=>{
+      const label=document.createElement('label');
+      label.className='choice';
+      const cb=document.createElement('input');
+      cb.type='checkbox';
+      cb.value=opt;
+      label.appendChild(cb);
+      label.append(opt);
+      choices.appendChild(label);
+    });
+    const val=document.createElement('button');
+    val.className='btn validate';
+    val.textContent='Valider';
+    val.onclick=()=>{
+      const sel=[...choices.querySelectorAll('input:checked')].map(i=>i.value);
+      text.classList.remove('visible');
+      choices.classList.add('hidden');
+      choices.style.opacity=0;
+      resolve(sel);
+    };
+    choices.appendChild(val);
+    choices.classList.remove('hidden');
+    choices.classList.add('visible');
+  });
+}
+
 async function sequence(){
   start.classList.add('hidden');
 
@@ -88,47 +122,49 @@ async function sequence(){
   localStorage.setItem('scans_used',used);
   localStorage.setItem('qr10_done','1');
 
-  // Phase 1
+  // Phase 1 : son seul 8s
   a1.play().catch(()=>{});
   await sleep(8000);
   a1.pause();
 
-  // Phase 2
-  const repCouloir = await ask("T'as imaginé quoi ?",[
+  // Phase 2 : métacognition pré-image
+  const repCouloir = await askSingle("T'as imaginé quoi ?",[
     "Un couloir blanc",
     "Quelque chose de plus sombre",
     "Rien de précis"
   ]);
   localStorage.setItem('qr10_couloir', repCouloir);
 
-  // Phase 3
+  // Phase 3 : la porte + imagination guidée
   image.src='portechambre.webp';
   image.classList.add('visible');
-  await sleep(1000);
-  text.className='bottom visible';
-  text.textContent='Chambre 214. Inès et Sam entrent.\nRegardez.';
+  await showText('Chambre 214. Inès et Sam entrent.',2000,'bottom');
+  await showText('Alors, comment vous, vous avez imaginé la scène ?',3000);
+  await showText('Vous avez 10 secondes pour imaginer ce qu’Inès et Sam vont voir et découvrir dans cette chambre',4000);
+  
   count.classList.add('visible');
-  for(let i=8;i>=1;i--){
+  for(let i=10;i>=1;i--){
     count.textContent=i;
     await sleep(1000);
   }
   count.classList.remove('visible');
-  text.classList.remove('visible');
   image.classList.remove('visible');
 
-  // Phase 4
-  await sleep(300);
-  await ask("Vous avez retenu quoi dans cette pièce ?",[
-    "Je ne sais pas encore",
-    "Quelque chose de précis"
+  // Phase 4 : question active multi-choix
+  const retenu = await askMulti('Vous avez retenu quoi dans cette pièce ?\nVous pouvez cocher plusieurs réponses',[
+    'La montre',
+    'Le téléphone',
+    'Rémy dans son lit',
+    'Autre'
   ]);
+  localStorage.setItem('qr10_retenu', JSON.stringify(retenu));
 
-  // Phase 5
+  // Phase 5 : Rémy
   a2.play().catch(()=>{});
   await sleep(8000);
   a2.pause();
 
-  // Phase 6
+  // Phase 6 : le vol + téléphones
   video.src='montre_poche.mp4';
   video.classList.add('visible');
   video.play().catch(()=>{});
@@ -153,11 +189,8 @@ async function sequence(){
   image.classList.remove('visible');
   text.classList.remove('visible');
 
-  // Phase 7
-  await showText("T'avais imaginé un couloir comment, déjà ?",2500);
-  const rep = localStorage.getItem('qr10_couloir') || '...';
-  await showText(`Tu avais dit : ${rep}.`,3500);
-  await showText('Inès, elle, avait déjà vu la montre.',3500);
+  // Fin : écran noir
+  await showText(' ',500);
 }
 
 start.onclick=()=>sequence();
