@@ -89,12 +89,10 @@ function askMulti(q,opts){
 async function run(){
   hide(start); hide(restart);
 
-  // Phase 1 - amorce sonore
   await play(narrateur);
   await new Promise(r=>{narrateur.onended=r; setTimeout(r,8000);});
   await sleep(3000);
 
-  // Phase 2 - métacognition
   const opts = ['Petite','Grande','Lumineuse','Sombre','Ordonnée','En bazar'];
   const rep = await askMulti('Avant d\'entrer — vous imaginez cette pièce comment ?', opts);
   localStorage.setItem('qr12_ambiance', JSON.stringify(rep));
@@ -113,7 +111,6 @@ async function run(){
     }catch{}
   }
 
-  // Phase 3 - focalisation
   await showImage('touslessuspects.jpg');
   await sleep(5000);
   consigne.textContent = 'Touchez le personnage qui vous intéresse le plus.';
@@ -154,7 +151,7 @@ async function run(){
 }
 
 async function phase5(){
-  await showText('Dans quelques secondes vous allez lire.\nChaque personnage dans cette pièce a une raison d\'être là.\nVous aussi vous savez des choses sur eux.\nUtilisez-les.\nVous pourrez scanner à nouveau à la fin de ce chapitre. La version sera peut-être différente...',7000,'center');
+  showTextStay('Dans quelques secondes vous allez lire.\nChaque personnage dans cette pièce a une raison d\'être là.\nVous aussi vous savez des choses sur eux.\nUtilisez-les.\nVous pourrez scanner à nouveau à la fin de ce chapitre. La version sera peut-être différente...','center');
   show(restart);
 }
 
