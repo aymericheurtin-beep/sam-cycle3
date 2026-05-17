@@ -6,8 +6,8 @@
 <title>QR12</title>
 <style>
 html,body{margin:0;height:100%;background:#000;color:#fff;font-family:'Courier New',monospace;overflow:hidden}
-#start,#restart{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:5vmin;padding:4vmin 8vmin;background:#fff;color:#000;border:none;border-radius:10px;cursor:pointer;z-index:100}
-#restart{display:none}
+#start{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:5vmin;padding:4vmin 8vmin;background:#fff;color:#000;border:none;border-radius:10px;cursor:pointer;z-index:100}
+#restart{position:absolute;bottom:6%;left:50%;transform:translateX(-50%);font-size:4.5vmin;padding:3vmin 7vmin;background:#fff;color:#000;border:none;border-radius:10px;cursor:pointer;z-index:100;display:none}
 #text{position:absolute;left:50%;transform:translateX(-50%);width:92%;text-align:center;font-size:4.6vmin;line-height:1.4;z-index:30;display:none;white-space:pre-line;text-shadow:0 0 6px #000}
 #text.center{top:10%}
 #choices{position:absolute;bottom:8%;left:50%;transform:translateX(-50%);display:none;flex-direction:column;gap:1.6vmin;width:88%;max-height:50vh;overflow-y:auto;z-index:40}
@@ -135,7 +135,7 @@ async function run(){
 
       const qr11First = localStorage.getItem('qr11_carnet_first');
       if(qr11First && qr11First.toLowerCase() === p.id.toLowerCase()){
-        await showText('Il vous intrigue... vous avez fait le même premier choix que dans le bureau de M. Vidal.',4000,'center');
+        await showText('Ce personnage vous intrigue... vous aviez choisi '+qr11First+' en premier dans le carnet de M. Vidal.',4000,'center');
       }
 
       charLine.textContent = p.line;
