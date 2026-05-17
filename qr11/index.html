@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=yes">
 <title>QR11 - Bureau Vidal</title>
 <style>
 html,body{margin:0;height:100%;background:#000;color:#fff;font-family:Courier New,monospace;overflow:hidden}
@@ -14,11 +14,13 @@ html,body{margin:0;height:100%;background:#000;color:#fff;font-family:Courier Ne
 #choices{position:absolute;top:26%;left:50%;transform:translateX(-50%);display:none;flex-direction:column;gap:1.6vmin;width:88%;max-height:58vh;overflow-y:auto;padding-bottom:2vmin;z-index:35;-webkit-overflow-scrolling:touch}
 .btn{font-size:3.8vmin;padding:2.4vmin;background:#111;color:#fff;border:1px solid #fff;border-radius:8px;cursor:pointer;text-align:center;flex-shrink:0}
 .btn.sel{background:#fff;color:#000}
-#image{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-width:90vmin;max-height:78vmin;z-index:10;display:none}
-#carnetBox{position:absolute;bottom:5%;left:50%;transform:translateX(-50%);width:92%;display:none;flex-direction:column;gap:1.2vmin;z-index:40;max-height:40vh;overflow-y:auto}
+#image{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-width:90vmin;max-height:78vmin;z-index:10;display:none;cursor:pointer;transition:transform .3s ease}
+#image.zoomed{max-width:none;max-height:none;width:220vmin;height:auto;top:55%;left:50%;transform:translate(-50%,-50%);z-index:60}
+#carnetBox{position:absolute;bottom:5%;left:50%;transform:translateX(-50%);width:92%;display:none;flex-direction:column;gap:1.2vmin;z-index:70;max-height:40vh;overflow-y:auto}
 .carnetBtn{font-size:3.4vmin;padding:1.8vmin;background:#000;border:1px solid #fff;color:#fff;border-radius:6px;cursor:pointer;text-align:center;flex-shrink:0}
 .carnetBtn.used{opacity:.4}
-#carnetLine{position:absolute;top:12%;left:50%;transform:translateX(-50%);width:90%;background:rgba(0,0,0,.85);padding:2vmin;border-radius:8px;font-size:3.6vmin;text-align:center;display:none;z-index:45}
+#carnetLine{position:absolute;top:12%;left:50%;transform:translateX(-50%);width:90%;background:rgba(0,0,0,.85);padding:2vmin;border-radius:8px;font-size:3.6vmin;text-align:center;display:none;z-index:75}
+#hint{position:absolute;bottom:2%;left:50%;transform:translateX(-50%);font-size:3.2vmin;color:#fff;background:rgba(0,0,0,.6);padding:1vmin 2vmin;border-radius:6px;z-index:65;display:none;pointer-events:none}
 </style>
 </head>
 <body>
@@ -34,13 +36,14 @@ html,body{margin:0;height:100%;background:#000;color:#fff;font-family:Courier Ne
   <button class="carnetBtn" data-id="DUBOIS">[ DUBOIS C. ]</button>
 </div>
 <div id="carnetLine"></div>
+<div id="hint"></div>
 
 <audio id="aKey" src="bruitkey.mp3" preload="auto"></audio>
 <audio id="aPage" src="bruit_pagephoto.mp3" preload="auto"></audio>
 
 <script>
 const $ = id => document.getElementById(id);
-const start = $('start'), restart = $('restart'), text = $('text'), choices = $('choices'), image = $('image'), carnetBox = $('carnetBox'), carnetLine = $('carnetLine');
+const start = $('start'), restart = $('restart'), text = $('text'), choices = $('choices'), image = $('image'), carnetBox = $('carnetBox'), carnetLine = $('carnetLine'), hint=$('hint');
 const aKey = $('aKey'), aPage = $('aPage');
 
 const show = el => el.style.display = 'block';
@@ -61,10 +64,11 @@ function showImage(src){
   return new Promise(res=>{
     image.onload=()=>{show(image);res();};
     image.onerror=()=>{show(image);res();};
+    image.classList.remove('zoomed');
     image.src=src;
   });
 }
-function hideImage(){hide(image);image.src='';}
+function hideImage(){hide(image);hide(hint);image.src='';image.classList.remove('zoomed');}
 async function play(a){try{await a.play();}catch{}}
 
 function askMulti(q,opts){
@@ -103,6 +107,16 @@ async function typeWords(lines,delay=600){
   await sleep(1200);hide(text);
 }
 
+function waitImageTap(){
+  return new Promise(res=>{
+    const handler=()=>{
+      image.removeEventListener('click',handler);
+      res();
+    };
+    image.addEventListener('click',handler);
+  });
+}
+
 async function run(){
   hide(start);hide(restart);
   localStorage.setItem('qr11_done','1');
@@ -121,9 +135,16 @@ async function run(){
   await showText('Voici un bureau',3000,'bottom');
   hideImage();
 
+  // Phase carnet imposée
   await showImage('bureau_vidal.jpg');
-  await sleep(800);
+  hint.textContent='Appuyez sur le carnet';
+  show(hint);
+  await waitImageTap();
+  hide(hint);
+  image.classList.add('zoomed');
+  await sleep(300);
   flex(carnetBox);
+
   const carnetTexts={
     LAVELOT:"LAVELOT : Moteur exceptionnel. Il ira pas aux France si j'ai mon mot à dire.",
     MOREL:"MOREL : Père absent — mobile émotionnel fort. Tout le monde est gagnant.",
@@ -141,7 +162,12 @@ async function run(){
         show(carnetLine);
         setTimeout(()=>hide(carnetLine),2500);
         opened++;
-        if(opened===3){hide(carnetBox);hideImage();res();}
+        if(opened===3){
+          // Attendre que la dernière ligne disparaisse avant de continuer
+          setTimeout(()=>{
+            hide(carnetBox);hideImage();hide(carnetLine);res();
+          },2600);
+        }
       };
     });
   });
@@ -149,10 +175,11 @@ async function run(){
   await showImage('vidal_jeune.webp');
   await sleep(5000);
   await typeWords(['Vidal. Dix-sept ans.','Dossard 14.','Sélection France compromise.'],600);
+  hideImage(); // éviter propositions sur l'image
   const repVidal = await askSingle('Vous l\'aviez imaginé comme ça ?',['Oui, à peu près','Non, rien à voir','Je ne l\'avais pas imaginé']);
   localStorage.setItem('qr11_vidal',repVidal);
-  hideImage();
 
+  // Transition clés + carnet
   await showImage('vidal_jeune.webp');
   play(aKey);
   await sleep(1500);
@@ -166,15 +193,7 @@ async function run(){
   const repFeel = await askSingle('Là, maintenant — vous ressentez quelque chose ?',['La peur','l\'excitation','autre chose']);
   localStorage.setItem('qr11_feel',repFeel);
 
-  const bureauTxt = localStorage.getItem('qr11_bureau')||'';
-  const vidalTxt = localStorage.getItem('qr11_vidal')||'';
-  const firstCarnet = localStorage.getItem('qr11_carnet_first')||'';
-  await showText(`Vous aviez imaginé un bureau ${bureauTxt}.\nIl était effrayant de netteté.`,3000,'center');
-  await sleep(400);
-  await showText(`Vous aviez dit que Vidal ressemblait à ${vidalTxt}.\nSam, lui, a mis du temps à reconnaître les épaules.`,3500,'center');
-  await sleep(400);
-  await showText(`Vous avez regardé ${firstCarnet} en premier.`,3000,'center');
-  await sleep(400);
+  // Fin sans récapitulatif "vous avez choisi..."
   await showText('Sam, lui, pense à la mandarine.',3000,'center');
 
   show(restart);
