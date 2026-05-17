@@ -55,12 +55,16 @@ function showText(t,hold=2500,pos='center'){
 function showTextStay(t,pos='center'){
   text.className='';text.classList.add(pos);text.textContent=t;show(text);
 }
-function hideText(){hide(text);}
+function showImage(src){
+  return new Promise(res=>{
+    image.onload=()=>{show(image);res();};
+    image.onerror=()=>{console.warn('Image manquante:',src);show(image);res();};
+    image.src=src;
+  });
+}
+function hideImage(){hide(image);image.src='';}
 
-function showImage(src){image.src=src;show(image);}
-function hideImage(){hide(image);}
-
-async function play(a){try{await a.play();}catch{}}
+async function play(a){try{await a.play();}catch(e){console.warn('Audio bloqué',e);}}
 
 function askMulti(q,opts){
   return new Promise(res=>{
@@ -69,7 +73,7 @@ function askMulti(q,opts){
     const selected=new Set();
     opts.forEach(o=>{
       const b=document.createElement('button');b.className='btn';b.textContent=o;
-      b.onclick=()=>{b.classList.toggle('sel'); if(selected.has(o))selected.delete(o);else selected.add(o);};
+      b.onclick=()=>{b.classList.toggle('sel');selected.has(o)?selected.delete(o):selected.add(o);};
       choices.appendChild(b);
     });
     const ok=document.createElement('button');ok.className='btn';ok.textContent='Valider';ok.style.marginTop='2vmin';
@@ -90,118 +94,113 @@ function askSingle(q,opts){
     flex(choices);
   });
 }
-
-async function typeWords(lines,delay=400){
+async function typeWords(lines,delay=600){
   show(text);text.className='center';text.textContent='';
-  for(const line of lines){
-    text.textContent+= (text.textContent?'
-':'')+line;
-    await sleep(delay);
-  }
-  await sleep(1200);
-  hide(text);
+  for(const line of lines){text.textContent+= (text.textContent?'
+':'')+line;await sleep(delay);}
+  await sleep(1200);hide(text);
 }
 
 async function run(){
-  hide(start);hide(restart);
-  localStorage.setItem('qr11_done','1');
+  try{
+    hide(start);hide(restart);
+    localStorage.setItem('qr11_done','1');
 
-  // Phase1 crochetage
-  showImage('crochetage_vidal2.webp');
-  await sleep(3000);
-  showTextStay('Confinement. YouTube.
+    // Phase1
+    await showImage('crochetage_vidal2.webp');
+    await sleep(3000);
+    showTextStay('Confinement. YouTube.
 C'est illégal.
 C'est pratique.','bottom');
-  await sleep(3500);
-  hide(text);hideImage();
+    await sleep(3500);hide(text);hideImage();
 
-  // Phase2 metacognition
-  const repBureau = await askMulti('Un bureau de prof. Un samedi matin. Vide.
+    // Phase2
+    const repBureau = await askMulti('Un bureau de prof. Un samedi matin. Vide.
 Vous imaginez quoi ?',[
-    'Ordonné','en bazar','petit','grand','lumineux','sombre','Rien de précis'
-  ]);
-  localStorage.setItem('qr11_bureau',repBureau.join(', '));
+      'Ordonné','en bazar','petit','grand','lumineux','sombre','Rien de précis'
+    ]);
+    localStorage.setItem('qr11_bureau',repBureau.join(', '));
 
-  showImage('bureau_vidal.jpg');
-  showTextStay('Voici un bureau','bottom');
-  await sleep(3000);
-  hide(text);hideImage();
+    await showImage('bureau_vidal.jpg');
+    showTextStay('Voici un bureau','bottom');
+    await sleep(3000);hide(text);hideImage();
 
-  // Phase3 focalisation active
-  showImage('bureau_vidal.jpg'); // zoom carnet simulé par même image
-  await sleep(1000);
-  flex(carnetBox);
-  const carnetTexts={
-    LAVELOT:'LAVELOT : Moteur exceptionnel. Il ira pas aux France si j'ai mon mot à dire.',
-    MOREL:'MOREL : Père absent — mobile émotionnel fort. Tout le monde est gagnant.',
-    DUBOIS:'DUBOIS : Court comme un frigo qui aurait oublié ses roulettes.'
-  };
-  let first=null, opened=0;
-  await new Promise(res=>{
-    carnetBox.querySelectorAll('.carnetBtn').forEach(btn=>{
-      btn.onclick=()=>{
-        const id=btn.dataset.id;
-        if(btn.classList.contains('used'))return;
-        btn.classList.add('used');
-        if(!first){first=id;localStorage.setItem('qr11_carnet_first',id);}
-        carnetLine.textContent=carnetTexts[id];
-        show(carnetLine);
-        setTimeout(()=>hide(carnetLine),2500);
-        opened++;
-        if(opened===3){hide(carnetBox);hideImage();res();}
-      };
+    // Phase3
+    await showImage('bureau_vidal.jpg');
+    await sleep(800);
+    flex(carnetBox);
+    const carnetTexts={
+      LAVELOT:'LAVELOT : Moteur exceptionnel. Il ira pas aux France si j'ai mon mot à dire.',
+      MOREL:'MOREL : Père absent — mobile émotionnel fort. Tout le monde est gagnant.',
+      DUBOIS:'DUBOIS : Court comme un frigo qui aurait oublié ses roulettes.'
+    };
+    let first=null, opened=0;
+    await new Promise(res=>{
+      carnetBox.querySelectorAll('.carnetBtn').forEach(btn=>{
+        btn.onclick=()=>{
+          if(btn.classList.contains('used'))return;
+          btn.classList.add('used');
+          const id=btn.dataset.id;
+          if(!first){first=id;localStorage.setItem('qr11_carnet_first',id);}
+          carnetLine.textContent=carnetTexts[id];
+          show(carnetLine);
+          setTimeout(()=>hide(carnetLine),2500);
+          opened++;
+          if(opened===3){hide(carnetBox);hideImage();res();}
+        };
+      });
     });
-  });
 
-  // Phase4 Vidal jeune
-  showImage('vidal_jeune.webp');
-  await sleep(5000);
-  await typeWords(['Vidal. Dix-sept ans.','Dossard 14.','Sélection France compromise.'],600);
-  const repVidal = await askSingle('Vous l'aviez imaginé comme ça ?',[
-    'Oui, à peu près','Non, rien à voir','Je ne l'avais pas imaginé'
-  ]);
-  localStorage.setItem('qr11_vidal',repVidal);
-  hideImage();
+    // Phase4
+    await showImage('vidal_jeune.webp');
+    await sleep(5000);
+    await typeWords(['Vidal. Dix-sept ans.','Dossard 14.','Sélection France compromise.'],600);
+    const repVidal = await askSingle('Vous l'aviez imaginé comme ça ?',[
+      'Oui, à peu près','Non, rien à voir','Je ne l'avais pas imaginé'
+    ]);
+    localStorage.setItem('qr11_vidal',repVidal);
+    hideImage();
 
-  // Phase5 son seul pendant image vidal jeune (reprise)
-  showImage('vidal_jeune.webp');
-  play(aKey);
-  await sleep(1500);
-  hideImage();
-  showImage('photo_carnet.webp');
-  play(aPage);
-  await Promise.all([
-    new Promise(r=>aKey.onended=r),
-    new Promise(r=>aPage.onended=r)
-  ]);
-  hideImage();
+    // Phase5
+    await showImage('vidal_jeune.webp');
+    play(aKey);
+    await sleep(1500);
+    hideImage();
+    await showImage('photo_carnet.webp');
+    play(aPage);
+    await sleep(4000);
+    hideImage();
 
-  // Phase6
-  await typeWords(['Silence.','Son coupé net.'],700);
-  const repFeel = await askSingle('Là, maintenant — vous ressentez quelque chose ?',[
-    'La peur','l'excitation','autre chose'
-  ]);
-  localStorage.setItem('qr11_feel',repFeel);
+    // Phase6
+    await typeWords(['Silence.','Son coupé net.'],700);
+    const repFeel = await askSingle('Là, maintenant — vous ressentez quelque chose ?',[
+      'La peur','l'excitation','autre chose'
+    ]);
+    localStorage.setItem('qr11_feel',repFeel);
 
-  // Phase7 retournement triple
-  const bureauTxt = localStorage.getItem('qr11_bureau')||'';
-  const vidalTxt = localStorage.getItem('qr11_vidal')||'';
-  const firstCarnet = localStorage.getItem('qr11_carnet_first')||'';
-  await showText(`Vous aviez imaginé un bureau ${bureauTxt}.
+    // Phase7
+    const bureauTxt = localStorage.getItem('qr11_bureau')||'';
+    const vidalTxt = localStorage.getItem('qr11_vidal')||'';
+    const firstCarnet = localStorage.getItem('qr11_carnet_first')||'';
+    await showText(`Vous aviez imaginé un bureau ${bureauTxt}.
 Il était effrayant de netteté.`,3000,'center');
-  await sleep(500);
-  await showText(`Vous aviez dit que Vidal ressemblait à ${vidalTxt}.
+    await sleep(400);
+    await showText(`Vous aviez dit que Vidal ressemblait à ${vidalTxt}.
 Sam, lui, a mis du temps à reconnaître les épaules.`,3500,'center');
-  await sleep(500);
-  await showText(`Vous avez regardé ${firstCarnet} en premier.`,3000,'center');
-  await sleep(500);
-  await showText('Sam, lui, pense à la mandarine.',3000,'center');
+    await sleep(400);
+    await showText(`Vous avez regardé ${firstCarnet} en premier.`,3000,'center');
+    await sleep(400);
+    await showText('Sam, lui, pense à la mandarine.',3000,'center');
 
-  show(restart);
+    show(restart);
+  }catch(e){
+    console.error(e);
+    text.textContent='Erreur : '+e.message;show(text);show(restart);
+  }
 }
 
-start.onclick=run;
-restart.onclick=()=>location.reload();
+start.addEventListener('click',run);
+restart.addEventListener('click',()=>location.reload());
 </script>
 </body>
 </html>
