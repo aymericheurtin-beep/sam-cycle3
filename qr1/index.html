@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -17,6 +17,26 @@ img,video{max-width:90%;max-height:70vh;object-fit:contain}
 p{font-size:22px;line-height:1.4;max-width:600px}
 .choiceBtn{background:#111;color:#fff;border:1px solid #fff;padding:15px 25px;font-size:18px;border-radius:8px;cursor:pointer;width:280px}
 .choiceBtn:active{transform:scale(0.98)}
+</style>
+<style>
+/* === UNIFICATION TYPO === */
+html,body,button,input,select,textarea {
+  font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+p, #text, .screen p, #question, #msg {
+  font-size:clamp(20px,4.5vmin,28px) !important;
+  line-height:1.45 !important;
+}
+button, .btn, .choiceBtn, .choice, .carnetBtn {
+  font-size:clamp(18px,4vmin,24px) !important;
+  font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+#startBtn, #start, #btn, #restartBtn, #restart {
+  font-size:clamp(20px,5vmin,26px) !important;
+}
+small, .sub, #recall, #hint, #carnetLine {
+  font-size:clamp(16px,3.2vmin,20px) !important;
+}
 </style>
 </head>
 <body>
