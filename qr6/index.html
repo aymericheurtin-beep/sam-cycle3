@@ -7,17 +7,17 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-family:system-ui}
-#btn{background:#fff;color:#000;border:none;padding:22px 44px;font-size:22px;border-radius:8px;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);cursor:pointer;z-index:10}
-#restart{background:#fff;color:#000;border:none;padding:16px 32px;font-size:20px;border-radius:8px;cursor:pointer;margin-top:30px}
+#btn{background:#fff;color:#000;border:none;padding:24px 48px;font-size:24px;border-radius:8px;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);cursor:pointer;z-index:10}
+#restart{background:#fff;color:#000;border:none;padding:18px 34px;font-size:22px;border-radius:8px;cursor:pointer;margin-top:32px}
 .screen{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;z-index:20}
 .screen.active{display:flex}
-#question{font-size:24px;line-height:1.45;max-width:680px;margin-bottom:34px}
-.choice{background:rgba(255,255,255,0.1);color:#fff;border:1px solid #fff;padding:18px 26px;font-size:20px;border-radius:8px;cursor:pointer;margin:9px 0;width:84%;max-width:420px}
+#question{font-size:26px;line-height:1.5;max-width:700px;margin-bottom:36px}
+.choice{background:rgba(255,255,255,0.1);color:#fff;border:1px solid #fff;padding:20px 28px;font-size:22px;border-radius:8px;cursor:pointer;margin:10px 0;width:86%;max-width:440px}
 .choice:hover{background:#fff;color:#000}
 #eyeWrap{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:#000;z-index:5}
 #eye{max-width:92vw;max-height:82vh;width:auto;height:auto;opacity:0;transition:opacity 1.5s ease}
 #eye.show{opacity:1}
-#response{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:22px;line-height:1.65;background:rgba(0,0,0,0.75);padding:32px 28px;border-radius:12px;text-align:center;display:none;z-index:15;max-width:82vw;opacity:0;transition:opacity 1s ease;white-space:pre-line}
+#response{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:24px;line-height:1.7;background:rgba(0,0,0,0.75);padding:34px 30px;border-radius:12px;text-align:center;display:none;z-index:15;max-width:84vw;opacity:0;transition:opacity 1s ease;white-space:pre-line}
 </style>
 </head>
 <body>
@@ -39,9 +39,9 @@ body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-fam
   <button id="restart">Recommencer</button>
 </div>
 
-<audio id="scanner" src="scanner.mp3" preload="auto"></audio>
-<audio id="tictac" src="tictac.mp3" preload="auto" loop></audio>
-<audio id="voix" src="audio_vidal.mp3" preload="auto"></audio>
+<audio id="scanner" src="scanner.mp3" preload="auto" playsinline></audio>
+<audio id="tictac" src="tictac.mp3" preload="auto" loop playsinline></audio>
+<audio id="voix" src="audio_vidal.mp3" preload="auto" playsinline></audio>
 
 <script>
 const btn = document.getElementById('btn');
@@ -58,6 +58,7 @@ const tictac = document.getElementById('tictac');
 const voix = document.getElementById('voix');
 
 let choix = '';
+let audioStarted = false;
 
 btn.onclick = () => {
   btn.style.display = 'none';
@@ -67,23 +68,38 @@ btn.onclick = () => {
 choices.forEach(b => {
   b.onclick = () => {
     choix = b.textContent;
-    localStorage.setItem('qr6_vidal_imagined', choix);
+    try{ localStorage.setItem('qr6_vidal_imagined', choix);}catch{}
     qscreen.classList.remove('active');
     
     eyeWrap.style.display = 'flex';
     setTimeout(() => eye.classList.add('show'), 50);
     
-    // Séquence audio : scan d'abord, puis tic-tac + voix
-    scanner.currentTime = 0;
-    scanner.play().catch(()=>{});
-    
-    scanner.onended = () => {
-      tictac.volume = 0.45;
-      tictac.play().catch(()=>{});
-      setTimeout(() => voix.play().catch(()=>{}), 800);
-    };
+    startAudioSequence();
   };
 });
+
+function startAudioSequence(){
+  if(audioStarted) return;
+  audioStarted = true;
+  
+  tictac.volume = 0.45;
+  
+  // Lancer tout dans le même geste utilisateur
+  const p1 = scanner.play();
+  const p2 = tictac.play();
+  
+  // Si le scan échoue, on continue quand même
+  if(p1 && p1.catch) p1.catch(()=>{});
+  if(p2 && p2.catch) p2.catch(()=>{});
+  
+  // Voix après 2.2s, toujours dans la fenêtre de geste autorisée
+  setTimeout(()=>{
+    voix.play().catch(()=>{
+      // fallback : réessayer au tap suivant
+      document.body.addEventListener('click', ()=> voix.play().catch(()=>{}), {once:true});
+    });
+  }, 2200);
+}
 
 voix.onended = () => {
   tictac.pause();
@@ -97,11 +113,18 @@ Et maintenant ?`;
     eyeWrap.style.display = 'none';
     finaltext.textContent = `Vous aviez dit : ${choix}.
 Et maintenant ?`;
-    finaltext.style.fontSize = '24px';
-    finaltext.style.lineHeight = '1.55';
+    finaltext.style.fontSize = '26px';
+    finaltext.style.lineHeight = '1.6';
     post.classList.add('active');
   }, 3500);
 };
+
+// Sécurité : si aucun audio ne part après 4s, force la suite
+setInterval(()=>{
+  if(eyeWrap.style.display==='flex' && voix.paused && scanner.paused && !audioStarted){
+    startAudioSequence();
+  }
+},1000);
 
 restart.onclick = () => location.reload();
 </script>
