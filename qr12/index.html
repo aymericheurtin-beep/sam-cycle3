@@ -1,193 +1,386 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>QR12 - Chapitre 16</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>QR12</title>
 <style>
-html,body{margin:0;height:100%;background:#000;color:#fff;font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;overflow:hidden}
-#start,#restart{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:5vmin;padding:4vmin 8vmin;background:#fff;color:#000;border:none;border-radius:10px;cursor:pointer;z-index:100}
-#restart{display:none}
-#text{position:absolute;left:50%;transform:translateX(-50%);width:92%;text-align:center;font-size:5vmin;line-height:1.35;z-index:30;display:none;white-space:pre-line;text-shadow:0 0 6px #000}
-#text.center{top:8%}
-#text.top{top:8%}
-#text.bottom{bottom:6%;font-size:3.8vmin;background:rgba(0,0,0,.75);padding:1.8vmin 2.5vmin;border-radius:8px;max-width:85%}
-#choices{position:absolute;top:28%;left:50%;transform:translateX(-50%);display:none;flex-direction:column;gap:2.2vmin;width:88%;z-index:30}
-.btn{font-size:4vmin;padding:3vmin;background:#111;color:#fff;border:1px solid #fff;border-radius:8px;cursor:pointer;text-align:center}
-.btn.validate{background:#fff;color:#000;margin-top:2vmin}
-.choice{display:flex;align-items:center;gap:2vmin;background:#111;border:1px solid #fff;border-radius:8px;padding:2.5vmin;font-size:4vmin;cursor:pointer}
-.choice input{width:4vmin;height:4vmin}
-#image,#video{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-width:90vmin;max-height:78vmin;z-index:10;display:none}
-#stats{position:absolute;bottom:5vmin;left:50%;transform:translateX(-50%);font-size:4vmin;font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;z-index:30;display:none;text-shadow:0 0 8px #000;text-align:center;line-height:1.4}
-</style>
-<style>
-/* === UNIFICATION TYPO === */
-html,body,button,input,select,textarea {
-  font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-}
-p, #text,.screen p, #question, #msg {
-  font-size:clamp(20px,4.5vmin,28px)!important;
-  line-height:1.45!important;
-}
-button,.btn,.choiceBtn,.choice,.carnetBtn {
-  font-size:clamp(18px,4vmin,24px)!important;
-  font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-}
-#startBtn, #start, #btn, #restartBtn, #restart {
-  font-size:clamp(20px,5vmin,26px)!important;
-}
-small,.sub, #recall, #hint, #stats {
-  font-size:clamp(16px,3.2vmin,20px)!important;
-}
+  :root{color-scheme:dark light}
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    background:#0b0d12;
+    color:#e8ecf1;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+  }
+  .wrap{
+    width:100%;
+    max-width:720px;
+    background:#121621;
+    border:1px solid #1f2636;
+    border-radius:16px;
+    padding:24px;
+    box-shadow:0 10px 30px rgba(0,0,0,.35);
+  }
+  h1{
+    margin:0 0 16px;
+    font-size:22px;
+    font-weight:700;
+    letter-spacing:.2px;
+  }
+  #text{
+    font-size:18px;
+    line-height:1.5;
+    white-space:pre-wrap;
+    min-height:3lh;
+  }
+  #choices{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    margin-top:16px;
+  }
+  .choice{
+    padding:12px 14px;
+    border-radius:12px;
+    border:1px solid #2a3448;
+    background:#161c29;
+    color:#e8ecf1;
+    cursor:pointer;
+    text-align:left;
+    font-size:16px;
+    transition:transform .05s ease,border-color .2s;
+  }
+  .choice:hover{border-color:#3a4763}
+  .choice:active{transform:scale(.99)}
+  .choice[aria-pressed="true"]{
+    border-color:#5b8cff;
+    background:#1a2440;
+  }
+  .row{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .btn{
+    padding:12px 16px;
+    border-radius:12px;
+    border:1px solid #2a3448;
+    background:#1a2030;
+    color:#e8ecf1;
+    cursor:pointer;
+    font-size:16px;
+    font-weight:600;
+  }
+  .btn.primary{
+    background:#5b8cff;
+    border-color:#5b8cff;
+    color:#fff;
+  }
+  .btn:disabled{opacity:.6;cursor:not-allowed}
+  #img{
+    max-width:100%;
+    height:auto;
+    border-radius:12px;
+    border:1px solid #1f2636;
+    display:block;
+    margin:0 auto;
+  }
+  .muted{color:#9aa7bd;font-size:14px}
+  .stack{display:flex;flex-direction:column;gap:12px}
+  .stats{
+    background:#0f1320;
+    border:1px dashed #2a3448;
+    border-radius:12px;
+    padding:14px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:14px;
+    line-height:1.6;
+  }
+  .hidden{display:none !important}
 </style>
 </head>
 <body>
-<button id="start">Touchez pour entrer</button>
-<button id="restart">Recommencer</button>
+<div class="wrap">
+  <h1>QR12</h1>
 
-<div id="text"></div>
-<div id="choices"></div>
-<img id="image" alt="">
-<video id="video" playsinline muted></video>
-<div id="stats"></div>
+  <div class="stack">
+    <button id="start" class="btn primary">Démarrer</button>
 
-<audio id="narrateur" src="narrateur.mp3" preload="auto"></audio>
+    <div id="text" class="hidden"></div>
+
+    <div id="choices" class="hidden"></div>
+
+    <img id="img" class="hidden" alt="Suspects" />
+
+    <button id="restart" class="btn hidden">Recommencer</button>
+
+    <div id="stats" class="stats hidden"></div>
+  </div>
+
+  <audio id="narrateur" src="narrateur.mp3" preload="auto"></audio>
+</div>
 
 <script>
-const $ = id => document.getElementById(id);
-const start = $('start'), restart = $('restart'), text = $('text'), choices = $('choices'), image = $('image'), video = $('video'), stats = $('stats');
-const narrateur = $('narrateur');
+  const $ = s => document.querySelector(s);
+  const startBtn = $('#start');
+  const restartBtn = $('#restart');
+  const textEl = $('#text');
+  const choicesEl = $('#choices');
+  const imgEl = $('#img');
+  const statsEl = $('#stats');
+  const narrateur = $('#narrateur');
 
-const show = el => el.style.display = 'block';
-const hide = el => el.style.display = 'none';
-const flex = el => el.style.display = 'flex';
-const sleep = ms => new Promise(r => setTimeout(r, ms));
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-function showText(t, hold=3000, pos='center'){
-  text.className = ''; text.classList.add(pos);
-  text.textContent = t; show(text);
-  return sleep(hold).then(()=>hide(text));
-}
+  const show = el => el.classList.remove('hidden');
+  const hide = el => el.classList.add('hidden');
+  const flex = el => {el.classList.remove('hidden'); el.style.display='flex'};
 
-function askSingle(q, opts){
-  return new Promise(async res=>{
-    text.className='center'; text.textContent=q; show(text);
-    await sleep(500);
-    choices.innerHTML='';
-    opts.forEach(o=>{
-      const b=document.createElement('button'); b.className='btn'; b.textContent=o;
-      b.onclick=()=>{ hide(text); hide(choices); res(o); };
-      choices.appendChild(b);
+  function showText(html){
+    textEl.innerHTML = html;
+    show(textEl);
+  }
+
+  function clearChoices(){
+    choicesEl.innerHTML = '';
+    hide(choicesEl);
+  }
+
+  async function askSingle(question, options){
+    showText(question);
+    choicesEl.innerHTML = '';
+    flex(choicesEl);
+    return new Promise(resolve => {
+      options.forEach(opt => {
+        const b = document.createElement('button');
+        b.className = 'choice';
+        b.textContent = opt;
+        b.onclick = () => {
+          clearChoices();
+          resolve(opt);
+        };
+        choicesEl.appendChild(b);
+      });
     });
-    flex(choices);
-  });
-}
+  }
 
-function askMulti(q, opts){
-  return new Promise(async res=>{
-    text.className='center'; text.textContent=q; show(text);
-    await sleep(500);
-    choices.innerHTML='';
-    opts.forEach(o=>{
-      const lab=document.createElement('label'); lab.className='choice';
-      const cb=document.createElement('input'); cb.type='checkbox'; cb.value=o;
-      lab.appendChild(cb); lab.append(o); choices.appendChild(lab);
+  async function askMulti(question, options){
+    showText(question);
+    choicesEl.innerHTML = '';
+    flex(choicesEl);
+    const selected = new Set();
+    options.forEach(opt => {
+      const b = document.createElement('button');
+      b.className = 'choice';
+      b.textContent = opt;
+      b.setAttribute('aria-pressed','false');
+      b.onclick = () => {
+        if(selected.has(opt)){
+          selected.delete(opt);
+          b.setAttribute('aria-pressed','false');
+        }else{
+          selected.add(opt);
+          b.setAttribute('aria-pressed','true');
+        }
+      };
+      choicesEl.appendChild(b);
     });
-    const v=document.createElement('button'); v.className='btn validate'; v.textContent='Valider';
-    v.onclick=()=>{ const sel=[...choices.querySelectorAll('input:checked')].map(i=>i.value); hide(text); hide(choices); res(sel); };
-    choices.appendChild(v);
-    flex(choices);
-  });
-}
-
-async function play(a){ try{ await a.play(); }catch(e){ console.warn('audio bloqué',e); } }
-
-function normalize(s){return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');}
-
-const charDesc={
-  'Vidal':'Bras croisés. La montre neuve. Il attend que ça finisse.',
-  'Noé':'Regard sur ses chaussures. La posture des mauvais jours.',
-  'Rémy':'Bras bandé de l’épaule aux doigts. Il aurait préféré rester à l’hôpital.',
-  'Chloé':'Elle arrive en dernier. Sa démarche quand elle est stressée.',
-  'Colin':'Mains dans les poches. Il regarde personne en particulier.',
-  'Sam':'Assis au centre. Il regarde Inès.',
-  'Inès':'Debout. Elle a demandé à être debout.'
-};
-
-async function run(){
-  if(localStorage.getItem('qr12_done')){
-    await showText('Vous avez déjà parcouru ce QR.',3000,'center');
-    show(restart);
-    return;
+    const row = document.createElement('div');
+    row.className = 'row';
+    const valider = document.createElement('button');
+    valider.className = 'btn primary';
+    valider.textContent = 'Valider';
+    valider.onclick = () => {
+      clearChoices();
+      resolve(Array.from(selected));
+    };
+    row.appendChild(valider);
+    choicesEl.appendChild(row);
+    return new Promise(resolve => {
+      valider._resolve = resolve;
+    });
   }
-  hide(start); hide(restart);
 
-  let used = parseInt(localStorage.getItem('scans_used')||'0')+1;
-  localStorage.setItem('scans_used', used);
-  localStorage.setItem('qr12_done','1');
-
-  // 1. Narrateur
-  narrateur.load();
-  await play(narrateur);
-  await new Promise(r=>{narrateur.onended=r; setTimeout(r,6000);});
-  narrateur.pause(); narrateur.currentTime=0;
-  await sleep(3000);
-
-  // 2. Question pièce
-  const repPiece = await askMulti('Avant d’entrer — vous imaginez cette pièce comment?', ['Petite','Grande','Lumineuse','Sombre','Ordonnée','En bazar']);
-
-  // Pont QR11
-  let qr11b=[];
-  try{qr11b=JSON.parse(localStorage.getItem('qr11_bureau')||'[]');}catch{}
-  const map={petite:'petit',grande:'grand',lumineuse:'lumineux',sombre:'sombre','ordonnée':'ordonné','en bazar':'en bazar'};
-  const repNorm=repPiece.map(r=>map[normalize(r)]||normalize(r));
-  const qr11Norm=qr11b.map(normalize);
-  const overlap=repNorm.some(r=>qr11Norm.includes(r));
-  await showText(overlap?'Tiens, comme le bureau de M. Vidal.':'Tiens, différemment du bureau de M. Vidal.',2500,'center');
-
-  // 3. Tous les suspects 5s
-  const imgList=['touslessuspects.jpg','touslessuspects.JPG','touslessuspects.png','touslessuspects.PNG'];
-  let imgIdx=0;
-  function tryLoadImg(){
-    if(imgIdx>=imgList.length){console.warn('Image introuvable');return;}
-    image.onerror=()=>{imgIdx++;tryLoadImg();};
-    image.src=imgList[imgIdx];
+  // Override askMulti resolve closure fix
+  async function askMultiFixed(question, options){
+    showText(question);
+    choicesEl.innerHTML = '';
+    flex(choicesEl);
+    const selected = new Set();
+    options.forEach(opt => {
+      const b = document.createElement('button');
+      b.className = 'choice';
+      b.textContent = opt;
+      b.setAttribute('aria-pressed','false');
+      b.onclick = () => {
+        if(selected.has(opt)){
+          selected.delete(opt);
+          b.setAttribute('aria-pressed','false');
+        }else{
+          selected.add(opt);
+          b.setAttribute('aria-pressed','true');
+        }
+      };
+      choicesEl.appendChild(b);
+    });
+    return new Promise(resolve => {
+      const row = document.createElement('div');
+      row.className = 'row';
+      const valider = document.createElement('button');
+      valider.className = 'btn primary';
+      valider.textContent = 'Valider';
+      valider.onclick = () => {
+        clearChoices();
+        resolve(Array.from(selected));
+      };
+      row.appendChild(valider);
+      choicesEl.appendChild(row);
+    });
   }
-  tryLoadImg();
-  show(image);
-  await sleep(5000);
-  hide(image);
 
-  // 4. Choix personnage
-  const charChoice = await askSingle('Touchez le personnage qui vous intéresse le plus.', Object.keys(charDesc));
-
-  let txt = charDesc[charChoice];
-  const firstCarnet = localStorage.getItem('qr11_first_carnet');
-  if(firstCarnet && normalize(firstCarnet)===normalize(charChoice)){
-    txt += "\n\nCe personnage doit vous intriguer, vous l’aviez choisi en premier dans le carnet de M. Vidal.";
+  async function play(audio){
+    try{
+      audio.currentTime = 0;
+      const p = audio.play();
+      if(p && typeof p.catch === 'function') p.catch(()=>{});
+    }catch{}
   }
-  const qr9 = localStorage.getItem('qr9_vestiaire');
-  if(qr9){txt += `\n\nAu vestiaire, vous comptiez ${qr9}. Sam a arrêté de compter aujourd’hui.`;}
-  const qr8 = localStorage.getItem('qr8_first');
-  if(qr8){txt += `\n\nDans le bureau d’Arnaud, vous aviez regardé ${qr8} en premier. Inès, elle, avait regardé les chaussures.`;}
 
-  await showText(txt,6000,'center');
+  function waitAudioOrTimeout(audio, ms){
+    return new Promise(resolve => {
+      let done = false;
+      const finish = () => {
+        if(done) return;
+        done = true;
+        audio.removeEventListener('ended', onEnd);
+        resolve();
+      };
+      const onEnd = () => finish();
+      audio.addEventListener('ended', onEnd, {once:true});
+      setTimeout(finish, ms);
+    });
+  }
 
-  // 5. Instruction lecture
-  await showText('Dans quelques secondes vous allez lire la suite du roman. Chaque personnage dans cette pièce a une raison d’être là. Vous aussi vous savez des choses sur eux. Utilisez-les.',7000,'center');
+  async function showImageTimeout(src, fallback, ms){
+    return new Promise(resolve => {
+      let settled = false;
+      const done = () => {
+        if(settled) return;
+        settled = true;
+        setTimeout(()=>{ hide(imgEl); resolve(); }, ms);
+      };
+      imgEl.onerror = () => {
+        if(fallback && imgEl.src.endsWith(src)){
+          imgEl.src = fallback;
+        }else{
+          done();
+        }
+      };
+      imgEl.onload = () => {
+        show(imgEl);
+        done();
+      };
+      imgEl.src = src;
+    });
+  }
 
-  // 6. Stats
-  const total=parseInt(localStorage.getItem('scans_total')||'12');
-  const usedNow=parseInt(localStorage.getItem('scans_used')||'0');
-  const solo=Math.max(0,total-usedNow);
-  stats.innerHTML=`Scans proposés : ${total}<br>Scans utilisés : ${usedNow}<br>Imagination seule : ${solo}`;
-  show(stats);
+  function getScans(){
+    const used = parseInt(localStorage.getItem('scans_used') || '0',10);
+    const total = parseInt(localStorage.getItem('scans_total') || '12',10);
+    const solo = used <= 1 ? 'oui' : 'non';
+    return {used,total,solo};
+  }
 
-  show(restart);
-}
+  function incScans(){
+    const used = parseInt(localStorage.getItem('scans_used') || '0',10)+1;
+    localStorage.setItem('scans_used', String(used));
+    if(!localStorage.getItem('scans_total')) localStorage.setItem('scans_total','12');
+  }
 
-start.onclick = run;
-restart.onclick = ()=> location.reload();
+  const descriptions = {
+    'Vidal':'Vidal : méthodique, observateur, parle peu mais note tout.',
+    'Noé':'Noé : impulsif, créatif, prend des risques.',
+    'Rémy':'Rémy : calme, logique, excellent en déduction.',
+    'Chloé':'Chloé : empathique, repère les détails humains.',
+    'Colin':'Colin : technique, à l’aise avec les appareils.',
+    'Sam':'Sam : rapide, efficace, va droit au but.',
+    'Inès':'Inès : prudente, mémoire visuelle impressionnante.'
+  };
+
+  startBtn.onclick = async () => {
+    hide(startBtn);
+    hide(restartBtn);
+    hide(statsEl);
+    hide(imgEl);
+    clearChoices();
+    incScans();
+
+    await play(narrateur);
+    await waitAudioOrTimeout(narrateur, 6000);
+
+    hide(textEl);
+    await showImageTimeout('touslessuspects.jpg','touslessuspects.png',5000);
+
+    const pieceOptions = ['Petite','Grande','Lumineuse','Sombre','Ordonnée','En bazar'];
+    const pieces = await askMultiFixed('Comment décririez-vous la pièce ?', pieceOptions);
+    localStorage.setItem('qr12_piece', JSON.stringify(pieces));
+
+    const bureau = localStorage.getItem('qr11_bureau') || 'inconnu';
+    const pieceTxt = pieces.length ? pieces.join(', ') : 'sans précision';
+    showText(`Pont : Votre bureau précédent était <b>${bureau}</b>.<br>La pièce actuelle semble <b>${pieceTxt}</b>.`);
+
+    await sleep(2000);
+
+    const characters = ['Vidal','Noé','Rémy','Chloé','Colin','Sam','Inès'];
+    const choisi = await askSingle('Qui choisissez-vous ?', characters);
+
+    let desc = descriptions[choisi] || `${choisi} : profil non renseigné.`;
+    const extras = [];
+
+    const firstCarnet = localStorage.getItem('qr11_first_carnet');
+    if(firstCarnet && firstCarnet === choisi){
+      extras.push('→ Correspondance avec le premier carnet de QR11.');
+    }
+    if(localStorage.getItem('qr9_vestiaire') && localStorage.getItem('qr8_first')){
+      extras.push('→ Indices vestiaire QR9 et premier élément QR8 confirmés.');
+    }
+
+    showText(`<b>${choisi}</b><br>${desc}${extras.length ? '<br><br>' + extras.join('<br>') : ''}`);
+
+    await sleep(7000);
+
+    showText('Instruction finale : conservez votre choix et avancez vers le point suivant sans partager d’informations. Restez attentif aux détails.');
+
+    await sleep(7000);
+
+    const {used,total,solo} = getScans();
+    statsEl.innerHTML = `scans_total: ${total}<br>scans_used: ${used}<br>solo: ${solo}`;
+    show(statsEl);
+    show(restartBtn);
+  };
+
+  restartBtn.onclick = () => {
+    hide(restartBtn);
+    hide(statsEl);
+    hide(imgEl);
+    clearChoices();
+    textEl.innerHTML = '';
+    hide(textEl);
+    show(startBtn);
+  };
+
+  // init
+  hide(textEl);
+  hide(choicesEl);
+  hide(imgEl);
+  hide(restartBtn);
+  hide(statsEl);
 </script>
 </body>
 </html>
