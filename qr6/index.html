@@ -5,18 +5,18 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
 <title>QR6 - Vidal</title>
 <style>
-html,body{margin:0;height:100%;background:#000;color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;overflow:hidden}
-#start,#restart{position:absolute;left:50%;transform:translateX(-50%);font-size:4.2vmin;padding:3.2vmin 6vmin;background:#fff;color:#000;border:none;border-radius:10px;cursor:pointer;z-index:100;font-family:inherit}
+html,body{margin:0;height:100%;background:#000;color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;overflow:hidden;-webkit-tap-highlight-color:transparent}
+#start,#restart{position:absolute;left:50%;transform:translateX(-50%);font-size:4.2vmin;padding:3.2vmin 6vmin;background:#fff;color:#000;border:none;border-radius:10px;cursor:pointer;z-index:200;font-family:inherit;touch-action:manipulation}
 #start{top:50%;transform:translate(-50%,-50%)}
 #restart{bottom:6%;display:none}
 #question{position:absolute;top:14%;left:50%;transform:translateX(-50%);width:90%;text-align:center;font-size:4.4vmin;line-height:1.3;display:none;z-index:30;font-weight:500}
 #choices{position:absolute;bottom:14%;left:50%;transform:translateX(-50%);display:none;flex-direction:column;gap:1.8vmin;width:82%;z-index:40}
-.choiceBtn{font-size:3.8vmin;padding:2.4vmin;background:rgba(20,20,20,.95);color:#fff;border:1px solid #fff;border-radius:10px;cursor:pointer;text-align:center;font-family:inherit}
-.choiceBtn:hover{background:#fff;color:#000}
+.choiceBtn{font-size:3.8vmin;padding:2.4vmin;background:rgba(20,20,20,.95);color:#fff;border:1px solid #fff;border-radius:10px;cursor:pointer;text-align:center;font-family:inherit;touch-action:manipulation}
+.choiceBtn:active{background:#fff;color:#000}
 #eyeWrap{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:#000;z-index:20}
 #eye{max-width:88vmin;max-height:88vmin;opacity:0;transition:opacity 1.2s}
 #eye.show{opacity:1}
-#response{position:absolute;bottom:22%;left:50%;transform:translateX(-50%);width:88%;text-align:center;font-size:4vmin;line-height:1.4;display:none;z-index:50;text-shadow:0 0 8px #000}
+#response{position:absolute;bottom:22%;left:50%;transform:translateX(-50%);width:88%;text-align:center;font-size:4vmin;line-height:1.4;display:none;z-index:50;text-shadow:0 0 8px #000;white-space:pre-line}
 </style>
 </head>
 <body>
@@ -43,12 +43,18 @@ const hide=el=>el.style.display='none';
 const flex=el=>el.style.display='flex';
 
 let choix='';
+let started=false;
 
-start.onclick=()=>{
+function initStart(){
+  if(started) return;
+  started=true;
   start.style.display='none';
   show(question);
   showChoices();
-};
+}
+
+start.addEventListener('click', initStart);
+start.addEventListener('touchend', e=>{e.preventDefault(); initStart();}, {passive:false});
 
 function showChoices(){
   const opts = ['Quelqu'un de dur','Quelqu'un de blessé','Autrement'];
@@ -57,7 +63,8 @@ function showChoices(){
     const b=document.createElement('button');
     b.className='choiceBtn';
     b.textContent=o;
-    b.onclick=()=>selectChoice(o);
+    b.addEventListener('click',()=>selectChoice(o));
+    b.addEventListener('touchend',e=>{e.preventDefault(); selectChoice(o);},{passive:false});
     choices.appendChild(b);
   });
   flex(choices);
@@ -65,19 +72,17 @@ function showChoices(){
 
 async function selectChoice(o){
   choix=o;
-  localStorage.setItem('qr6_vidal_imagined', o);
+  try{ localStorage.setItem('qr6_vidal_imagined', o);}catch{}
   hide(question);
   hide(choices);
 
   eyeWrap.style.display='flex';
   requestAnimationFrame(()=>eye.classList.add('show'));
 
-  // ambiance scan + tic tac Casio
   tictac.volume = 0.4;
-  try{ tictac.play(); }catch{}
-  try{ await scanner.play(); }catch{}
+  tictac.play().catch(()=>{});
+  scanner.play().catch(()=>{});
 
-  // voix Vidal par dessus
   try{ await audioVidal.play(); }catch{}
   await new Promise(r=>{
     audioVidal.onended=r;
@@ -85,6 +90,7 @@ async function selectChoice(o){
   });
 
   tictac.pause();
+  tictac.currentTime=0;
 
   response.textContent = `Vous aviez dit : ${choix}.
 Et maintenant ?`;
@@ -92,7 +98,8 @@ Et maintenant ?`;
   show(restart);
 }
 
-restart.onclick=()=>location.reload();
+restart.addEventListener('click',()=>location.reload());
+restart.addEventListener('touchend',e=>{e.preventDefault(); location.reload();},{passive:false});
 </script>
 </body>
 </html>
