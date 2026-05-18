@@ -5,18 +5,18 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
 <title>QR6 - Vidal</title>
 <style>
-html,body{margin:0;height:100%;background:#000;color:#fff;font-family:'Courier New',monospace;overflow:hidden}
-#start,#restart{position:absolute;left:50%;transform:translateX(-50%);font-size:5vmin;padding:4vmin 8vmin;background:#fff;color:#000;border:none;border-radius:10px;cursor:pointer;z-index:100}
+html,body{margin:0;height:100%;background:#000;color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;overflow:hidden}
+#start,#restart{position:absolute;left:50%;transform:translateX(-50%);font-size:4.2vmin;padding:3.2vmin 6vmin;background:#fff;color:#000;border:none;border-radius:10px;cursor:pointer;z-index:100;font-family:inherit}
 #start{top:50%;transform:translate(-50%,-50%)}
 #restart{bottom:6%;display:none}
-#question{position:absolute;top:12%;left:50%;transform:translateX(-50%);width:90%;text-align:center;font-size:5.2vmin;line-height:1.3;display:none;z-index:30}
-#choices{position:absolute;bottom:12%;left:50%;transform:translateX(-50%);display:none;flex-direction:column;gap:2vmin;width:85%;z-index:40}
-.choiceBtn{font-size:4.5vmin;padding:3vmin;background:rgba(20,20,20,.95);color:#fff;border:1px solid #fff;border-radius:10px;cursor:pointer;text-align:center}
+#question{position:absolute;top:14%;left:50%;transform:translateX(-50%);width:90%;text-align:center;font-size:4.4vmin;line-height:1.3;display:none;z-index:30;font-weight:500}
+#choices{position:absolute;bottom:14%;left:50%;transform:translateX(-50%);display:none;flex-direction:column;gap:1.8vmin;width:82%;z-index:40}
+.choiceBtn{font-size:3.8vmin;padding:2.4vmin;background:rgba(20,20,20,.95);color:#fff;border:1px solid #fff;border-radius:10px;cursor:pointer;text-align:center;font-family:inherit}
 .choiceBtn:hover{background:#fff;color:#000}
 #eyeWrap{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:#000;z-index:20}
-#eye{max-width:90vmin;max-height:90vmin;opacity:0;transition:opacity 1.2s}
+#eye{max-width:88vmin;max-height:88vmin;opacity:0;transition:opacity 1.2s}
 #eye.show{opacity:1}
-#response{position:absolute;bottom:20%;left:50%;transform:translateX(-50%);width:90%;text-align:center;font-size:4.8vmin;line-height:1.4;display:none;z-index:50;text-shadow:0 0 8px #000}
+#response{position:absolute;bottom:22%;left:50%;transform:translateX(-50%);width:88%;text-align:center;font-size:4vmin;line-height:1.4;display:none;z-index:50;text-shadow:0 0 8px #000}
 </style>
 </head>
 <body>
@@ -26,20 +26,21 @@ html,body{margin:0;height:100%;background:#000;color:#fff;font-family:'Courier N
 <div id="question">Vidal vous l'aviez imaginé comment ?</div>
 <div id="choices"></div>
 
-<div id="eyeWrap"><img id="eye" src="oeil.jpg" alt="oeil"></div>
+<div id="eyeWrap"><img id="eye" src="imageoeil.jpg" alt="oeil"></div>
 
 <div id="response"></div>
 
 <audio id="audioVidal" src="audio_vidal.mp3" preload="auto" playsinline></audio>
+<audio id="scanner" src="scanner.mp3" preload="auto" playsinline></audio>
+<audio id="tictac" src="tictac.mp3" preload="auto" loop playsinline></audio>
 
 <script>
 const $=id=>document.getElementById(id);
-const start=$('start'), restart=$('restart'), question=$('question'), choices=$('choices'), eyeWrap=$('eyeWrap'), eye=$('eye'), response=$('response'), audioVidal=$('audioVidal');
+const start=$('start'), restart=$('restart'), question=$('question'), choices=$('choices'), eyeWrap=$('eyeWrap'), eye=$('eye'), response=$('response'), audioVidal=$('audioVidal'), scanner=$('scanner'), tictac=$('tictac');
 
 const show=el=>el.style.display='block';
 const hide=el=>el.style.display='none';
 const flex=el=>el.style.display='flex';
-const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 
 let choix='';
 
@@ -50,7 +51,7 @@ start.onclick=()=>{
 };
 
 function showChoices(){
-  const opts = ['Quelqu\'un de dur','Quelqu\'un de blessé','Autrement'];
+  const opts = ['Quelqu'un de dur','Quelqu'un de blessé','Autrement'];
   choices.innerHTML='';
   opts.forEach(o=>{
     const b=document.createElement('button');
@@ -71,13 +72,22 @@ async function selectChoice(o){
   eyeWrap.style.display='flex';
   requestAnimationFrame(()=>eye.classList.add('show'));
 
+  // ambiance scan + tic tac Casio
+  tictac.volume = 0.4;
+  try{ tictac.play(); }catch{}
+  try{ await scanner.play(); }catch{}
+
+  // voix Vidal par dessus
   try{ await audioVidal.play(); }catch{}
   await new Promise(r=>{
     audioVidal.onended=r;
-    setTimeout(r,8000);
+    setTimeout(r,12000);
   });
 
-  response.textContent = `Vous aviez dit : ${choix}.\nEt maintenant ?`;
+  tictac.pause();
+
+  response.textContent = `Vous aviez dit : ${choix}.
+Et maintenant ?`;
   show(response);
   show(restart);
 }
