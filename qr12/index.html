@@ -1,155 +1,145 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>QR12 - Chapitre 16</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>QR12</title>
+    <style>
+        html, body, div, span, img, video, button { 
+            all: unset; 
+            display: revert; 
+            box-sizing: border-box;
+        }
+        body > div:not(#start):not(#restart):not(#stats) { display: none !important; }
+        
+        html, body {
+            background: #000 !important;
+            color: #fff;
+            font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+        }
+        .btn {
+            font-size: 4vmin;
+            padding: 3vmin 6vmin;
+            background: #fff;
+            border: none;
+            border-radius: 8px;
+            color: #000;
+            font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            cursor: pointer;
+            position: relative;
+            z-index: 9999;
+            -webkit-tap-highlight-color: transparent;
+        }
+        #start { animation: blink 1.5s infinite; }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        #media {
+            position: fixed;
+            width: 100vmin;
+            height: 100vmin;
+            object-fit: contain;
+            opacity: 0;
+            transition: opacity 1.2s;
+            z-index: 9997;
+            background: #000;
+        }
+        #restart {
+            position: fixed;
+            bottom: 10vmin;
+            opacity: 0;
+            transition: opacity 1s;
+        }
+        .visible { opacity: 1 !important; }
+        .hidden { display: none !important; }
+    </style>
 <style>
-html,body{margin:0;height:100%;background:#000;color:#fff;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;overflow:hidden}
-#start,#restart{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:clamp(20px,5vmin,26px);padding:3vmin 6vmin;background:#fff;color:#000;border:none;border-radius:10px;cursor:pointer;z-index:200}
-#restart{display:none;top:auto;bottom:8vmin}
-#image{position:absolute;top:45%;left:50%;transform:translate(-50%,-50%);max-width:92vmin;max-height:70vmin;display:none;z-index:10}
-#text{position:absolute;left:50%;transform:translateX(-50%);width:92%;text-align:center;font-size:clamp(20px,4.5vmin,28px);line-height:1.4;z-index:50;display:none;white-space:pre-line;text-shadow:0 0 6px #000}
-#text.center{top:12%}
-#text.top{top:8%}
-#choices{position:absolute;top:30%;left:50%;transform:translateX(-50%);display:none;flex-direction:column;gap:2vmin;width:88%;z-index:60;max-height:60vh;overflow:auto}
-.btn{font-size:clamp(18px,4vmin,24px);padding:2.8vmin;background:#111;color:#fff;border:1px solid #fff;border-radius:8px;cursor:pointer;text-align:center}
-.btn.sel{background:#fff;color:#000}
-#charBar{position:absolute;bottom:8vmin;left:50%;transform:translateX(-50%);display:none;flex-wrap:wrap;gap:1.5vmin;justify-content:center;width:94%;z-index:60}
-#charBar .btn{padding:2vmin 3vmin;font-size:clamp(16px,3.5vmin,22px)}
-#stats{position:absolute;bottom:18vmin;left:50%;transform:translateX(-50%);text-align:center;font-size:clamp(16px,3.2vmin,20px);line-height:1.5;display:none;z-index:50;max-width:90%}
+/* === UNIFICATION TYPO === */
+html,body,button,input,select,textarea {
+  font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+p, #text, .screen p, #question, #msg {
+  font-size:clamp(20px,4.5vmin,28px) !important;
+  line-height:1.45 !important;
+}
+button, .btn, .choiceBtn, .choice, .carnetBtn {
+  font-size:clamp(18px,4vmin,24px) !important;
+  font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+#startBtn, #start, #btn, #restartBtn, #restart {
+  font-size:clamp(20px,5vmin,26px) !important;
+}
+small, .sub, #recall, #hint, #carnetLine {
+  font-size:clamp(16px,3.2vmin,20px) !important;
+}
 </style>
 </head>
 <body>
-<button id="start">Touchez pour entrer</button>
-<img id="image" alt="">
-<div id="text"></div>
-<div id="choices"></div>
-<div id="charBar"></div>
-<div id="stats"></div>
-<button id="restart">Recommencer</button>
-<audio id="narrateur" src="narrateur.mp3" preload="auto"></audio>
-<script>
-const start=document.getElementById('start');
-const restart=document.getElementById('restart');
-const image=document.getElementById('image');
-const text=document.getElementById('text');
-const choices=document.getElementById('choices');
-const charBar=document.getElementById('charBar');
-const stats=document.getElementById('stats');
-const narrateur=document.getElementById('narrateur');
+    <button id="start" class="btn">Touchez pour entrer</button>
+    <img id="media" src="" style="display:none;">
+    <button id="restart" class="btn">Recommencer</button>
 
-const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-function show(el){el.style.display='block'}
-function hide(el){el.style.display='none'}
-function showText(msg,pos='center'){text.className='';text.classList.add(pos);text.textContent=msg;show(text)}
-function hideText(){hide(text)}
+    <audio id="audioNarrateur" src="narrateur.mp3" preload="auto" playsinline webkit-playsinline></audio>
 
-async function askMulti(q,opts){
-  showText(q,'center');
-  choices.innerHTML='';
-  const sel=new Set();
-  opts.forEach(o=>{
-    const b=document.createElement('button');b.className='btn';b.textContent=o;
-    b.onclick=()=>{b.classList.toggle('sel'); sel.has(o)?sel.delete(o):sel.add(o);};
-    choices.appendChild(b);
-  });
-  const ok=document.createElement('button');ok.className='btn';ok.textContent='Valider';ok.style.background='#fff';ok.style.color='#000';
-  ok.onclick=()=>{hideText();hide(choices);res([...sel]);};
-  choices.appendChild(ok);
-  choices.style.display='flex';
-  return new Promise(res=>{ ok.onclick=()=>{hideText();hide(choices);res([...sel]);}; });
-}
+    <script>
+        const start = document.getElementById('start');
+        const media = document.getElementById('media');
+        const restart = document.getElementById('restart');
+        const audioNarrateur = document.getElementById('audioNarrateur');
 
-const charDesc={
-  Vidal:"Bras croisés. La montre neuve. Il attend que ça finisse.",
-  Noé:"Regard sur ses chaussures. La posture des mauvais jours.",
-  Rémy:"Bras bandé de l’épaule aux doigts. Il aurait préféré rester à l’hôpital.",
-  Chloé:"Elle arrive en dernier. Sa démarche quand elle est stressée.",
-  Colin:"Mains dans les poches. Il regarde personne en particulier.",
-  Sam:"Assis au centre. Il regarde Inès.",
-  Inès:"Debout. Elle a demandé à être debout."
-};
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+        
+        const showImage = (src) => {
+            return new Promise((resolve) => {
+                media.onload = () => {
+                    media.style.display = 'block';
+                    media.classList.add('visible');
+                    resolve();
+                };
+                media.onerror = () => {
+                    console.error('Image introuvable:', src);
+                    resolve();
+                };
+                media.src = src;
+            });
+        };
 
-function normalize(s){return s.toLowerCase().replace('é','e').replace('è','e');}
+        const hideImage = async () => {
+            media.classList.remove('visible');
+            await sleep(1200);
+            media.src = '';
+        };
 
-async function run(){
-  if(localStorage.getItem('qr12_done')){
-    showText('Vous avez déjà parcouru ce QR.','center');
-    restart.style.display='block';
-    return;
-  }
-  hide(start);
-  // Phase 1 audio
-  try{await narrateur.play();await new Promise(r=>{narrateur.onended=r;setTimeout(r,6000);});}catch{}
-  await sleep(3000);
-  // Phase 2 question pièce
-  const opts=['Petite','Grande','Lumineuse','Sombre','Ordonnée','En bazar'];
-  const rep=await askMulti('Avant d’entrer — vous imaginez cette pièce comment ?',opts);
-  // Pont QR11
-  let qr11b=[];
-  try{qr11b=JSON.parse(localStorage.getItem('qr11_bureau')||'[]');}catch{}
-  const map={petite:'petit',grande:'grand',lumineuse:'lumineux',sombre:'sombre',ordonnée:'ordonné', 'en bazar':'en bazar'};
-  const repNorm=rep.map(r=>map[normalize(r)]||normalize(r));
-  const overlap=repNorm.some(r=>qr11b.map(normalize).includes(r));
-  showText(overlap?'Tiens, comme le bureau de M. Vidal.':'Tiens, différemment du bureau de M. Vidal.','center');
-  await sleep(2500);hideText();
-  // Phase 3 image 5s
-  image.src='touslessuspects.jpg';
-  show(image);
-  await sleep(5000);
-  // Consigne + boutons
-  showText('Touchez le personnage qui vous intéresse le plus.','top');
-  charBar.innerHTML='';
-  Object.keys(charDesc).forEach(name=>{
-    const b=document.createElement('button');b.className='btn';b.textContent=name;
-    b.onclick=()=>chooseChar(name);
-    charBar.appendChild(b);
-  });
-  charBar.style.display='flex';
-}
+        async function sequence() {
+            start.classList.add('hidden');
+            
+            try {
+                await showImage('touslessuspects.png');
+                audioNarrateur.play();
+                await new Promise(r => audioNarrateur.onended = r);
+                await hideImage();
+                restart.classList.add('visible');
+            } catch(e) {
+                console.error('Erreur:', e);
+                restart.classList.add('visible');
+            }
+        }
 
-async function chooseChar(name){
-  charBar.style.display='none';
-  hideText();
-  hide(image);
-  const firstCarnet=localStorage.getItem('qr11_first_carnet');
-  let extra='';
-  if(firstCarnet && normalize(firstCarnet)===normalize(name)){
-    extra="
-
-Ce personnage doit vous intriguer, vous l’aviez choisi en premier dans le carnet de M. Vidal.";
-  }
-  // refs qr9 / qr8
-  let ref='';
-  const qr9=localStorage.getItem('qr9_vestiaire');
-  if(qr9){ref+=`
-
-Au vestiaire, vous comptiez ${qr9}. Sam a arrêté de compter aujourd’hui.`;}
-  const qr8=localStorage.getItem('qr8_first');
-  if(qr8){ref+=`
-
-Dans le bureau d’Arnaud, vous aviez regardé ${qr8} en premier. Inès, elle, avait regardé les chaussures.`;}
-  showText(charDesc[name]+extra+ref,'center');
-  await sleep(6000);
-  hideText();
-  // Phase 5 instruction
-  showText('Dans quelques secondes vous allez lire la suite du roman. Chaque personnage dans cette pièce a une raison d’être là. Vous aussi vous savez des choses sur eux. Utilisez-les.','center');
-  await sleep(7000);
-  hideText();
-  // stats
-  const total=parseInt(localStorage.getItem('scans_total')||'12');
-  const used=parseInt(localStorage.getItem('scans_used')||'0');
-  const solo=Math.max(0,total-used);
-  stats.innerHTML=`Scans proposés : ${total}<br>Scans utilisés : ${used}<br>Imagination seule : ${solo}`;
-  show(stats);
-  localStorage.setItem('qr12_done','true');
-  restart.style.display='block';
-}
-
-start.onclick=run;
-restart.onclick=()=>location.reload();
-</script>
+        start.onclick = () => sequence();
+        restart.onclick = () => location.reload();
+    </script>
 </body>
 </html>
