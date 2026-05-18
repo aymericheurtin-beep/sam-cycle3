@@ -13,6 +13,26 @@ body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-fam
 #restart{background:#fff;color:#000;border:none;padding:15px 30px;font-size:18px;border-radius:8px;cursor:pointer;margin-top:30px}
 p{font-size:22px;line-height:1.4;max-width:650px}
 </style>
+<style>
+/* === UNIFICATION TYPO === */
+html,body,button,input,select,textarea {
+  font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+p, #text, .screen p, #question, #msg {
+  font-size:clamp(20px,4.5vmin,28px) !important;
+  line-height:1.45 !important;
+}
+button, .btn, .choiceBtn, .choice, .carnetBtn {
+  font-size:clamp(18px,4vmin,24px) !important;
+  font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+#startBtn, #start, #btn, #restartBtn, #restart {
+  font-size:clamp(20px,5vmin,26px) !important;
+}
+small, .sub, #recall, #hint, #carnetLine {
+  font-size:clamp(16px,3.2vmin,20px) !important;
+}
+</style>
 </head>
 <body>
 <button id="btn">Touchez pour commencer</button>
