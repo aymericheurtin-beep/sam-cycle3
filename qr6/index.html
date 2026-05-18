@@ -21,10 +21,7 @@ body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-fam
 #scanOverlay{position:absolute;inset:0;pointer-events:none;overflow:hidden;display:none}
 #scanOverlay.active{display:block}
 #scanLine{position:absolute;left:0;right:0;height:4px;background:linear-gradient(90deg,transparent,rgba(0,255,200,0.9),transparent);box-shadow:0 0 12px rgba(0,255,200,0.8),0 0 24px rgba(0,255,200,0.5);animation:scanMove 2.2s linear infinite}
-@keyframes scanMove{
-  0%{top:-5%}
-  100%{top:105%}
-}
+@keyframes scanMove{0%{top:-5%}100%{top:105%}}
 #scanGrid{position:absolute;inset:0;background:repeating-linear-gradient(to bottom,rgba(0,255,200,0.07) 0px,rgba(0,255,200,0.07) 1px,transparent 1px,transparent 4px);mix-blend-mode:screen;opacity:0.6}
 #response{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:24px;line-height:1.7;background:rgba(0,0,0,0.75);padding:34px 30px;border-radius:12px;text-align:center;display:none;z-index:15;max-width:84vw;opacity:0;transition:opacity 1s ease;white-space:pre-line}
 </style>
@@ -56,8 +53,8 @@ body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-fam
   <button id="restart">Recommencer</button>
 </div>
 
-<audio id="scanner" src="scanner.mp3" preload="auto" playsinline></audio>
-<audio id="tictac" src="tictac.mp3" preload="auto" loop playsinline></audio>
+<audio id="scannerA" src="scanner.mp3" preload="auto" loop playsinline></audio>
+<audio id="scannerB" src="scanner.mp3" preload="auto" loop playsinline></audio>
 <audio id="voix" src="audio_vidal.mp3" preload="auto" playsinline></audio>
 
 <script>
@@ -71,12 +68,11 @@ const response = document.getElementById('response');
 const post = document.getElementById('post');
 const finaltext = document.getElementById('finaltext');
 const restart = document.getElementById('restart');
-const scanner = document.getElementById('scanner');
-const tictac = document.getElementById('tictac');
+const scannerA = document.getElementById('scannerA');
+const scannerB = document.getElementById('scannerB');
 const voix = document.getElementById('voix');
 
 let choix = '';
-let audioStarted = false;
 
 btn.onclick = () => {
   btn.style.display = 'none';
@@ -93,29 +89,24 @@ choices.forEach(b => {
     setTimeout(() => eye.classList.add('show'), 50);
     scanOverlay.classList.add('active');
     
-    startAudioSequence();
+    scannerA.volume = 1.0;
+    scannerB.volume = 0.6;
+    scannerA.currentTime = 0;
+    scannerB.currentTime = 0;
+    scannerA.play().catch(()=>{});
+    setTimeout(()=> scannerB.play().catch(()=>{}), 180);
+    
+    setTimeout(()=>{
+      voix.play().catch(()=>{
+        document.body.addEventListener('click', ()=> voix.play().catch(()=>{}), {once:true});
+      });
+    }, 2000);
   };
 });
 
-function startAudioSequence(){
-  if(audioStarted) return;
-  audioStarted = true;
-  
-  scanner.volume = 1.0;
-  tictac.volume = 0.5;
-  
-  scanner.play().catch(()=>{});
-  tictac.play().catch(()=>{});
-  
-  setTimeout(()=>{
-    voix.play().catch(()=>{
-      document.body.addEventListener('click', ()=> voix.play().catch(()=>{}), {once:true});
-    });
-  }, 2200);
-}
-
 voix.onended = () => {
-  tictac.pause();
+  scannerA.pause();
+  scannerB.pause();
   scanOverlay.classList.remove('active');
   response.textContent = `Vous aviez dit : ${choix}.
 Et maintenant ?`;
