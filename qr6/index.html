@@ -2,104 +2,103 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>QR6 - Vidal</title>
 <style>
-html,body{margin:0;height:100%;background:#000;color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;overflow:hidden;-webkit-tap-highlight-color:transparent}
-#start,#restart{position:absolute;left:50%;transform:translateX(-50%);font-size:4.2vmin;padding:3.2vmin 6vmin;background:#fff;color:#000;border:none;border-radius:10px;cursor:pointer;z-index:200;font-family:inherit;touch-action:manipulation}
-#start{top:50%;transform:translate(-50%,-50%)}
-#restart{bottom:6%;display:none}
-#question{position:absolute;top:14%;left:50%;transform:translateX(-50%);width:90%;text-align:center;font-size:4.4vmin;line-height:1.3;display:none;z-index:30;font-weight:500}
-#choices{position:absolute;bottom:14%;left:50%;transform:translateX(-50%);display:none;flex-direction:column;gap:1.8vmin;width:82%;z-index:40}
-.choiceBtn{font-size:3.8vmin;padding:2.4vmin;background:rgba(20,20,20,.95);color:#fff;border:1px solid #fff;border-radius:10px;cursor:pointer;text-align:center;font-family:inherit;touch-action:manipulation}
-.choiceBtn:active{background:#fff;color:#000}
-#eyeWrap{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:#000;z-index:20}
-#eye{max-width:88vmin;max-height:88vmin;opacity:0;transition:opacity 1.2s}
-#eye.show{opacity:1}
-#response{position:absolute;bottom:22%;left:50%;transform:translateX(-50%);width:88%;text-align:center;font-size:4vmin;line-height:1.4;display:none;z-index:50;text-shadow:0 0 8px #000;white-space:pre-line}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-family:system-ui}
+#btn{background:#fff;color:#000;border:none;padding:20px 40px;font-size:20px;border-radius:8px;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);cursor:pointer;z-index:10}
+#restart{background:#fff;color:#000;border:none;padding:15px 30px;font-size:18px;border-radius:8px;cursor:pointer;margin-top:30px}
+.screen{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;z-index:20}
+.screen.active{display:flex}
+#question{font-size:22px;line-height:1.4;max-width:650px;margin-bottom:30px}
+.choice{background:rgba(255,255,255,0.1);color:#fff;border:1px solid #fff;padding:16px 24px;font-size:18px;border-radius:8px;cursor:pointer;margin:8px 0;width:80%;max-width:400px}
+.choice:hover{background:#fff;color:#000}
+#eye{position:fixed;top:0;left:0;width:100%;height:100%;object-fit:cover;display:none;opacity:0;transition:opacity 1.5s ease;z-index:5}
+#response{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:20px;line-height:1.6;background:rgba(0,0,0,0.75);padding:30px 25px;border-radius:12px;text-align:center;display:none;z-index:15;max-width:80vw;opacity:0;transition:opacity 1s ease;white-space:pre-line}
 </style>
 </head>
 <body>
-<button id="start">Touchez pour commencer</button>
-<button id="restart">Recommencer</button>
+<button id="btn">Touchez pour commencer</button>
 
-<div id="question">Vidal vous l'aviez imaginé comment ?</div>
-<div id="choices"></div>
+<div id="qscreen" class="screen">
+  <div id="question">Vidal vous l'aviez imaginé comment ?</div>
+  <button class="choice">Quelqu'un de dur</button>
+  <button class="choice">Quelqu'un de blessé</button>
+  <button class="choice">Autrement</button>
+</div>
 
-<div id="eyeWrap"><img id="eye" src="imageoeil.jpg" alt="oeil"></div>
+<img id="eye" src="imageoeil.jpg" alt="oeil">
 
 <div id="response"></div>
 
-<audio id="audioVidal" src="audio_vidal.mp3" preload="auto" playsinline></audio>
-<audio id="scanner" src="scanner.mp3" preload="auto" playsinline></audio>
-<audio id="tictac" src="tictac.mp3" preload="auto" loop playsinline></audio>
+<div id="post" class="screen">
+  <div id="finaltext"></div>
+  <button id="restart">Recommencer</button>
+</div>
+
+<audio id="scanner" src="scanner.mp3" preload="auto"></audio>
+<audio id="tictac" src="tictac.mp3" preload="auto" loop></audio>
+<audio id="voix" src="audio_vidal.mp3" preload="auto"></audio>
 
 <script>
-const $=id=>document.getElementById(id);
-const start=$('start'), restart=$('restart'), question=$('question'), choices=$('choices'), eyeWrap=$('eyeWrap'), eye=$('eye'), response=$('response'), audioVidal=$('audioVidal'), scanner=$('scanner'), tictac=$('tictac');
+const btn = document.getElementById('btn');
+const qscreen = document.getElementById('qscreen');
+const choices = document.querySelectorAll('.choice');
+const eye = document.getElementById('eye');
+const response = document.getElementById('response');
+const post = document.getElementById('post');
+const finaltext = document.getElementById('finaltext');
+const restart = document.getElementById('restart');
+const scanner = document.getElementById('scanner');
+const tictac = document.getElementById('tictac');
+const voix = document.getElementById('voix');
 
-const show=el=>el.style.display='block';
-const hide=el=>el.style.display='none';
-const flex=el=>el.style.display='flex';
+let choix = '';
 
-let choix='';
-let started=false;
+btn.onclick = () => {
+  btn.style.display = 'none';
+  qscreen.classList.add('active');
+};
 
-function initStart(){
-  if(started) return;
-  started=true;
-  start.style.display='none';
-  show(question);
-  showChoices();
-}
+choices.forEach(b => {
+  b.onclick = () => {
+    choix = b.textContent;
+    localStorage.setItem('qr6_vidal_imagined', choix);
+    qscreen.classList.remove('active');
+    
+    eye.style.display = 'block';
+    setTimeout(() => eye.style.opacity = '1', 100);
+    
+    // ambiance d'abord
+    tictac.volume = 0.4;
+    tictac.play().catch(()=>{});
+    scanner.play().catch(()=>{});
+    
+    // voix Vidal après que l'oeil soit bien installé
+    setTimeout(() => voix.play().catch(()=>{}), 2000);
+  };
+});
 
-start.addEventListener('click', initStart);
-start.addEventListener('touchend', e=>{e.preventDefault(); initStart();}, {passive:false});
-
-function showChoices(){
-  const opts = ['Quelqu'un de dur','Quelqu'un de blessé','Autrement'];
-  choices.innerHTML='';
-  opts.forEach(o=>{
-    const b=document.createElement('button');
-    b.className='choiceBtn';
-    b.textContent=o;
-    b.addEventListener('click',()=>selectChoice(o));
-    b.addEventListener('touchend',e=>{e.preventDefault(); selectChoice(o);},{passive:false});
-    choices.appendChild(b);
-  });
-  flex(choices);
-}
-
-async function selectChoice(o){
-  choix=o;
-  try{ localStorage.setItem('qr6_vidal_imagined', o);}catch{}
-  hide(question);
-  hide(choices);
-
-  eyeWrap.style.display='flex';
-  requestAnimationFrame(()=>eye.classList.add('show'));
-
-  tictac.volume = 0.4;
-  tictac.play().catch(()=>{});
-  scanner.play().catch(()=>{});
-
-  try{ await audioVidal.play(); }catch{}
-  await new Promise(r=>{
-    audioVidal.onended=r;
-    setTimeout(r,12000);
-  });
-
+voix.onended = () => {
   tictac.pause();
-  tictac.currentTime=0;
-
   response.textContent = `Vous aviez dit : ${choix}.
 Et maintenant ?`;
-  show(response);
-  show(restart);
-}
+  response.style.display = 'block';
+  setTimeout(() => response.style.opacity = '1', 100);
+  
+  setTimeout(() => {
+    response.style.display = 'none';
+    eye.style.display = 'none';
+    finaltext.textContent = `Vous aviez dit : ${choix}.
+Et maintenant ?`;
+    finaltext.style.fontSize = '22px';
+    finaltext.style.lineHeight = '1.5';
+    post.classList.add('active');
+  }, 3500);
+};
 
-restart.addEventListener('click',()=>location.reload());
-restart.addEventListener('touchend',e=>{e.preventDefault(); location.reload();},{passive:false});
+restart.onclick = () => location.reload();
 </script>
 </body>
 </html>
