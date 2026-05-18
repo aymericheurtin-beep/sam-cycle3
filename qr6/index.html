@@ -7,17 +7,17 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-family:system-ui}
-#btn{background:#fff;color:#000;border:none;padding:20px 40px;font-size:20px;border-radius:8px;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);cursor:pointer;z-index:10}
-#restart{background:#fff;color:#000;border:none;padding:15px 30px;font-size:18px;border-radius:8px;cursor:pointer;margin-top:30px}
+#btn{background:#fff;color:#000;border:none;padding:22px 44px;font-size:22px;border-radius:8px;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);cursor:pointer;z-index:10}
+#restart{background:#fff;color:#000;border:none;padding:16px 32px;font-size:20px;border-radius:8px;cursor:pointer;margin-top:30px}
 .screen{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;z-index:20}
 .screen.active{display:flex}
-#question{font-size:22px;line-height:1.4;max-width:650px;margin-bottom:30px}
-.choice{background:rgba(255,255,255,0.1);color:#fff;border:1px solid #fff;padding:16px 24px;font-size:18px;border-radius:8px;cursor:pointer;margin:8px 0;width:80%;max-width:400px}
+#question{font-size:24px;line-height:1.45;max-width:680px;margin-bottom:34px}
+.choice{background:rgba(255,255,255,0.1);color:#fff;border:1px solid #fff;padding:18px 26px;font-size:20px;border-radius:8px;cursor:pointer;margin:9px 0;width:84%;max-width:420px}
 .choice:hover{background:#fff;color:#000}
 #eyeWrap{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:#000;z-index:5}
 #eye{max-width:92vw;max-height:82vh;width:auto;height:auto;opacity:0;transition:opacity 1.5s ease}
 #eye.show{opacity:1}
-#response{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:20px;line-height:1.6;background:rgba(0,0,0,0.75);padding:30px 25px;border-radius:12px;text-align:center;display:none;z-index:15;max-width:80vw;opacity:0;transition:opacity 1s ease;white-space:pre-line}
+#response{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:22px;line-height:1.65;background:rgba(0,0,0,0.75);padding:32px 28px;border-radius:12px;text-align:center;display:none;z-index:15;max-width:82vw;opacity:0;transition:opacity 1s ease;white-space:pre-line}
 </style>
 </head>
 <body>
@@ -73,11 +73,15 @@ choices.forEach(b => {
     eyeWrap.style.display = 'flex';
     setTimeout(() => eye.classList.add('show'), 50);
     
-    tictac.volume = 0.4;
-    tictac.play().catch(()=>{});
+    // Séquence audio : scan d'abord, puis tic-tac + voix
+    scanner.currentTime = 0;
     scanner.play().catch(()=>{});
     
-    setTimeout(() => voix.play().catch(()=>{}), 2000);
+    scanner.onended = () => {
+      tictac.volume = 0.45;
+      tictac.play().catch(()=>{});
+      setTimeout(() => voix.play().catch(()=>{}), 800);
+    };
   };
 });
 
@@ -93,8 +97,8 @@ Et maintenant ?`;
     eyeWrap.style.display = 'none';
     finaltext.textContent = `Vous aviez dit : ${choix}.
 Et maintenant ?`;
-    finaltext.style.fontSize = '22px';
-    finaltext.style.lineHeight = '1.5';
+    finaltext.style.fontSize = '24px';
+    finaltext.style.lineHeight = '1.55';
     post.classList.add('active');
   }, 3500);
 };
