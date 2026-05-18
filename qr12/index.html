@@ -11,7 +11,7 @@
             display: revert; 
             box-sizing: border-box;
         }
-        body > div:not(#start):not(#restart) { display: none !important; }
+        body > div:not(#start):not(#restart):not(#stats) { display: none !important; }
         
         html, body {
             background: #000 !important;
@@ -91,7 +91,6 @@ small, .sub, #recall, #hint, #carnetLine {
     <button id="start" class="btn">Touchez pour entrer</button>
     <img id="media" src="" style="display:none;">
     <button id="restart" class="btn">Recommencer</button>
-    <div id="stats" style="position:fixed;bottom:22vmin;left:50%;transform:translateX(-50%);text-align:center;font-size:clamp(18px,4vmin,24px);line-height:1.5;opacity:0;transition:opacity 1s;z-index:9998;max-width:90vw;"></div>
 
     <audio id="audioNarrateur" src="narrateur.mp3" preload="auto" playsinline webkit-playsinline></audio>
 
@@ -100,7 +99,6 @@ small, .sub, #recall, #hint, #carnetLine {
         const media = document.getElementById('media');
         const restart = document.getElementById('restart');
         const audioNarrateur = document.getElementById('audioNarrateur');
-        const stats = document.getElementById('stats');
 
         const sleep = ms => new Promise(r => setTimeout(r, ms));
         
@@ -130,14 +128,9 @@ small, .sub, #recall, #hint, #carnetLine {
             
             try {
                 await showImage('touslessuspects.png');
-                audioNarrateur.play().catch(()=>{});
-                await new Promise(r => { audioNarrateur.onended = r; setTimeout(r,8000); });
+                audioNarrateur.play();
+                await new Promise(r => audioNarrateur.onended = r);
                 await hideImage();
-                const total = parseInt(localStorage.getItem('scans_total')||'0');
-                const used = parseInt(localStorage.getItem('scans_used')||'0');
-                const solo = Math.max(0, total - used);
-                stats.innerHTML = `QR proposés : ${total}<br>QR ouverts : ${used}<br>Vous avez choisi d'imaginer seul ${solo} fois.`;
-                stats.style.opacity = '1';
                 restart.classList.add('visible');
             } catch(e) {
                 console.error('Erreur:', e);
