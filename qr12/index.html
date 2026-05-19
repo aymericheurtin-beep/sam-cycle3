@@ -14,15 +14,12 @@ html,body{margin:0;height:100%;background:#000;color:#fff;font-family:system-ui,
 #choices{position:absolute;bottom:8%;left:50%;transform:translateX(-50%);display:none;flex-direction:column;gap:2.2vmin;width:88%;max-height:45vh;overflow-y:auto;z-index:80}
 .btn{font-size:clamp(18px,4vmin,24px);padding:20px 28px;background:rgba(17,17,17,.92);color:#fff;border:1px solid #fff;border-radius:8px;cursor:pointer;text-align:center}
 .btn.sel{background:#fff;color:#000}
-
 #suspectsWrap{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-width:95vmin;max-height:80vmin;display:none;z-index:20}
 #suspectsImg{display:block;max-width:95vmin;max-height:80vmin}
 .zone{position:absolute;top:0;height:100%;cursor:pointer;border:2px solid transparent;transition:.2s}
 .zone:hover{border-color:#fff;background:rgba(255,255,255,.12)}
-
 #inesCropWrap{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:60vmin;height:80vmin;overflow:hidden;display:none;z-index:15;border:2px solid #fff;border-radius:8px;background:#000}
 #inesCropWrap img{position:absolute;width:300%;height:200%;top:0;left:0}
-
 #stats{position:absolute;bottom:5vmin;right:6vmin;font-size:clamp(16px,3.5vmin,22px);z-index:30;display:none;text-shadow:0 0 8px #000;text-align:right;line-height:1.4;background:rgba(0,0,0,.6);padding:1.5vmin 2vmin;border-radius:8px}
 </style>
 </head>
@@ -31,92 +28,30 @@ html,body{margin:0;height:100%;background:#000;color:#fff;font-family:system-ui,
 <button id="restart">Recommencer</button>
 <div id="text"></div>
 <div id="choices"></div>
-
-<div id="suspectsWrap">
-  <img id="suspectsImg" src="touslessuspects.jpg" alt="">
-</div>
-
-<div id="inesCropWrap"><img id="inesCropImg" src="./ines_5_choix.jpg" alt=""></div>
+<div id="suspectsWrap"><img id="suspectsImg" src="touslessuspects.jpg" alt=""></div>
+<div id="inesCropWrap"><img id="inesCropImg" src="ines_5_choix.jpg" alt=""></div>
 <div id="stats"></div>
 <audio id="narrateur" src="narrateur.mp3" preload="auto" playsinline></audio>
-
 <script>
 const $=id=>document.getElementById(id);
 const start=$('start'),restart=$('restart'),text=$('text'),choices=$('choices'),stats=$('stats'),narrateur=$('narrateur');
 const suspectsWrap=$('suspectsWrap'),suspectsImg=$('suspectsImg');
 const cropWrap=$('inesCropWrap'),cropImg=$('inesCropImg');
-
 const show=el=>el.style.display='block', hide=el=>el.style.display='none', flex=el=>el.style.display='flex';
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-
 function showText(t,hold=3000,pos='center'){text.className='';text.classList.add(pos);text.textContent=t;show(text);return sleep(hold).then(()=>hide(text));}
 function showTextStay(t,pos='center'){text.className='';text.classList.add(pos);text.textContent=t;show(text);}
 async function play(a){try{await a.play()}catch{}}
 function stopAudio(a){try{a.pause();a.currentTime=0}catch{}}
-
 function askMulti(q,opts){return new Promise(res=>{showTextStay(q,'center');choices.innerHTML='';const sel=new Set();opts.forEach(o=>{const b=document.createElement('button');b.className='btn';b.textContent=o;b.onclick=()=>{b.classList.toggle('sel');sel.has(o)?sel.delete(o):sel.add(o)};choices.appendChild(b)});const ok=document.createElement('button');ok.className='btn';ok.textContent='Valider';ok.style.background='#fff';ok.style.color='#000';ok.onclick=()=>{hide(text);hide(choices);res([...sel])};choices.appendChild(ok);flex(choices)})}
-
 const descriptions={Vidal:"Bras croisés. La montre neuve. Il attend que ça finisse.",Noé:"Regard sur ses chaussures. La posture des mauvais jours.",Rémy:"Bras bandé de l’épaule aux doigts. Il aurait préféré rester à l’hôpital.",Chloé:"Elle arrive en dernier. Sa démarche quand elle est stressée.",Colin:"Mains dans les poches. Il regarde personne en particulier.",Sam:"Assis au centre. Il regarde Inès.",Inès:"Debout. Elle a demandé à être debout."};
 const normalize=s=>(s||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
-
 function addUsed(id){const set=new Set(JSON.parse(localStorage.getItem('qr_used_set')||'[]'));set.add(id);localStorage.setItem('qr_used_set',JSON.stringify([...set]));return set.size}
-
-// Ordre des personnages de gauche à droite sur touslessuspects.jpg
-// >>> MODIFIE CET ORDRE SI CE N'EST PAS LE BON <<<
 const characterOrder=['Vidal','Noé','Rémy','Chloé','Colin','Sam','Inès'];
-
-function askCharacterOnImage(){
-  return new Promise(res=>{
-    show(suspectsWrap);
-    // crée 7 zones égales
-    suspectsWrap.querySelectorAll('.zone').forEach(z=>z.remove());
-    const n=characterOrder.length;
-    for(let i=0;i<n;i++){
-      const z=document.createElement('div');
-      z.className='zone';
-      z.style.left=`${i*100/n}%`;
-      z.style.width=`${100/n}%`;
-      z.title=characterOrder[i];
-      z.onclick=()=>{suspectsWrap.querySelectorAll('.zone').forEach(zz=>zz.remove());hide(suspectsWrap);res(characterOrder[i]);};
-      suspectsWrap.appendChild(z);
-    }
-  });
-}
-
-async function showInesCrop(){
-  const choice=parseInt(localStorage.getItem('qr4_ines_choice')||'0',10);
-  if(!choice) return false;
-  const col=(choice-1)%3, row=Math.floor((choice-1)/3);
-  cropImg.style.left=`-${col*100}%`;
-  cropImg.style.top=`-${row*100}%`;
-  show(cropWrap);
-  showTextStay("c'était ton Inès",'bottom');
-  await sleep(4000);
-  hide(text);hide(cropWrap);
-  return true;
-}
-
-async function run(){
-  hide(start);hide(restart);hide(stats);
-  const used=addUsed('qr12');
-  await play(narrateur);await sleep(8000);stopAudio(narrateur);
-  await askMulti('Comment imaginez-vous cette pièce ?',['Petite','Grande','Lumineuse','Sombre','Ordonnée','En bazar']);
-  showTextStay('Appuyez sur le personnage qui vous intéresse le plus.','center');
-  const charChoice=await askCharacterOnImage();
-  hide(text);
-  if(charChoice==='Inès'){await showInesCrop();}
-  let txt=descriptions[charChoice]||'';
-  const firstCarnet=localStorage.getItem('qr11_carnet_first')||'';
-  if(firstCarnet && normalize(firstCarnet)===normalize(charChoice)){
-    txt+="\n\nDécidément, ce personnage vous intrigue, vous l'aviez choisi en 1er dans le carnet de M. Vidal.";
-  }
-  await showText(txt,6000,'center');
-  await showText("Dans quelques secondes vous allez lire la suite du roman.\nChaque personnage dans cette pièce a une raison d'être là.\nVous aussi vous savez des choses sur eux.\nUtilisez-les.",7000,'center');
-  stats.innerHTML=`Scans proposés : 12<br>Scans utilisés : ${used}`;
-  show(stats);show(restart);
-}
-start.onclick=run;
-restart.onclick=()=>location.reload();
+function askCharacterOnImage(){return new Promise(res=>{show(suspectsWrap);suspectsWrap.querySelectorAll('.zone').forEach(z=>z.remove());const n=characterOrder.length;for(let i=0;i<n;i++){const z=document.createElement('div');z.className='zone';z.style.left=`${i*100/n}%`;z.style.width=`${100/n}%`;z.title=characterOrder[i];z.onclick=()=>{suspectsWrap.querySelectorAll('.zone').forEach(zz=>zz.remove());hide(suspectsWrap);res(characterOrder[i]);};suspectsWrap.appendChild(z);}});}
+async function showInesCrop(){const choice=parseInt(localStorage.getItem('qr4_ines_choice')||'0',10);if(!choice) return false;const col=(choice-1)%3,row=Math.floor((choice-1)/3);cropImg.style.left=`-${col*100}%`;cropImg.style.top=`-${row*100}%`;show(cropWrap);showTextStay("c'était ton Inès",'bottom');await sleep(4000);hide(text);hide(cropWrap);return true;}
+async function run(){hide(start);hide(restart);hide(stats);const used=addUsed('qr12');await play(narrateur);await sleep(8000);stopAudio(narrateur);await askMulti('Comment imaginez-vous cette pièce ?',['Petite','Grande','Lumineuse','Sombre','Ordonnée','En bazar']);showTextStay('Appuyez sur le personnage qui vous intéresse le plus.','center');const charChoice=await askCharacterOnImage();hide(text);if(charChoice==='Inès'){await showInesCrop();}let txt=descriptions[charChoice]||'';const firstCarnet=localStorage.getItem('qr11_carnet_first')||'';if(firstCarnet && normalize(firstCarnet)===normalize(charChoice)){txt+="\n\nDécidément, ce personnage vous intrigue, vous l'aviez choisi en 1er dans le carnet de M. Vidal.";}await showText(txt,6000,'center');await showText("Dans quelques secondes vous allez lire la suite du roman.\nChaque personnage dans cette pièce a une raison d'être là.\nVous aussi vous savez des choses sur eux.\nUtilisez-les.",7000,'center');stats.innerHTML=`Scans proposés : 12<br>Scans utilisés : ${used}`;show(stats);show(restart);}
+start.onclick=run;restart.onclick=()=>location.reload();
 </script>
 </body>
 </html>
