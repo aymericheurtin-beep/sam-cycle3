@@ -28,24 +28,11 @@ body{background:#000;color:#fff;font-family:system-ui, -apple-system, 'Segoe UI'
 .blur{filter:blur(12px)}
 </style>
 <style>
-/* === UNIFICATION TYPO === */
-html,body,button,input,select,textarea {
-  font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-}
-p, #text, .screen p, #question, #msg {
-  font-size:clamp(20px,4.5vmin,28px) !important;
-  line-height:1.45 !important;
-}
-button, .btn, .choiceBtn, .choice, .carnetBtn {
-  font-size:clamp(18px,4vmin,24px) !important;
-  font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-}
-#startBtn, #start, #btn, #restartBtn, #restart {
-  font-size:clamp(20px,5vmin,26px) !important;
-}
-small, .sub, #recall, #hint, #carnetLine {
-  font-size:clamp(16px,3.2vmin,20px) !important;
-}
+html,body,button,input,select,textarea {font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;}
+p, #text, .screen p, #question, #msg {font-size:clamp(20px,4.5vmin,28px) !important;line-height:1.45 !important;}
+button, .btn, .choiceBtn, .choice, .carnetBtn {font-size:clamp(18px,4vmin,24px) !important;font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;}
+#startBtn, #start, #btn, #restartBtn, #restart {font-size:clamp(20px,5vmin,26px) !important;}
+small, .sub, #recall, #hint, #carnetLine {font-size:clamp(16px,3.2vmin,20px) !important;}
 </style>
 </head>
 <body>
@@ -62,15 +49,6 @@ small, .sub, #recall, #hint, #carnetLine {
 
 <button id="restart" class="btn">Recommencer</button>
 
-<div id="pre" class="screen">
-  <p>Sam entre dans le bureau. Que ressent-il?</p>
-  <div class="choice">
-    <button class="btn choiceBtn" data-val="la peur">La peur</button>
-    <button class="btn choiceBtn" data-val="l'indifférence">L'indifférence</button>
-    <button class="btn choiceBtn" data-val="autre">Autre</button>
-  </div>
-</div>
-
 <audio id="annonce" src="message_arnaud.mp3" preload="auto"></audio>
 
 <script>
@@ -78,12 +56,10 @@ const start=document.getElementById('start');
 const text=document.getElementById('text');
 const image=document.getElementById('image');
 const restart=document.getElementById('restart');
-const pre=document.getElementById('pre');
 const annonce=document.getElementById('annonce');
 const thumbs=document.getElementById('thumbs');
 const overlay=document.getElementById('overlay');
 
-let choix='';
 let order=[];
 let opened={caméra:false,fumée:false,carnet:false};
 
@@ -96,16 +72,8 @@ start.onclick=()=>{
   let u=parseInt(localStorage.getItem('scans_used')||0)+1;
   localStorage.setItem('scans_used',u);
   start.classList.add('hidden');
-  pre.classList.add('active');
+  sequence();
 };
-
-document.querySelectorAll('.choiceBtn').forEach(b=>{
-  b.onclick=()=>{
-    choix=b.dataset.val;
-    pre.classList.remove('active');
-    sequence();
-  };
-});
 
 restart.onclick=()=>location.reload();
 
@@ -183,7 +151,13 @@ function interpretation(first){
 async function final(){
   const first=order[0];
   const interp=interpretation(first);
-  text.innerHTML=`Vous aviez dit ${choix}.<br>Toujours ok avec ça?<br><small>Vous avez regardé ${first} en 1er.<br>${interp}</small>`;
+  // PONT QR8 -> QR9/10/11/12
+  try{
+    localStorage.setItem('qr8_first', first);
+    localStorage.setItem('qr8_order', JSON.stringify(order));
+    localStorage.setItem('qr8_profile', first==='caméra' ? 'preuve' : first==='fumée' ? 'conséquence' : 'écrit');
+  }catch(e){}
+  text.innerHTML=`${interp}<br><small>Vous avez regardé ${first} en 1er.</small>`;
   text.classList.add('visible');
   await sleep(6000);
   restart.classList.add('visible');
