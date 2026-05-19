@@ -136,10 +136,13 @@ async function run(){
   hide(start);hide(restart);
   await showImage('crochetage_vidal.jpg');
   await sleep(4000);
-  showTextStay('Confinement. YouTube.\nC\'est illégal.\nC\'est pratique.','bottom');
+  showTextStay("Confinement. YouTube.\nC'est illégal.\nC'est pratique.",'bottom');
   await sleep(3500);hide(text);await hideImage();
 
-  await askMulti('Un bureau de prof. Un samedi matin. Vide.\nVous imaginez quoi ?',[
+  const vidalImagined = localStorage.getItem('qr6_vidal_imagined') || '...';
+  await showText(`Vous aviez imaginé Vidal comme ${vidalImagined}.\nEt son bureau, un samedi matin, vous l'imaginez comment ?`, 4500, 'center');
+
+  await askMulti("Un bureau de prof. Un samedi matin. Vide.\nVous imaginez quoi ?",[
     'Ordonné','en bazar','petit','grand','lumineux','sombre','Rien de précis'
   ]);
 
@@ -195,12 +198,12 @@ async function run(){
   await sleep(5000);
   await hideImage();
 
-  await askSingle('Vous l'aviez imaginé comme ça ?',['Oui, à peu près','Non, rien à voir','Je ne l'avais pas imaginé']);
+  await askSingle("Vous l'aviez imaginé comme ça ?",['Oui, à peu près','Non, rien à voir',"Je ne l'avais pas imaginé"]);
 
   await showImage('vidal_jeune.webp');
   await sleep(5000);
   play(aKey);
-  const feelPromise = askSingle('Là, maintenant — vous ressentez quelque chose ?',['La peur','l'excitation','autre chose']);
+  const feelPromise = askSingle('Là, maintenant — vous ressentez quelque chose ?',['La peur',"l'excitation",'autre chose']);
   await sleep(1500);
   await hideImage();
   await showImage('phot_carnet.webp');
