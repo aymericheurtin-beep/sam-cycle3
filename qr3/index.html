@@ -13,9 +13,11 @@ img,video{max-width:90%;max-height:70vh;object-fit:contain}
 #startBtn{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:100;background:#fff;color:#000;border:none;padding:20px 40px;font-size:20px;border-radius:8px;cursor:pointer}
 #restartBtn{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);background:#fff;color:#000;border:none;padding:15px 30px;font-size:18px;border-radius:8px;cursor:pointer;display:none;z-index:10;opacity:0;transition:opacity 1s ease}
 #restartBtn.show{opacity:1;display:block}
+p{font-size:22px;line-height:1.4;max-width:700px}
 </style>
 <style>
 html,body,button,input,select,textarea{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+p{font-size:clamp(20px,4.5vmin,28px)!important;line-height:1.45!important}
 button{font-size:clamp(18px,4vmin,24px)!important}
 #startBtn,#restartBtn{font-size:clamp(20px,5vmin,26px)!important}
 </style>
@@ -28,10 +30,15 @@ button{font-size:clamp(18px,4vmin,24px)!important}
   <video id="v0" src="./docfinalqr3.mp4" playsinline></video>
 </div>
 
+<div id="s1" class="screen">
+  <p>Avec le bruit de la porte, du bouchon et du liquide, comprenez-vous différemment pourquoi il a besoin de courir ?</p>
+</div>
+
 <script>
 const startBtn=document.getElementById('startBtn');
 const restartBtn=document.getElementById('restartBtn');
 const s0=document.getElementById('s0');
+const s1=document.getElementById('s1');
 const v0=document.getElementById('v0');
 
 startBtn.onclick=async()=>{
@@ -42,8 +49,9 @@ startBtn.onclick=async()=>{
 
 v0.onended=()=>{
   s0.classList.remove('active');
+  s1.classList.add('active');
   restartBtn.style.display='block';
-  setTimeout(()=>restartBtn.classList.add('show'),50);
+  setTimeout(()=>restartBtn.classList.add('show'),300);
 };
 
 restartBtn.onclick=()=>location.reload();
