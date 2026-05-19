@@ -2,24 +2,26 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>QR12</title>
 <style>
 html,body{margin:0;height:100%;background:#000;color:#fff;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;overflow:hidden}
 #start,#restart{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:5vmin;padding:4vmin 8vmin;background:#fff;color:#000;border:none;border-radius:10px;cursor:pointer;z-index:100}
 #restart{display:none}
-#text{position:absolute;left:50%;transform:translateX(-50%);width:92%;text-align:center;font-size:5vmin;line-height:1.35;z-index:30;display:none;white-space:pre-line;text-shadow:0 0 6px #000}
+#text{position:absolute;left:50%;transform:translateX(-50%);width:92%;text-align:center;font-size:4.6vmin;line-height:1.35;z-index:30;display:none;white-space:pre-line;text-shadow:0 0 6px #000}
 #text.center{top:8%}
-#text.bottom{bottom:6%;font-size:3.8vmin;background:rgba(0,0,0,.75);padding:1.8vmin 2.5vmin;border-radius:8px;max-width:85%}
-#choices{position:absolute;top:28%;left:50%;transform:translateX(-50%);display:none;flex-direction:column;gap:2.2vmin;width:88%;z-index:30}
-.btn{font-size:4vmin;padding:3vmin;background:#111;color:#fff;border:1px solid #fff;border-radius:8px;cursor:pointer;text-align:center}
-.btn.validate{background:#fff;color:#000;margin-top:2vmin}
-.choice{display:flex;align-items:center;gap:2vmin;background:#111;border:1px solid #fff;border-radius:8px;padding:2.5vmin;font-size:4vmin;cursor:pointer}
-.choice input{width:4vmin;height:4vmin}
-#image{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-width:90vmin;max-height:78vmin;z-index:10;display:none}
-#stats{position:absolute;bottom:5vmin;right:6vmin;font-size:4vmin;z-index:30;display:none;text-shadow:0 0 8px #000;text-align:right;line-height:1.4;background:rgba(0,0,0,.6);padding:1.5vmin 2vmin;border-radius:8px}
-/* Unification typo */
-.choice, .btn{font-family:inherit;font-size:4vmin;line-height:1.35}
+#text.bottom{bottom:6%;font-size:3.6vmin;background:rgba(0,0,0,.75);padding:1.6vmin 2.2vmin;border-radius:8px;max-width:85%}
+#choices{position:absolute;bottom:8%;left:50%;transform:translateX(-50%);display:none;flex-direction:column;gap:1.6vmin;width:88%;max-height:45vh;overflow-y:auto;padding-bottom:2vmin;z-index:80;-webkit-overflow-scrolling:touch}
+.btn{font-size:3.8vmin;padding:2.4vmin;background:rgba(17,17,17,.92);color:#fff;border:1px solid #fff;border-radius:8px;cursor:pointer;text-align:center;flex-shrink:0;backdrop-filter:blur(2px)}
+.btn.sel{background:#fff;color:#000}
+#image{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-width:90vmin;max-height:78vmin;z-index:10;display:none;cursor:pointer;transition:transform .3s ease, opacity 1.2s}
+#image.zoomed{max-width:none;max-height:none;width=200vmin;height:auto;top:60%;left:50%;transform:translate(-50%,-50%);z-index:60}
+#carnetBox{position:absolute;top:5%;left:50%;transform:translateX(-50%);width:92%;display:none;flex-direction:column;gap:1.2vmin;z-index:70;max-height:30vh;overflow-y:auto}
+.carnetBtn{font-size:3.4vmin;padding:1.8vmin;background:rgba(0,0,0,.85);border:1px solid #fff;color:#fff;border-radius:6px;cursor:pointer;text-align:center;flex-shrink:0}
+.carnetBtn.used{opacity:.4}
+#carnetLine{position:absolute;bottom:12%;left:50%;transform:translateX(-50%);width:90%;background:rgba(0,0,0,.9);padding:2.2vmin;border-radius:8px;font-size:3.8vmin;line-height:1.4;text-align:center;display:none;z-index:75}
+#carnetLine u{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px}
+#hint{position:absolute;bottom:2%;left:50%;transform:translateX(-50%);font-size:3.2vmin;color:#fff;background:rgba(0,0,0,.6);padding:1vmin 2vmin;border-radius:6px;z-index:65;display:none;pointer-events:none}
 </style>
 </head>
 <body>
@@ -28,199 +30,224 @@ html,body{margin:0;height:100%;background:#000;color:#fff;font-family:system-ui,
 <div id="text"></div>
 <div id="choices"></div>
 <img id="image" alt="">
-<div id="stats"></div>
-<audio id="narrateur" preload="auto" src="container:///mnt/data/narrateur_qr12.mp3"></audio>
-<img id="img_all" src="container:///mnt/data/touslessuspects.jpg" hidden>
-<img id="img_all_png" src="container:///mnt/data/touslessuspects.png" hidden>
-<img id="img_ines" src="container:///mnt/data/qr4_ines.jpg" hidden>
+<div id="stats" style="position:absolute;bottom:5vmin;right:6vmin;font-size:4vmin;z-index:30;display:none;text-shadow:0 0 8px #000;text-align:right;line-height:1.4;background:rgba(0,0,0,.6);padding:1.5vmin 2vmin;border-radius:8px"></div>
+<audio id="narrateur" src="narrateur.mp3" preload="auto" playsinline></audio>
 
 <script>
 const $ = id => document.getElementById(id);
-const show = el => el.style.display='block';
-const hide = el => el.style.display='none';
-const flex = el => el.style.display='flex';
-const sleep = ms => new Promise(r=>setTimeout(r,ms));
+const start = $('start');
+const restart = $('restart');
+const text = $('text');
+const choices = $('choices');
+const image = $('image');
+const stats = $('stats');
+const narrateur = $('narrateur');
 
-function showText(txt, pos='center'){
-  const t=$('text');
-  t.className=pos;
-  t.textContent=txt;
-  show(t);
-  hide($('choices'));
-}
+const show = el => el.style.display = 'block';
+const hide = el => el.style.display = 'none';
+const flex = el => el.style.display = 'flex';
+const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-function showTextStay(txt, pos='center'){
-  const t=$('text');
-  t.className=pos;
-  t.textContent=txt;
-  show(t);
-}
-
-function askSingle(q, opts){
-  return new Promise(res=>{
-    if(q) showTextStay(q,'center');
-    const box=$('choices');
-    box.innerHTML='';
-    flex(box);
-    opts.forEach(opt=>{
-      const b=document.createElement('div');
-      b.className='btn';
-      b.textContent=opt;
-      b.onclick=()=>{
-        hide(box);
-        hide($('text'));
-        res(opt);
-      };
-      box.appendChild(b);
-    });
+function showText(t, hold, pos = 'center') {
+  return new Promise(async resolve => {
+    text.className = pos;
+    text.textContent = t;
+    show(text);
+    await sleep(hold);
+    hide(text);
+    resolve();
   });
 }
 
-function askMulti(q, opts){
-  return new Promise(res=>{
-    showText(q,'center');
-    const box=$('choices');
-    box.innerHTML='';
-    flex(box);
-    const selected=new Set();
-    opts.forEach(opt=>{
-      const label=document.createElement('label');
-      label.className='choice';
-      const cb=document.createElement('input');
-      cb.type='checkbox';
-      cb.onchange=()=>{
-        if(cb.checked) selected.add(opt);
-        else selected.delete(opt);
-      };
-      const span=document.createElement('span');
-      span.textContent=opt;
-      label.appendChild(cb);
-      label.appendChild(span);
-      label.onclick=(e)=>{
-        if(e.target!==cb){
-          cb.checked=!cb.checked;
-          cb.onchange();
+function showTextStay(t, pos = 'center') {
+  text.className = pos;
+  text.textContent = t;
+  show(text);
+}
+
+function showImage(src) {
+  image.src = src;
+  show(image);
+}
+
+function hideImage() {
+  hide(image);
+}
+
+async function play(a) {
+  try {
+    await a.play();
+  } catch (e) {}
+}
+
+function stopAudio(a) {
+  a.pause();
+  a.currentTime = 0;
+}
+
+function askMulti(q, opts) {
+  return new Promise(resolve => {
+    showTextStay(q, 'center');
+    choices.innerHTML = '';
+    const sel = new Set();
+    opts.forEach(o => {
+      const b = document.createElement('button');
+      b.className = 'btn';
+      b.textContent = o;
+      b.onclick = () => {
+        if (sel.has(o)) {
+          sel.delete(o);
+          b.classList.remove('sel');
+        } else {
+          sel.add(o);
+          b.classList.add('sel');
         }
       };
-      box.appendChild(label);
+      choices.appendChild(b);
     });
-    const btn=document.createElement('div');
-    btn.className='btn validate';
-    btn.textContent='Valider';
-    btn.onclick=()=>{
-      if(selected.size===0) return;
-      hide(box);
-      hide($('text'));
-      res(Array.from(selected));
+    const ok = document.createElement('button');
+    ok.className = 'btn';
+    ok.textContent = 'Valider';
+    ok.style.marginTop = '1vmin';
+    ok.style.background = '#fff';
+    ok.style.color = '#000';
+    ok.onclick = () => {
+      hide(text);
+      hide(choices);
+      resolve([...sel]);
     };
-    box.appendChild(btn);
+    choices.appendChild(ok);
+    flex(choices);
+    choices.scrollTop = 0;
   });
 }
 
-function play(id){
-  return new Promise(async resolve=>{
-    const a=$(id);
-    if(!a || !a.src) return resolve();
-    try{
-      await a.play();
-      a.onended=()=>resolve();
-    }catch(e){
-      resolve();
-    }
-    setTimeout(resolve,6000);
+function askSingle(q, opts) {
+  return new Promise(resolve => {
+    showTextStay(q, 'center');
+    choices.innerHTML = '';
+    opts.forEach(o => {
+      const b = document.createElement('button');
+      b.className = 'btn';
+      b.textContent = o;
+      b.onclick = () => {
+        hide(text);
+        hide(choices);
+        resolve(o);
+      };
+      choices.appendChild(b);
+    });
+    flex(choices);
+    choices.scrollTop = 0;
   });
 }
 
-function normalize(arr){
-  return arr.map(s=>s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"")).sort();
-}
-
-const descriptions={
-  'Vidal':"Vidal, 42 ans. Prof principal de la classe. Autoritaire, il impose une discipline stricte.",
-  'Noé':"Noé, 17 ans. Élève discret. Toujours au fond de la classe, il observe plus qu’il ne parle.",
-  'Rémy':"Rémy, 16 ans. Sportif populaire. Charismatique, mais impulsif quand on le contredit.",
-  'Chloé':"Chloé, 17 ans. Déléguée de classe. Organisée, elle note tout dans son carnet.",
-  'Colin':"Colin, 16 ans. Passionné d’informatique. Il passe son temps sur les ordinateurs du lycée.",
-  'Sam':"Sam, 17 ans. Artiste. Carnet de croquis toujours à portée de main.",
-  'Inès':"Inès, 16 ans. Nouvelle arrivée. Personne ne la connaît vraiment encore."
+const descriptions = {
+  'Vidal': "Professeur d’histoire et fin stratège du jeu. C’est chez lui que tout semble commencer. Méfiant, il note tout dans un carnet et observe les autres sans un mot. Personne ne sait s’il joue pour gagner… ou pour autre chose.",
+  'Noé': "Élève brillant mais distant. Il connaît les règles du jeu par cœur et anticipe chaque coup. Il semble chercher une faille dans le système. Une revanche ?",
+  'Rémy': "Discret, presque effacé. Personne ne le remarque, et c’est peut-être sa force. Il écoute, retient, et frappe quand on ne l’attend pas. Que cache ce silence ?",
+  'Chloé': "Déterminée et impulsive. Elle joue pour prouver qu’elle vaut mieux que ce qu’on dit d’elle. Elle n’a pas peur des conflits, mais ses émotions la trahissent parfois.",
+  'Colin': "Blagueur en apparence, mais calculateur. Il détourne l’attention pour mieux manipuler. Il sait exactement quoi dire pour semer le doute dans l’équipe.",
+  'Sam': "Athlétique et franc. Il déteste les mensonges et les complots. Mais sa loyauté pourrait le rendre vulnérable. Est-il prêt à trahir pour survivre ?",
+  'Inès': "Calme et mystérieuse. Elle observe plus qu’elle ne parle. Elle semble déjà connaître l’issue du jeu… Ou alors elle sait quelque chose que les autres ignorent."
 };
 
-async function run(){
-  hide($('start'));
-  hide($('restart'));
-  hide($('stats'));
-  
-  await play('narrateur');
-  await sleep(3000);
-  
-  const rep=await askMulti("Comment imaginez-vous cette pièce ?", ['Petite','Grande','Lumineuse','Sombre','Ordonnée','En bazar']);
-  
-  const qr11bureau=JSON.parse(localStorage.getItem('qr11_bureau')||'[]');
-  const a=normalize(rep);
-  const b=normalize(qr11bureau);
-  const identique=JSON.stringify(a)===JSON.stringify(b) && a.length>0;
-  
-  let pont="Votre vision correspond aux indices laissés sur place.";
-  if(!qr11bureau.length){
-    pont="Aucune observation préalable. Retenez bien ces détails.";
-  }else if(!identique){
-    const communs=a.filter(x=>b.includes(x));
-    const diffs=a.filter(x=>!b.includes(x)).concat(b.filter(x=>!a.includes(x)));
-    if(communs.length){
-      pont=`Points communs relevés : ${communs.join(', ')}. `;
-    }else{
-      pont=`Vos impressions divergent des indices notés. `;
-    }
-    if(diffs.length){
-      pont+=`Écarts : ${diffs.join(', ')}.`;
-    }
-  }
-  
-  await showText(pont,'bottom');
-  await sleep(4000);
-  hide($('text'));
-  
-  const img=$('image');
-  img.src=$('img_all').src;
-  img.onerror=()=>{img.src=$('img_all_png').src};
-  show(img);
-  await sleep(5000);
-  hide(img);
-  
-  showTextStay("Appuyez sur le personnage qui vous intéresse le plus.",'center');
-  const choix=await askSingle("", ['Vidal','Noé','Rémy','Chloé','Colin','Sam','Inès']);
-  
-  const qr11first=localStorage.getItem('qr11_first_carnet');
-  let desc=descriptions[choix]||"";
-  if(qr11first && choix===qr11first){
-    desc+="\n\nVous l’aviez déjà repéré près du carnet.";
-  }
-  
-  showText(desc,'center');
-  await sleep(5000);
-  
-  if(choix==='Inès' && localStorage.getItem('qr4_ines')){
-    hide($('text'));
-    img.src=$('img_ines').src;
-    show(img);
-    await sleep(4000);
-    hide(img);
-  }
-  
-  hide($('text'));
-  showText("Chaque détail compte. Le roman commence ici.",'bottom');
-  await sleep(7000);
-  hide($('text'));
-  
-  const stats=$('stats');
-  stats.innerHTML=`Pièce : ${rep.join(', ')}<br>Suspect choisi : ${choix}`;
-  show(stats);
-  
-  $('restart').style.display='block';
+function normalize(str) {
+  if (!str) return '';
+  return str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
 }
 
-$('start').onclick=run;
-$('restart').onclick=()=>location.reload();
+async function run() {
+  hide(start);
+  hide(restart);
+  
+  await play(narrateur);
+  await sleep(8000);
+  narrateur.pause();
+  narrateur.currentTime = 0;
+  
+  const repPiece = await askMulti('Comment imaginez-vous cette pièce ?', ['Petite', 'Grande', 'Lumineuse', 'Sombre', 'Ordonnée', 'En bazar']);
+  
+  const mapNorm = {
+    'petite': 'petit',
+    'grande': 'grand',
+    'lumineuse': 'lumineux',
+    'sombre': 'sombre',
+    'ordonnée': 'ordonné',
+    'en bazar': 'en bazar'
+  };
+  
+  const repNorm = new Set(repPiece.map(r => mapNorm[r.toLowerCase()] || r.toLowerCase()));
+  
+  let qr11 = [];
+  try {
+    qr11 = JSON.parse(localStorage.getItem('qr11_bureau') || '[]');
+  } catch (e) {}
+  const qr11Norm = new Set(qr11.map(r => mapNorm[r.toLowerCase()] || r.toLowerCase()));
+  
+  const same = repNorm.size === qr11Norm.size && [...repNorm].every(x => qr11Norm.has(x));
+  
+  if (same && qr11.length > 0) {
+    await showText("Tiens, comme le bureau de M. Vidal.", 2500, 'center');
+  } else {
+    await showText("Tiens, différemment du bureau de M. Vidal.", 2500, 'center');
+  }
+  
+  image.onerror = () => {
+    if (image.src.endsWith('.jpg')) {
+      image.src = 'touslessuspects.png';
+    }
+  };
+  showImage('touslessuspects.jpg');
+  await sleep(5000);
+  hideImage();
+  
+  showTextStay("Appuyez sur le personnage qui vous intéresse le plus.", 'center');
+  const charChoice = await askSingle("", ['Vidal', 'Noé', 'Rémy', 'Chloé', 'Colin', 'Sam', 'Inès']);
+  hide(text);
+  
+  let txt = descriptions[charChoice];
+  if (normalize(localStorage.getItem('qr11_first_carnet')) === normalize(charChoice)) {
+    txt += "\n\nCe personnage doit vous intriguer, vous l’aviez également choisi en premier dans le carnet de M. Vidal.";
+  }
+  
+  await showText(txt, 6000, 'center');
+  
+  if (charChoice === 'Inès' && localStorage.getItem('qr4_ines')) {
+    showImage(localStorage.getItem('qr4_ines'));
+    await sleep(4000);
+    hideImage();
+  }
+  
+  await showText("Dans quelques secondes vous allez lire la suite du roman.\nChaque personnage dans cette pièce a une raison d’être là.\nVous aussi vous savez des choses sur eux.\nUtilisez-les.", 7000, 'center');
+  
+  const total = parseInt(localStorage.getItem('scans_total') || '12', 10);
+  const used = parseInt(localStorage.getItem('scans_used') || '0', 10) + 1;
+  localStorage.setItem('scans_used', used);
+  
+  stats.innerHTML = `Scans proposés : ${total}<br>Scans utilisés : ${used}<br>À toi de jouer sans aide : ${Math.max(0, total - used)}`;
+  show(stats);
+  show(restart);
+}
+
+start.onclick = run;
+restart.onclick = () => location.reload();
+
+// Unification typo block
+document.addEventListener('touchstart', function(e) {
+  if (e.touches.length > 1) {
+    e.preventDefault();
+  }
+}, {passive: false});
+
+let lastTouchEnd = 0;
+document.addEventListener('touchend', function(e) {
+  const now = Date.now();
+  if (now - lastTouchEnd <= 300) {
+    e.preventDefault();
+  }
+  lastTouchEnd = now;
+}, {passive: false});
 </script>
 </body>
 </html>
