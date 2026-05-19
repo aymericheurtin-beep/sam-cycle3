@@ -10,7 +10,7 @@ body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-fam
 .screen{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;z-index:20}
 .screen.active{display:flex}
 #btn{background:#fff;color:#000;border:none;padding:20px 40px;font-size:20px;border-radius:8px;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);cursor:pointer;z-index:10}
-#restart{background:#fff;color:#000;border:none;padding:15px 30px;font-size:18px;border-radius:8px;cursor:pointer;margin-top:30px}
+#restart{background:#fff;color:#000;border:none;padding:15px 30px;font-size:18px;border-radius:8px;cursor:pointer;position:fixed;bottom:40px;left:50%;transform:translateX(-50%);z-index:30}
 #photo{position:fixed;top:0;left:0;width:100%;height:100%;object-fit:cover;display:none;opacity:0;transition:opacity 1.5s ease}
 #texte{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:20px;line-height:1.6;background:rgba(0,0,0,0.7);padding:30px 25px;border-radius:12px;text-align:center;display:none;z-index:5;max-width:80vw;opacity:0;transition:opacity 1.5s ease}
 #texte p{margin:14px 0}
@@ -20,24 +20,11 @@ body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-fam
 p.question{font-size:22px;line-height:1.4;max-width:650px}
 </style>
 <style>
-/* === UNIFICATION TYPO === */
-html,body,button,input,select,textarea {
-  font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-}
-p, #text, .screen p, #question, #msg {
-  font-size:clamp(20px,4.5vmin,28px) !important;
-  line-height:1.45 !important;
-}
-button, .btn, .choiceBtn, .choice, .carnetBtn {
-  font-size:clamp(18px,4vmin,24px) !important;
-  font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-}
-#startBtn, #start, #btn, #restartBtn, #restart {
-  font-size:clamp(20px,5vmin,26px) !important;
-}
-small, .sub, #recall, #hint, #carnetLine {
-  font-size:clamp(16px,3.2vmin,20px) !important;
-}
+html,body,button,input,select,textarea {font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;}
+p, #text, .screen p, #question, #msg {font-size:clamp(20px,4.5vmin,28px) !important;line-height:1.45 !important;}
+button, .btn, .choiceBtn, .choice, .carnetBtn {font-size:clamp(18px,4vmin,24px) !important;font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;}
+#startBtn, #start, #btn, #restartBtn, #restart {font-size:clamp(20px,5vmin,26px) !important;}
+small, .sub, #recall, #hint, #carnetLine {font-size:clamp(16px,3.2vmin,20px) !important;}
 </style>
 </head>
 <body>
