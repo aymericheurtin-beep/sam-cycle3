@@ -73,32 +73,33 @@ async function run(){
 
  const repPiece = await askMulti('Comment imaginez-vous cette pièce ?', ['Petite','Grande','Lumineuse','Sombre','Ordonnée','En bazar']);
 
- // Pont bureau Vidal supprimé
-
  await showImage('touslessuspects.jpg');
  await sleep(5000);
  await hideImage();
 
  const charChoice = await askSingle('Appuyez sur le personnage qui vous intéresse le plus.', ['Vidal','Noé','Rémy','Chloé','Colin','Sam','Inès']);
 
+ // Pont Inès : image d'abord avec texte "c'était ton Inès"
+ if(charChoice === 'Inès'){
+   const inesPhoto = localStorage.getItem('qr4_ines_photo') || localStorage.getItem('qr4_ines') || localStorage.getItem('qr4_choice') || '';
+   if(inesPhoto){
+     await showImage(inesPhoto);
+     showTextStay("c'était ton Inès",'bottom');
+     await sleep(4000);
+     hide(text);
+     await hideImage();
+   } else {
+     console.warn('Photo Inès non trouvée dans localStorage');
+   }
+ }
+
  let txt = descriptions[charChoice] || '';
 
- // Pont carnet QR11
  const firstCarnet = localStorage.getItem('qr11_carnet_first') || localStorage.getItem('qr11_first_carnet') || '';
  if(firstCarnet && normalize(firstCarnet) === normalize(charChoice)){
    txt += "\n\nDécidément, ce personnage vous intrigue, vous l'aviez choisi en 1er dans le carnet de M. Vidal.";
  }
  await showText(txt,6000,'center');
-
- // Pont Inès avec photo choisie en QR4
- if(charChoice === 'Inès'){
-   const inesPhoto = localStorage.getItem('qr4_ines_photo') || localStorage.getItem('qr4_ines');
-   if(inesPhoto){
-     await showImage(inesPhoto);
-     await sleep(4000);
-     await hideImage();
-   }
- }
 
  await showText("Dans quelques secondes vous allez lire la suite du roman.\nChaque personnage dans cette pièce a une raison d'être là.\nVous aussi vous savez des choses sur eux.\nUtilisez-les.",7000,'center');
 
