@@ -6,34 +6,35 @@
 <title>QR12</title>
 <style>
 html,body{margin:0;height:100%;background:#000;color:#fff;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;overflow:hidden}
-#start,#restart{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:5vmin;padding:4vmin 8vmin;background:#fff;color:#000;border:none;border-radius:10px;cursor:pointer;z-index:100}
-#restart{display:none}
-#text{position:absolute;left:50%;transform:translateX(-50%);width:92%;text-align:center;font-size:4.6vmin;line-height:1.35;z-index:30;display:none;white-space:pre-line;text-shadow:0 0 6px #000}
+#start{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:clamp(20px,5vmin,26px);padding:20px 40px;background:#fff;color:#000;border:none;border-radius:10px;cursor:pointer;z-index:100}
+#restart{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);font-size:clamp(20px,5vmin,26px);padding:15px 30px;background:#fff;color:#000;border:none;border-radius:10px;cursor:pointer;z-index:100;display:none}
+#text{position:absolute;left:50%;transform:translateX(-50%);width:92%;text-align:center;font-size:clamp(20px,4.5vmin,28px);line-height:1.45;z-index:30;display:none;white-space:pre-line;text-shadow:0 0 6px #000}
 #text.center{top:8%}
-#text.bottom{bottom:6%;font-size:3.6vmin;background:rgba(0,0,0,.75);padding:1.6vmin 2.2vmin;border-radius:8px;max-width:85%}
-#choices{position:absolute;bottom:8%;left:50%;transform:translateX(-50%);display:none;flex-direction:column;gap:1.6vmin;width:88%;max-height:45vh;overflow-y:auto;padding-bottom:2vmin;z-index:80;-webkit-overflow-scrolling:touch}
-.btn{font-size:3.8vmin;padding:2.4vmin;background:rgba(17,17,17,.92);color:#fff;border:1px solid #fff;border-radius:8px;cursor:pointer;text-align:center;flex-shrink:0;backdrop-filter:blur(2px)}
+#text.bottom{bottom:6%;font-size:clamp(18px,3.8vmin,24px);background:rgba(0,0,0,.75);padding:1.8vmin 2.5vmin;border-radius:8px;max-width:85%}
+#choices{position:absolute;bottom:8%;left:50%;transform:translateX(-50%);display:none;flex-direction:column;gap:2.2vmin;width:88%;max-height:45vh;overflow-y:auto;padding-bottom:2vmin;z-index:80;-webkit-overflow-scrolling:touch}
+.btn{font-size:clamp(18px,4vmin,24px);padding:20px 28px;background:rgba(17,17,17,.92);color:#fff;border:1px solid #fff;border-radius:8px;cursor:pointer;text-align:center;flex-shrink:0;backdrop-filter:blur(2px);font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
 .btn.sel{background:#fff;color:#000}
-#image{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-width:90vmin;max-height:78vmin;z-index:10;display:none;cursor:pointer;transition:transform .3s ease, opacity 1.2s}
+#image{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-width:90vmin;max-height:78vmin;z-index:10;display:none;cursor:pointer;transition:transform .3s ease, opacity 1.2s;opacity:0}
 #image.zoomed{max-width:none;max-height:none;width:200vmin;height:auto;top:60%;left:50%;transform:translate(-50%,-50%);z-index:60}
 #carnetBox{position:absolute;top:5%;left:50%;transform:translateX(-50%);width:92%;display:none;flex-direction:column;gap:1.2vmin;z-index:70;max-height:30vh;overflow-y:auto}
-.carnetBtn{font-size:3.4vmin;padding:1.8vmin;background:rgba(0,0,0,.85);border:1px solid #fff;color:#fff;border-radius:6px;cursor:pointer;text-align:center;flex-shrink:0}
+.carnetBtn{font-size:clamp(18px,4vmin,24px);padding:18px 24px;background:rgba(0,0,0,.85);border:1px solid #fff;color:#fff;border-radius:6px;cursor:pointer;text-align:center;flex-shrink:0;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
 .carnetBtn.used{opacity:.4}
-#carnetLine{position:absolute;bottom:12%;left:50%;transform:translateX(-50%);width:90%;background:rgba(0,0,0,.9);padding:2.2vmin;border-radius:8px;font-size:3.8vmin;line-height:1.4;text-align:center;display:none;z-index:75}
+#carnetLine{position:absolute;bottom:12%;left:50%;transform:translateX(-50%);width:90%;background:rgba(0,0,0,.9);padding:2.2vmin;border-radius:8px;font-size:clamp(16px,3.8vmin,22px);line-height:1.4;text-align:center;display:none;z-index:75}
 #carnetLine u{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px}
-#hint{position:absolute;bottom:2%;left:50%;transform:translateX(-50%);font-size:3.2vmin;color:#fff;background:rgba(0,0,0,.6);padding:1vmin 2vmin;border-radius:6px;z-index:65;display:none;pointer-events:none}
+#hint{position:absolute;bottom:2%;left:50%;transform:translateX(-50%);font-size:clamp(16px,3.2vmin,20px);color:#fff;background:rgba(0,0,0,.6);padding:1vmin 2vmin;border-radius:6px;z-index:65;display:none;pointer-events:none}
+#stats{position:absolute;bottom:5vmin;right:6vmin;font-size:clamp(16px,3.5vmin,22px);z-index:30;display:none;text-shadow:0 0 8px #000;text-align:right;line-height:1.4;background:rgba(0,0,0,.6);padding:1.5vmin 2vmin;border-radius:8px}
 </style>
 </head>
 <body>
-<button id="start">Touchez pour commencer</button>
-<button id="restart">Recommencer</button>
+<button id="start" type="button" onclick="run()">Touchez pour commencer</button>
+<button id="restart" type="button" onclick="location.reload()">Recommencer</button>
 <div id="text"></div>
 <div id="choices"></div>
 <img id="image" alt="">
 <div id="carnetBox"></div>
 <div id="carnetLine"></div>
 <div id="hint"></div>
-<div id="stats" style="position:absolute;bottom:5vmin;right:6vmin;font-size:4vmin;z-index:30;display:none;text-shadow:0 0 8px #000;text-align:right;line-height:1.4;background:rgba(0,0,0,.6);padding:1.5vmin 2vmin;border-radius:8px"></div>
+<div id="stats"></div>
 <audio id="narrateur" src="narrateur.mp3" preload="auto" playsinline></audio>
 
 <script>
@@ -42,7 +43,7 @@ const start=$('start'), restart=$('restart'), text=$('text'), choices=$('choices
 const show=el=>el.style.display='block'; const hide=el=>el.style.display='none'; const flex=el=>el.style.display='flex'; const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 function showText(t,hold=3000,pos='center'){ text.className=''; text.classList.add(pos); text.textContent=t; show(text); return sleep(hold).then(()=>hide(text)); }
 function showTextStay(t,pos='center'){ text.className=''; text.classList.add(pos); text.textContent=t; show(text); }
-function showImage(src){ return new Promise(res=>{ image.onload=()=>{show(image); image.style.opacity='1'; res();}; image.onerror=()=>{ console.warn('Image manquante:',src); show(image); res();}; image.classList.remove('zoomed'); image.style.opacity='0'; setTimeout(()=>{image.src=src;},50); }); }
+function showImage(src){ return new Promise(res=>{ let done=false; const finish=()=>{ if(done) return; done=true; show(image); requestAnimationFrame(()=>{ image.style.opacity='1'; }); res(); }; image.onload=finish; image.onerror=()=>{ console.warn('Image manquante:',src); finish(); }; image.classList.remove('zoomed'); image.style.opacity='0'; image.src=src; setTimeout(finish,2000); }); }
 function hideImage(){ return new Promise(async res=>{ image.style.opacity='0'; await sleep(1200); hide(image); hide(hint); image.src=''; image.classList.remove('zoomed'); res(); }); }
 async function play(a){ try{ await a.play(); }catch{} }
 function stopAudio(a){ try{ a.pause(); a.currentTime=0; }catch{} }
@@ -63,7 +64,6 @@ function normalize(s){ return (s||'').toString().toLowerCase().normalize('NFD').
 
 async function run(){
  hide(start); hide(restart); hide(stats);
- // inc scans
  const used = (parseInt(localStorage.getItem('scans_used')||'0',10)+1);
  localStorage.setItem('scans_used', used);
 
@@ -73,12 +73,7 @@ async function run(){
 
  const repPiece = await askMulti('Comment imaginez-vous cette pièce ?', ['Petite','Grande','Lumineuse','Sombre','Ordonnée','En bazar']);
 
- let bureau = [];
- try{ bureau = JSON.parse(localStorage.getItem('qr11_bureau')||'[]'); }catch{}
- const map = { petite:'petit', grande:'grand', lumineuse:'lumineux', sombre:'sombre', ordonnee:'ordonne', 'en bazar':'en bazar' };
- const norm = arr => arr.map(v=> map[normalize(v)] || normalize(v)).sort().join('|');
- const same = norm(repPiece) === norm(bureau) && bureau.length>0;
- await showText(same ? "Tiens, comme le bureau de M. Vidal." : "Tiens, différemment du bureau de M. Vidal.",2500,'center');
+ // Pont bureau Vidal supprimé
 
  await showImage('touslessuspects.jpg');
  await sleep(5000);
@@ -87,28 +82,32 @@ async function run(){
  const charChoice = await askSingle('Appuyez sur le personnage qui vous intéresse le plus.', ['Vidal','Noé','Rémy','Chloé','Colin','Sam','Inès']);
 
  let txt = descriptions[charChoice] || '';
- const firstCarnet = localStorage.getItem('qr11_first_carnet')||'';
- if(normalize(firstCarnet) === normalize(charChoice)){
-   txt += "\n\nCe personnage doit vous intriguer, vous l’aviez également choisi en premier dans le carnet de M. Vidal.";
+
+ // Pont carnet QR11
+ const firstCarnet = localStorage.getItem('qr11_carnet_first') || localStorage.getItem('qr11_first_carnet') || '';
+ if(firstCarnet && normalize(firstCarnet) === normalize(charChoice)){
+   txt += "\n\nDécidément, ce personnage vous intrigue, vous l'aviez choisi en 1er dans le carnet de M. Vidal.";
  }
  await showText(txt,6000,'center');
 
- if(charChoice === 'Inès' && localStorage.getItem('qr4_ines')){
-   await showImage(localStorage.getItem('qr4_ines'));
-   await sleep(4000);
-   await hideImage();
+ // Pont Inès avec photo choisie en QR4
+ if(charChoice === 'Inès'){
+   const inesPhoto = localStorage.getItem('qr4_ines_photo') || localStorage.getItem('qr4_ines');
+   if(inesPhoto){
+     await showImage(inesPhoto);
+     await sleep(4000);
+     await hideImage();
+   }
  }
 
- await showText("Dans quelques secondes vous allez lire la suite du roman.\nChaque personnage dans cette pièce a une raison d’être là.\nVous aussi vous savez des choses sur eux.\nUtilisez-les.",7000,'center');
+ await showText("Dans quelques secondes vous allez lire la suite du roman.\nChaque personnage dans cette pièce a une raison d'être là.\nVous aussi vous savez des choses sur eux.\nUtilisez-les.",7000,'center');
 
- const total = parseInt(localStorage.getItem('scans_total')||'12',10);
+ const total = 12;
  stats.innerHTML = `Scans proposés : ${total}<br>Scans utilisés : ${used}`;
  show(stats);
  show(restart);
 }
 
-start.onclick = run;
-restart.onclick = ()=> location.reload();
 </script>
 </body>
 </html>
