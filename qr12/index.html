@@ -1,47 +1,114 @@
 <!DOCTYPE html>
-<html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>QR12</title><style>
-html,body{margin:0;height:100%;background:#000;color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;overflow:hidden}
-#start{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:clamp(20px,5vmin,26px);padding:20px 40px;background:#fff;color:#000;border:none;border-radius:10px;cursor:pointer;z-index:100}
-#restart{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);font-size:clamp(20px,5vmin,26px);padding:15px 30px;background:#fff;color:#000;border:none;border-radius:10px;cursor:pointer;z-index:100;display:none}
-#text{position:absolute;left:50%;transform:translateX(-50%);width:92%;text-align:center;font-size:clamp(20px,4.5vmin,28px);line-height:1.45;z-index:30;display:none;white-space:pre-line;text-shadow:0 0 6px #000}
-#text.center{top:8%}#text.bottom{bottom:6%;font-size:clamp(18px,3.8vmin,24px);background:rgba(0,0,0,.75);padding:1.8vmin 2.5vmin;border-radius:8px;max-width:85%}
-#suspectsWrap{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-width:95vmin;max-height:80vmin;display:none;z-index:20}
-#suspectsImg{display:block;max-width:95vmin;max-height:80vmin}
-.zone{position:absolute;width:18%;height:26%;transform:translate(-50%,-50%);cursor:pointer;border-radius:50%;border:2px solid rgba(255,255,255,.35);background:rgba(255,255,255,.06);transition:.2s}
-.zone:hover{border-color:#fff;background:rgba(255,255,255,.18)}
-#inesCropWrap{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:45vmin;height:60vmin;overflow:hidden;display:none;z-index:15;border:2px solid #fff;border-radius:8px;background:#000}
-#inesCropWrap img{position:absolute;width:300%;height:200%;top:0;left:0;image-rendering:auto}
-#stats{position:absolute;bottom:5vmin;right:6vmin;font-size:clamp(16px,3.5vmin,22px);z-index:30;display:none;text-shadow:0 0 8px #000;text-align:right;line-height:1.4;background:rgba(0,0,0,.6);padding:1.5vmin 2vmin;border-radius:8px}
-</style></head><body>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>QR12</title>
+<style>
+html,body{margin:0;height:100%;background:#000;color:#fff;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;overflow:hidden}
+#start,#restart{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:5vmin;padding:4vmin 8vmin;background:#fff;color:#000;border:none;border-radius:10px;cursor:pointer;z-index:100}
+#restart{display:none}
+#text{position:absolute;left:50%;transform:translateX(-50%);width:92%;text-align:center;font-size:4.6vmin;line-height:1.35;z-index:30;display:none;white-space:pre-line;text-shadow:0 0 6px #000}
+#text.center{top:8%}
+#text.bottom{bottom:6%;font-size:3.6vmin;background:rgba(0,0,0,.75);padding:1.6vmin 2.2vmin;border-radius:8px;max-width:85%}
+#choices{position:absolute;bottom:8%;left:50%;transform:translateX(-50%);display:none;flex-direction:column;gap:1.6vmin;width:88%;max-height:45vh;overflow-y:auto;padding-bottom:2vmin;z-index:80;-webkit-overflow-scrolling:touch}
+.btn{font-size:3.8vmin;padding:2.4vmin;background:rgba(17,17,17,.92);color:#fff;border:1px solid #fff;border-radius:8px;cursor:pointer;text-align:center;flex-shrink:0;backdrop-filter:blur(2px)}
+.btn.sel{background:#fff;color:#000}
+#image{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-width:90vmin;max-height:78vmin;z-index:10;display:none;cursor:pointer;transition:transform .3s ease, opacity 1.2s}
+#image.zoomed{max-width:none;max-height:none;width:200vmin;height:auto;top:60%;left:50%;transform:translate(-50%,-50%);z-index:60}
+#carnetBox{position:absolute;top:5%;left:50%;transform:translateX(-50%);width:92%;display:none;flex-direction:column;gap:1.2vmin;z-index:70;max-height:30vh;overflow-y:auto}
+.carnetBtn{font-size:3.4vmin;padding:1.8vmin;background:rgba(0,0,0,.85);border:1px solid #fff;color:#fff;border-radius:6px;cursor:pointer;text-align:center;flex-shrink:0}
+.carnetBtn.used{opacity:.4}
+#carnetLine{position:absolute;bottom:12%;left:50%;transform:translateX(-50%);width:90%;background:rgba(0,0,0,.9);padding:2.2vmin;border-radius:8px;font-size:3.8vmin;line-height:1.4;text-align:center;display:none;z-index:75}
+#carnetLine u{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px}
+#hint{position:absolute;bottom:2%;left:50%;transform:translateX(-50%);font-size:3.2vmin;color:#fff;background:rgba(0,0,0,.6);padding:1vmin 2vmin;border-radius:6px;z-index:65;display:none;pointer-events:none}
+</style>
+</head>
+<body>
 <button id="start">Touchez pour commencer</button>
 <button id="restart">Recommencer</button>
 <div id="text"></div>
-<div id="suspectsWrap"><img id="suspectsImg" src="touslessuspects.jpg" alt=""></div>
-<div id="inesCropWrap"><img id="inesCropImg" src="ines_5_choix.jpg" alt=""></div>
-<div id="stats"></div>
+<div id="choices"></div>
+<img id="image" alt="">
+<div id="carnetBox"></div>
+<div id="carnetLine"></div>
+<div id="hint"></div>
+<div id="stats" style="position:absolute;bottom:5vmin;right:6vmin;font-size:4vmin;z-index:30;display:none;text-shadow:0 0 8px #000;text-align:right;line-height:1.4;background:rgba(0,0,0,.6);padding:1.5vmin 2vmin;border-radius:8px"></div>
 <audio id="narrateur" src="narrateur.mp3" preload="auto" playsinline></audio>
-<script>
-const $=id=>document.getElementById(id);
-const start=$('start'),restart=$('restart'),text=$('text'),stats=$('stats'),narrateur=$('narrateur');
-const suspectsWrap=$('suspectsWrap'),cropWrap=$('inesCropWrap'),cropImg=$('inesCropImg');
-const show=el=>el.style.display='block', hide=el=>el.style.display='none';
-const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-function showText(t,hold=3000,pos='center'){text.className='';text.classList.add(pos);text.textContent=t;show(text);return sleep(hold).then(()=>hide(text));}
-function showTextStay(t,pos='center'){text.className='';text.classList.add(pos);text.textContent=t;show(text);}
-async function play(a){try{await a.play()}catch{}}
-function stopAudio(a){try{a.pause();a.currentTime=0}catch{}}
-const descriptions={'Rémy':"Bras bandé de l’épaule aux doigts. Il aurait préféré rester à l’hôpital.",'Noé':"Regard sur ses chaussures. La posture des mauvais jours.",'Vidal':"Bras croisés. La montre neuve. Il attend que ça finisse.",'Sam':"Assis au centre, de dos. Il regarde Inès.",'Inès':"Debout avec carnet. Elle a demandé à être debout.",'Colin':"Mains dans les poches, adossé au mur. Il regarde personne en particulier.",'Chloé':"De dos, elle marche vers le bureau. Sa démarche quand elle est stressée."};
-const normalize=s=>(s||'').toString().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();
-function addUsed(id){const set=new Set(JSON.parse(localStorage.getItem('qr_used_set')||'[]'));set.add(id);localStorage.setItem('qr_used_set',JSON.stringify([...set]));return set.size}
-const zones=[{name:"Rémy",x:19.7,y:23.5},{name:"Vidal",x:32.2,y:23.9},{name:"Noé",x:18.3,y:63.6},{name:"Sam",x:40.6,y:66.8},{name:"Inès",x:57.3,y:52.1},{name:"Colin",x:70.5,y:50.5},{name:"Chloé",x:57.4,y:72.0}];
-function askCharacterOnImage(){return new Promise(res=>{show(suspectsWrap);suspectsWrap.querySelectorAll('.zone').forEach(z=>z.remove());zones.forEach(z=>{const d=document.createElement('div');d.className='zone';d.style.left=z.x+'%';d.style.top=z.y+'%';d.title=z.name;d.onclick=()=>{suspectsWrap.querySelectorAll('.zone').forEach(zz=>zz.remove());hide(suspectsWrap);res(z.name);};suspectsWrap.appendChild(d);});});}
-async function showInesCrop(){const choice=parseInt(localStorage.getItem('qr4_ines_choice')||'0',10);if(!choice){await showText("Aucune Inès n'a été choisie dans QR4.",2500,'center');return;}const imgOk=await new Promise(r=>{cropImg.onload=()=>r(true);cropImg.onerror=()=>r(false);if(cropImg.complete&&cropImg.naturalWidth)r(true);});if(!imgOk){await showText("Photo Inès introuvable.
-Copiez ines_5_choix.jpg dans le dossier QR12.",4000,'center');return;}const col=(choice-1)%3,row=Math.floor((choice-1)/3);cropImg.style.left=`-${col*100}%`;cropImg.style.top=`-${row*100}%`;show(cropWrap);showTextStay("c'était ton Inès",'bottom');await sleep(4000);hide(text);hide(cropWrap);}
-async function run(){hide(start);hide(restart);hide(stats);const used=addUsed('qr12');await play(narrateur);await sleep(8000);stopAudio(narrateur);showTextStay('Appuyez sur le personnage qui vous intéresse le plus.','center');const charChoice=await askCharacterOnImage();hide(text);if(charChoice==='Inès'){await showInesCrop();}let txt=descriptions[charChoice]||'';const firstCarnet=localStorage.getItem('qr11_carnet_first')||'';if(firstCarnet&&normalize(firstCarnet)===normalize(charChoice)){txt+="
 
-Décidément, ce personnage vous intrigue, vous l'aviez choisi en 1er dans le carnet de M. Vidal.";}await showText(txt,6000,'center');await showText("Dans quelques secondes vous allez lire la suite du roman.
-Chaque personnage dans cette pièce a une raison d'être là.
-Vous aussi vous savez des choses sur eux.
-Utilisez-les.",7000,'center');stats.innerHTML=`Scans proposés : 12<br>Scans utilisés : ${used}`;show(stats);show(restart);}
-start.onclick=run;restart.onclick=()=>location.reload();
-</script></body></html>
+<script>
+const $ = id => document.getElementById(id);
+const start=$('start'), restart=$('restart'), text=$('text'), choices=$('choices'), image=$('image'), carnetBox=$('carnetBox'), carnetLine=$('carnetLine'), hint=$('hint'), stats=$('stats'), narrateur=$('narrateur');
+const show=el=>el.style.display='block'; const hide=el=>el.style.display='none'; const flex=el=>el.style.display='flex'; const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function showText(t,hold=3000,pos='center'){ text.className=''; text.classList.add(pos); text.textContent=t; show(text); return sleep(hold).then(()=>hide(text)); }
+function showTextStay(t,pos='center'){ text.className=''; text.classList.add(pos); text.textContent=t; show(text); }
+function showImage(src){ return new Promise(res=>{ image.onload=()=>{show(image); image.style.opacity='1'; res();}; image.onerror=()=>{ console.warn('Image manquante:',src); show(image); res();}; image.classList.remove('zoomed'); image.style.opacity='0'; setTimeout(()=>{image.src=src;},50); }); }
+function hideImage(){ return new Promise(async res=>{ image.style.opacity='0'; await sleep(1200); hide(image); hide(hint); image.src=''; image.classList.remove('zoomed'); res(); }); }
+async function play(a){ try{ await a.play(); }catch{} }
+function stopAudio(a){ try{ a.pause(); a.currentTime=0; }catch{} }
+function askMulti(q,opts){ return new Promise(res=>{ showTextStay(q,'center'); choices.innerHTML=''; const sel=new Set(); opts.forEach(o=>{ const b=document.createElement('button'); b.className='btn'; b.textContent=o; b.onclick=()=>{ b.classList.toggle('sel'); sel.has(o)?sel.delete(o):sel.add(o); }; choices.appendChild(b); }); const ok=document.createElement('button'); ok.className='btn'; ok.textContent='Valider'; ok.style.marginTop='1vmin'; ok.style.background='#fff'; ok.style.color='#000'; ok.onclick=()=>{ hide(text); hide(choices); res([...sel]); }; choices.appendChild(ok); flex(choices); choices.scrollTop=0; }); }
+function askSingle(q,opts){ return new Promise(res=>{ showTextStay(q,'center'); choices.innerHTML=''; opts.forEach(o=>{ const b=document.createElement('button'); b.className='btn'; b.textContent=o; b.onclick=()=>{ hide(text); hide(choices); res(o); }; choices.appendChild(b); }); flex(choices); choices.scrollTop=0; }); }
+
+const descriptions = {
+ 'Vidal': "Bras croisés. La montre neuve. Il attend que ça finisse.",
+ 'Noé': "Regard sur ses chaussures. La posture des mauvais jours.",
+ 'Rémy': "Bras bandé de l’épaule aux doigts. Il aurait préféré rester à l’hôpital.",
+ 'Chloé': "Elle arrive en dernier. Sa démarche quand elle est stressée.",
+ 'Colin': "Mains dans les poches. Il regarde personne en particulier.",
+ 'Sam': "Assis au centre. Il regarde Inès.",
+ 'Inès': "Debout. Elle a demandé à être debout."
+};
+
+function normalize(s){ return (s||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim(); }
+
+async function run(){
+ hide(start); hide(restart); hide(stats);
+ // inc scans
+ const used = (parseInt(localStorage.getItem('scans_used')||'0',10)+1);
+ localStorage.setItem('scans_used', used);
+
+ await play(narrateur);
+ await sleep(8000);
+ stopAudio(narrateur);
+
+ const repPiece = await askMulti('Comment imaginez-vous cette pièce ?', ['Petite','Grande','Lumineuse','Sombre','Ordonnée','En bazar']);
+
+ let bureau = [];
+ try{ bureau = JSON.parse(localStorage.getItem('qr11_bureau')||'[]'); }catch{}
+ const map = { petite:'petit', grande:'grand', lumineuse:'lumineux', sombre:'sombre', ordonnee:'ordonne', 'en bazar':'en bazar' };
+ const norm = arr => arr.map(v=> map[normalize(v)] || normalize(v)).sort().join('|');
+ const same = norm(repPiece) === norm(bureau) && bureau.length>0;
+ await showText(same ? "Tiens, comme le bureau de M. Vidal." : "Tiens, différemment du bureau de M. Vidal.",2500,'center');
+
+ await showImage('touslessuspects.jpg');
+ await sleep(5000);
+ await hideImage();
+
+ const charChoice = await askSingle('Appuyez sur le personnage qui vous intéresse le plus.', ['Vidal','Noé','Rémy','Chloé','Colin','Sam','Inès']);
+
+ let txt = descriptions[charChoice] || '';
+ const firstCarnet = localStorage.getItem('qr11_first_carnet')||'';
+ if(normalize(firstCarnet) === normalize(charChoice)){
+   txt += "\n\nCe personnage doit vous intriguer, vous l’aviez également choisi en premier dans le carnet de M. Vidal.";
+ }
+ await showText(txt,6000,'center');
+
+ if(charChoice === 'Inès' && localStorage.getItem('qr4_ines')){
+   await showImage(localStorage.getItem('qr4_ines'));
+   await sleep(4000);
+   await hideImage();
+ }
+
+ await showText("Dans quelques secondes vous allez lire la suite du roman.\nChaque personnage dans cette pièce a une raison d’être là.\nVous aussi vous savez des choses sur eux.\nUtilisez-les.",7000,'center');
+
+ const total = parseInt(localStorage.getItem('scans_total')||'12',10);
+ stats.innerHTML = `Scans proposés : ${total}<br>Scans utilisés : ${used}`;
+ show(stats);
+ show(restart);
+}
+
+start.onclick = run;
+restart.onclick = ()=> location.reload();
+</script>
+</body>
+</html>
