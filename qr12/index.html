@@ -11,104 +11,80 @@ html,body{margin:0;height:100%;background:#000;color:#fff;font-family:system-ui,
 #text{position:absolute;left:50%;transform:translateX(-50%);width:92%;text-align:center;font-size:clamp(20px,4.5vmin,28px);line-height:1.45;z-index:30;display:none;white-space:pre-line;text-shadow:0 0 6px #000}
 #text.center{top:8%}
 #text.bottom{bottom:6%;font-size:clamp(18px,3.8vmin,24px);background:rgba(0,0,0,.75);padding:1.8vmin 2.5vmin;border-radius:8px;max-width:85%}
-#choices{position:absolute;bottom:8%;left:50%;transform:translateX(-50%);display:none;flex-direction:column;gap:2.2vmin;width:88%;max-height:45vh;overflow-y:auto;padding-bottom:2vmin;z-index:80;-webkit-overflow-scrolling:touch}
-.btn{font-size:clamp(18px,4vmin,24px);padding:20px 28px;background:rgba(17,17,17,.92);color:#fff;border:1px solid #fff;border-radius:8px;cursor:pointer;text-align:center;flex-shrink:0;backdrop-filter:blur(2px);font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+#choices{position:absolute;bottom:8%;left:50%;transform:translateX(-50%);display:none;flex-direction:column;gap:2.2vmin;width:88%;max-height:45vh;overflow-y:auto;padding-bottom:2vmin;z-index:80}
+.btn{font-size:clamp(18px,4vmin,24px);padding:20px 28px;background:rgba(17,17,17,.92);color:#fff;border:1px solid #fff;border-radius:8px;cursor:pointer;text-align:center}
 .btn.sel{background:#fff;color:#000}
-#image{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-width:90vmin;max-height:78vmin;z-index:10;display:none;cursor:pointer;transition:transform .3s ease, opacity 1.2s;opacity:0}
-#image.zoomed{max-width:none;max-height:none;width:200vmin;height:auto;top:60%;left:50%;transform:translate(-50%,-50%);z-index:60}
-#carnetBox{position:absolute;top:5%;left:50%;transform:translateX(-50%);width:92%;display:none;flex-direction:column;gap:1.2vmin;z-index:70;max-height:30vh;overflow-y:auto}
-.carnetBtn{font-size:clamp(18px,4vmin,24px);padding:18px 24px;background:rgba(0,0,0,.85);border:1px solid #fff;color:#fff;border-radius:6px;cursor:pointer;text-align:center;flex-shrink:0;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
-.carnetBtn.used{opacity:.4}
-#carnetLine{position:absolute;bottom:12%;left:50%;transform:translateX(-50%);width:90%;background:rgba(0,0,0,.9);padding:2.2vmin;border-radius:8px;font-size:clamp(16px,3.8vmin,22px);line-height:1.4;text-align:center;display:none;z-index:75}
-#carnetLine u{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px}
-#hint{position:absolute;bottom:2%;left:50%;transform:translateX(-50%);font-size:clamp(16px,3.2vmin,20px);color:#fff;background:rgba(0,0,0,.6);padding:1vmin 2vmin;border-radius:6px;z-index:65;display:none;pointer-events:none}
+#image{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-width:90vmin;max-height:78vmin;z-index:10;display:none;opacity:0;transition:opacity 1.2s}
+#inesCropWrap{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:60vmin;height:80vmin;overflow:hidden;display:none;z-index:15;border:2px solid #fff;border-radius:8px;background:#000}
+#inesCropWrap img{position:absolute;width:300%;height:200%;top:0;left:0}
 #stats{position:absolute;bottom:5vmin;right:6vmin;font-size:clamp(16px,3.5vmin,22px);z-index:30;display:none;text-shadow:0 0 8px #000;text-align:right;line-height:1.4;background:rgba(0,0,0,.6);padding:1.5vmin 2vmin;border-radius:8px}
 </style>
 </head>
 <body>
-<button id="start" type="button" onclick="run()">Touchez pour commencer</button>
-<button id="restart" type="button" onclick="location.reload()">Recommencer</button>
+<button id="start">Touchez pour commencer</button>
+<button id="restart">Recommencer</button>
 <div id="text"></div>
 <div id="choices"></div>
 <img id="image" alt="">
-<div id="carnetBox"></div>
-<div id="carnetLine"></div>
-<div id="hint"></div>
+<div id="inesCropWrap"><img id="inesCropImg" src="./ines_5_choix.jpg" alt=""></div>
 <div id="stats"></div>
 <audio id="narrateur" src="narrateur.mp3" preload="auto" playsinline></audio>
 
 <script>
-const $ = id => document.getElementById(id);
-const start=$('start'), restart=$('restart'), text=$('text'), choices=$('choices'), image=$('image'), carnetBox=$('carnetBox'), carnetLine=$('carnetLine'), hint=$('hint'), stats=$('stats'), narrateur=$('narrateur');
-const show=el=>el.style.display='block'; const hide=el=>el.style.display='none'; const flex=el=>el.style.display='flex'; const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-function showText(t,hold=3000,pos='center'){ text.className=''; text.classList.add(pos); text.textContent=t; show(text); return sleep(hold).then(()=>hide(text)); }
-function showTextStay(t,pos='center'){ text.className=''; text.classList.add(pos); text.textContent=t; show(text); }
-function showImage(src){ return new Promise(res=>{ let done=false; const finish=()=>{ if(done) return; done=true; show(image); requestAnimationFrame(()=>{ image.style.opacity='1'; }); res(); }; image.onload=finish; image.onerror=()=>{ console.warn('Image manquante:',src); finish(); }; image.classList.remove('zoomed'); image.style.opacity='0'; image.src=src; setTimeout(finish,2000); }); }
-function hideImage(){ return new Promise(async res=>{ image.style.opacity='0'; await sleep(1200); hide(image); hide(hint); image.src=''; image.classList.remove('zoomed'); res(); }); }
-async function play(a){ try{ await a.play(); }catch{} }
-function stopAudio(a){ try{ a.pause(); a.currentTime=0; }catch{} }
-function askMulti(q,opts){ return new Promise(res=>{ showTextStay(q,'center'); choices.innerHTML=''; const sel=new Set(); opts.forEach(o=>{ const b=document.createElement('button'); b.className='btn'; b.textContent=o; b.onclick=()=>{ b.classList.toggle('sel'); sel.has(o)?sel.delete(o):sel.add(o); }; choices.appendChild(b); }); const ok=document.createElement('button'); ok.className='btn'; ok.textContent='Valider'; ok.style.marginTop='1vmin'; ok.style.background='#fff'; ok.style.color='#000'; ok.onclick=()=>{ hide(text); hide(choices); res([...sel]); }; choices.appendChild(ok); flex(choices); choices.scrollTop=0; }); }
-function askSingle(q,opts){ return new Promise(res=>{ showTextStay(q,'center'); choices.innerHTML=''; opts.forEach(o=>{ const b=document.createElement('button'); b.className='btn'; b.textContent=o; b.onclick=()=>{ hide(text); hide(choices); res(o); }; choices.appendChild(b); }); flex(choices); choices.scrollTop=0; }); }
+const $=id=>document.getElementById(id);
+const start=$('start'),restart=$('restart'),text=$('text'),choices=$('choices'),image=$('image'),stats=$('stats'),narrateur=$('narrateur');
+const cropWrap=$('inesCropWrap'),cropImg=$('inesCropImg');
+const show=el=>el.style.display='block', hide=el=>el.style.display='none', flex=el=>el.style.display='flex';
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 
-const descriptions = {
- 'Vidal': "Bras croisés. La montre neuve. Il attend que ça finisse.",
- 'Noé': "Regard sur ses chaussures. La posture des mauvais jours.",
- 'Rémy': "Bras bandé de l’épaule aux doigts. Il aurait préféré rester à l’hôpital.",
- 'Chloé': "Elle arrive en dernier. Sa démarche quand elle est stressée.",
- 'Colin': "Mains dans les poches. Il regarde personne en particulier.",
- 'Sam': "Assis au centre. Il regarde Inès.",
- 'Inès': "Debout. Elle a demandé à être debout."
-};
+function showText(t,hold=3000,pos='center'){text.className='';text.classList.add(pos);text.textContent=t;show(text);return sleep(hold).then(()=>hide(text));}
+function showTextStay(t,pos='center'){text.className='';text.classList.add(pos);text.textContent=t;show(text);}
+function showImage(src){return new Promise(res=>{image.onload=()=>{show(image);requestAnimationFrame(()=>image.style.opacity='1');res();};image.style.opacity='0';image.src=src;setTimeout(res,2000);});}
+function hideImage(){return new Promise(async r=>{image.style.opacity='0';await sleep(1200);hide(image);r();});}
+async function play(a){try{await a.play()}catch{}}
+function stopAudio(a){try{a.pause();a.currentTime=0}catch{}}
 
-function normalize(s){ return (s||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim(); }
+function askMulti(q,opts){return new Promise(res=>{showTextStay(q,'center');choices.innerHTML='';const sel=new Set();opts.forEach(o=>{const b=document.createElement('button');b.className='btn';b.textContent=o;b.onclick=()=>{b.classList.toggle('sel');sel.has(o)?sel.delete(o):sel.add(o)};choices.appendChild(b)});const ok=document.createElement('button');ok.className='btn';ok.textContent='Valider';ok.style.background='#fff';ok.style.color='#000';ok.onclick=()=>{hide(text);hide(choices);res([...sel])};choices.appendChild(ok);flex(choices)})}
+function askSingle(q,opts){return new Promise(res=>{showTextStay(q,'center');choices.innerHTML='';opts.forEach(o=>{const b=document.createElement('button');b.className='btn';b.textContent=o;b.onclick=()=>{hide(text);hide(choices);res(o)}});flex(choices)})}
 
-async function run(){
- hide(start); hide(restart); hide(stats);
- const used = (parseInt(localStorage.getItem('scans_used')||'0',10)+1);
- localStorage.setItem('scans_used', used);
+const descriptions={Vidal:"Bras croisés. La montre neuve. Il attend que ça finisse.",Noé:"Regard sur ses chaussures. La posture des mauvais jours.",Rémy:"Bras bandé de l’épaule aux doigts. Il aurait préféré rester à l’hôpital.",Chloé:"Elle arrive en dernier. Sa démarche quand elle est stressée.",Colin:"Mains dans les poches. Il regarde personne en particulier.",Sam:"Assis au centre. Il regarde Inès.",Inès:"Debout. Elle a demandé à être debout."};
+const normalize=s=>(s||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
 
- await play(narrateur);
- await sleep(8000);
- stopAudio(narrateur);
+function addUsed(id){const set=new Set(JSON.parse(localStorage.getItem('qr_used_set')||'[]'));set.add(id);localStorage.setItem('qr_used_set',JSON.stringify([...set]));return set.size}
 
- const repPiece = await askMulti('Comment imaginez-vous cette pièce ?', ['Petite','Grande','Lumineuse','Sombre','Ordonnée','En bazar']);
-
- await showImage('touslessuspects.jpg');
- await sleep(5000);
- await hideImage();
-
- const charChoice = await askSingle('Appuyez sur le personnage qui vous intéresse le plus.', ['Vidal','Noé','Rémy','Chloé','Colin','Sam','Inès']);
-
- // Pont Inès : image d'abord avec texte "c'était ton Inès"
- if(charChoice === 'Inès'){
-   const inesPhoto = localStorage.getItem('qr4_ines_photo') || localStorage.getItem('qr4_ines') || localStorage.getItem('qr4_choice') || '';
-   if(inesPhoto){
-     await showImage(inesPhoto);
-     showTextStay("c'était ton Inès",'bottom');
-     await sleep(4000);
-     hide(text);
-     await hideImage();
-   } else {
-     console.warn('Photo Inès non trouvée dans localStorage');
-   }
- }
-
- let txt = descriptions[charChoice] || '';
-
- const firstCarnet = localStorage.getItem('qr11_carnet_first') || localStorage.getItem('qr11_first_carnet') || '';
- if(firstCarnet && normalize(firstCarnet) === normalize(charChoice)){
-   txt += "\n\nDécidément, ce personnage vous intrigue, vous l'aviez choisi en 1er dans le carnet de M. Vidal.";
- }
- await showText(txt,6000,'center');
-
- await showText("Dans quelques secondes vous allez lire la suite du roman.\nChaque personnage dans cette pièce a une raison d'être là.\nVous aussi vous savez des choses sur eux.\nUtilisez-les.",7000,'center');
-
- const total = 12;
- stats.innerHTML = `Scans proposés : ${total}<br>Scans utilisés : ${used}`;
- show(stats);
- show(restart);
+async function showInesCrop(){
+  const choice=parseInt(localStorage.getItem('qr4_ines_choice')||'0',10);
+  if(!choice) return false;
+  const col=(choice-1)%3, row=Math.floor((choice-1)/3);
+  cropImg.style.left=`-${col*100}%`;
+  cropImg.style.top=`-${row*100}%`;
+  show(cropWrap);
+  showTextStay("c'était ton Inès",'bottom');
+  await sleep(4000);
+  hide(text); hide(cropWrap);
+  return true;
 }
 
+async function run(){
+  hide(start);hide(restart);hide(stats);
+  const used=addUsed('qr12');
+  await play(narrateur);await sleep(8000);stopAudio(narrateur);
+  await askMulti('Comment imaginez-vous cette pièce?',['Petite','Grande','Lumineuse','Sombre','Ordonnée','En bazar']);
+  await showImage('touslessuspects.jpg');await sleep(5000);await hideImage();
+  const charChoice=await askSingle('Appuyez sur le personnage qui vous intéresse le plus.',['Vidal','Noé','Rémy','Chloé','Colin','Sam','Inès']);
+  if(charChoice==='Inès'){await showInesCrop();}
+  let txt=descriptions[charChoice]||'';
+  const firstCarnet=localStorage.getItem('qr11_carnet_first')||'';
+  if(firstCarnet && normalize(firstCarnet)===normalize(charChoice)){
+    txt+="\n\nDécidément, ce personnage vous intrigue, vous l'aviez choisi en 1er dans le carnet de M. Vidal.";
+  }
+  await showText(txt,6000,'center');
+  await showText("Dans quelques secondes vous allez lire la suite du roman.\nChaque personnage dans cette pièce a une raison d'être là.\nVous aussi vous savez des choses sur eux.\nUtilisez-les.",7000,'center');
+  stats.innerHTML=`Scans proposés : 12<br>Scans utilisés : ${used}`;
+  show(stats);show(restart);
+}
+start.onclick=run;
+restart.onclick=()=>location.reload();
 </script>
 </body>
 </html>
