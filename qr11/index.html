@@ -5,47 +5,27 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=yes">
 <title>QR11 - Bureau Vidal</title>
 <style>
-html,body{margin:0;height:100%;background:#000;color:#fff;font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;overflow:hidden}
-#start,#restart{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:5vmin;padding:4vmin 8vmin;background:#fff;color:#000;border:none;border-radius:10px;cursor:pointer;z-index:100}
-#restart{display:none}
-#text{position:absolute;left:50%;transform:translateX(-50%);width:92%;text-align:center;font-size:4.6vmin;line-height:1.35;z-index:30;display:none;white-space:pre-line;text-shadow:0 0 6px #000}
+html,body{margin:0;height:100%;background:#000;color:#fff;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;overflow:hidden}
+#start{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:clamp(20px,5vmin,26px);padding:20px 40px;background:#fff;color:#000;border:none;border-radius:10px;cursor:pointer;z-index:100}
+#restart{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);font-size:clamp(20px,5vmin,26px);padding:15px 30px;background:#fff;color:#000;border:none;border-radius:10px;cursor:pointer;z-index:100;display:none}
+#text{position:absolute;left:50%;transform:translateX(-50%);width:92%;text-align:center;font-size:clamp(20px,4.5vmin,28px);line-height:1.45;z-index:30;display:none;white-space:pre-line;text-shadow:0 0 6px #000}
 #text.center{top:8%}
-#text.bottom{bottom:6%;font-size:3.6vmin;background:rgba(0,0,0,.75);padding:1.6vmin 2.2vmin;border-radius:8px;max-width:85%}
-#choices{position:absolute;bottom:8%;left:50%;transform:translateX(-50%);display:none;flex-direction:column;gap:1.6vmin;width:88%;max-height:45vh;overflow-y:auto;padding-bottom:2vmin;z-index:80;-webkit-overflow-scrolling:touch}
-.btn{font-size:3.8vmin;padding:2.4vmin;background:rgba(17,17,17,.92);color:#fff;border:1px solid #fff;border-radius:8px;cursor:pointer;text-align:center;flex-shrink:0;backdrop-filter:blur(2px)}
+#text.bottom{bottom:6%;font-size:clamp(18px,3.8vmin,24px);background:rgba(0,0,0,.75);padding:1.8vmin 2.5vmin;border-radius:8px;max-width:85%}
+#choices{position:absolute;bottom:8%;left:50%;transform:translateX(-50%);display:none;flex-direction:column;gap:2.2vmin;width:88%;max-height:45vh;overflow-y:auto;padding-bottom:2vmin;z-index:80;-webkit-overflow-scrolling:touch}
+.btn{font-size:clamp(18px,4vmin,24px);padding:20px 28px;background:rgba(17,17,17,.92);color:#fff;border:1px solid #fff;border-radius:8px;cursor:pointer;text-align:center;flex-shrink:0;backdrop-filter:blur(2px);font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
 .btn.sel{background:#fff;color:#000}
 #image{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-width:90vmin;max-height:78vmin;z-index:10;display:none;cursor:pointer;transition:transform .3s ease, opacity 1.2s}
 #image.zoomed{max-width:none;max-height:none;width:200vmin;height:auto;top:60%;left:50%;transform:translate(-50%,-50%);z-index:60}
 #carnetBox{position:absolute;top:5%;left:50%;transform:translateX(-50%);width:92%;display:none;flex-direction:column;gap:1.2vmin;z-index:70;max-height:30vh;overflow-y:auto}
-.carnetBtn{font-size:3.4vmin;padding:1.8vmin;background:rgba(0,0,0,.85);border:1px solid #fff;color:#fff;border-radius:6px;cursor:pointer;text-align:center;flex-shrink:0}
+.carnetBtn{font-size:clamp(18px,4vmin,24px);padding:18px 24px;background:rgba(0,0,0,.85);border:1px solid #fff;color:#fff;border-radius:6px;cursor:pointer;text-align:center;flex-shrink:0;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
 .carnetBtn.used{opacity:.4}
-#carnetLine{position:absolute;bottom:12%;left:50%;transform:translateX(-50%);width:90%;background:rgba(0,0,0,.9);padding:2.2vmin;border-radius:8px;font-size:3.8vmin;line-height:1.4;text-align:center;display:none;z-index:75}
+#carnetLine{position:absolute;bottom:12%;left:50%;transform:translateX(-50%);width:90%;background:rgba(0,0,0,.9);padding:2.2vmin;border-radius:8px;font-size:clamp(16px,3.8vmin,22px);line-height:1.4;text-align:center;display:none;z-index:75}
 #carnetLine u{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px}
-#hint{position:absolute;bottom:2%;left:50%;transform:translateX(-50%);font-size:3.2vmin;color:#fff;background:rgba(0,0,0,.6);padding:1vmin 2vmin;border-radius:6px;z-index:65;display:none;pointer-events:none}
-</style>
-<style>
-/* === UNIFICATION TYPO === */
-html,body,button,input,select,textarea {
-  font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-}
-p, #text, .screen p, #question, #msg {
-  font-size:clamp(20px,4.5vmin,28px) !important;
-  line-height:1.45 !important;
-}
-button, .btn, .choiceBtn, .choice, .carnetBtn {
-  font-size:clamp(18px,4vmin,24px) !important;
-  font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-}
-#startBtn, #start, #btn, #restartBtn, #restart {
-  font-size:clamp(20px,5vmin,26px) !important;
-}
-small, .sub, #recall, #hint, #carnetLine {
-  font-size:clamp(16px,3.2vmin,20px) !important;
-}
+#hint{position:absolute;bottom:2%;left:50%;transform:translateX(-50%);font-size:clamp(16px,3.2vmin,20px);color:#fff;background:rgba(0,0,0,.6);padding:1vmin 2vmin;border-radius:6px;z-index:65;display:none;pointer-events:none}
 </style>
 </head>
 <body>
-<button id="start">Touchez pour entrer</button>
+<button id="start">Touchez pour commencer</button>
 <button id="restart">Recommencer</button>
 
 <div id="text"></div>
@@ -148,11 +128,14 @@ async function run(){
   // 1. Crochetage
   await showImage('crochetage_vidal.jpg');
   await sleep(4000);
-  showTextStay('Confinement. YouTube.\nC\'est illégal.\nC\'est pratique.','bottom');
+  showTextStay('Confinement. YouTube.
+C'est illégal.
+C'est pratique.','bottom');
   await sleep(3500);hide(text);await hideImage();
 
   // 2. Bureau imagination
-  await askMulti('Un bureau de prof. Un samedi matin. Vide.\nVous imaginez quoi ?',[
+  await askMulti('Un bureau de prof. Un samedi matin. Vide.
+Vous imaginez quoi ?',[
     'Ordonné','en bazar','petit','grand','lumineux','sombre','Rien de précis'
   ]);
 
@@ -171,18 +154,27 @@ async function run(){
   flex(carnetBox);
 
   const carnetTexts={
-    LAVELOT:"<u><u>LAVELOT S.</u></u> : Moteur exceptionnel, profil explosif. Trop instable pour les France. Il ira pas si j'ai mon mot à dire.",
+    LAVELOT:"<u>LAVELOT S.</u> : Moteur exceptionnel, profil explosif. Trop instable pour les France. Il ira pas si j'ai mon mot à dire.",
     MOREL:"MOREL N. : Père absent — mobile émotionnel fort. Tout le monde est gagnant.",
     DUBOIS:"DUBOIS C. : Court comme un frigo qui aurait oublié ses roulettes."
   };
-  const DISPLAY_TIME = 12000;
+  const DISPLAY_TIME = 15000; // temps de lecture allongé
   let opened=0;
+  const carnetOrder=[];
   await new Promise(res=>{
     carnetBox.querySelectorAll('.carnetBtn').forEach(btn=>{
       btn.onclick=()=>{
         if(btn.classList.contains('used'))return;
         btn.classList.add('used');
         const id=btn.dataset.id;
+        if(carnetOrder.length===0){
+          // PONT : premier nom cliqué
+          try{
+            localStorage.setItem('qr11_carnet_first', id);
+            localStorage.setItem('qr11_pont_qr12', id.toLowerCase()+'_first');
+          }catch(e){}
+        }
+        carnetOrder.push(id);
         carnetLine.innerHTML = carnetTexts[id];
         show(carnetLine);
         setTimeout(()=>hide(carnetLine), DISPLAY_TIME);
@@ -195,19 +187,21 @@ async function run(){
       };
     });
   });
+  // Sauvegarde ordre complet
+  try{ localStorage.setItem('qr11_carnet_order', JSON.stringify(carnetOrder)); }catch(e){}
 
   // 4. Vidal lecture
   await showImage('vidal_jeune.webp');
   await sleep(5000);
   await hideImage();
 
-  await askSingle('Vous l\'aviez imaginé comme ça ?',['Oui, à peu près','Non, rien à voir','Je ne l\'avais pas imaginé']);
+  await askSingle('Vous l'aviez imaginé comme ça ?',['Oui, à peu près','Non, rien à voir','Je ne l'avais pas imaginé']);
 
   // 5. Séquence finale
   await showImage('vidal_jeune.webp');
   await sleep(5000);
   play(aKey);
-  const feelPromise = askSingle('Là, maintenant — vous ressentez quelque chose ?',['La peur','l\'excitation','autre chose']);
+  const feelPromise = askSingle('Là, maintenant — vous ressentez quelque chose ?',['La peur','l'excitation','autre chose']);
   await sleep(1500);
   await hideImage();
   await showImage('phot_carnet.webp');
