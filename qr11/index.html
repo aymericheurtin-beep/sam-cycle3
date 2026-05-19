@@ -136,17 +136,10 @@ async function run(){
   hide(start);hide(restart);
   await showImage('crochetage_vidal.jpg');
   await sleep(4000);
-  showTextStay('Confinement. YouTube.
-C'est illégal.
-C'est pratique.','bottom');
+  showTextStay('Confinement. YouTube.\nC\'est illégal.\nC\'est pratique.','bottom');
   await sleep(3500);hide(text);await hideImage();
 
-  const vidalImagined = localStorage.getItem('qr6_vidal_imagined') || '...';
-  await showText(`Vous aviez imaginé Vidal comme ${vidalImagined}.
-Et son bureau, un samedi matin, vous l'imaginez comment ?`, 4500, 'center');
-
-  await askMulti('Un bureau de prof. Un samedi matin. Vide.
-Vous imaginez quoi ?',[
+  await askMulti('Un bureau de prof. Un samedi matin. Vide.\nVous imaginez quoi ?',[
     'Ordonné','en bazar','petit','grand','lumineux','sombre','Rien de précis'
   ]);
 
