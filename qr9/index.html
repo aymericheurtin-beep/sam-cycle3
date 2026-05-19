@@ -17,7 +17,7 @@ html,body{margin:0;height:100%;background:#000;color:#fff;font-family:system-ui,
 </style>
 </head>
 <body>
-<button id="start">Touchez pour entrer</button>
+<button id="start">Touchez pour commencer</button>
 <button id="restart">Recommencer</button>
 
 <div id="text"></div>
@@ -67,12 +67,10 @@ async function run(){
   localStorage.setItem('scans_used', used);
   localStorage.setItem('qr9_done','1');
 
-  // 1. Audio Lavelot
   await play(aLavelot);
   await sleep(8000);
   aLavelot.pause(); aLavelot.currentTime=0;
 
-  // 2. Texte + Q1 vestiaire
   await showText('Les élèves rentrent dans le vestiaire.',2500,'center');
   
   const repVestiaire = await askSingle('Comment imaginez-vous ce vestiaire ?', [
@@ -84,13 +82,11 @@ async function run(){
   ]);
   localStorage.setItem('qr9_vestiaire', repVestiaire);
 
-  // 3. Image vestiaire sans bruit
   image.src='vestiaire.jpg'; show(image);
   text.className='bottom'; text.textContent='voici un vestiaire'; show(text);
   await sleep(4000);
   hide(image); hide(text);
 
-  // 4. Bruit cadenas puis main
   await play(aCadenas);
   await sleep(3000);
   aCadenas.pause(); aCadenas.currentTime=0;
@@ -98,7 +94,6 @@ async function run(){
   await sleep(2500);
   hide(image);
 
-  // 5. Question cadenas avec rappel QR1
   const qr1 = localStorage.getItem('qr1_cadenas');
   
   const repCadenas = await askSingle('Le cadenas, vous l’aviez imaginé comment ?', [
@@ -117,12 +112,10 @@ La dernière fois vous aviez imaginé ${qr1}`,4000,'center');
     }
   }
 
-  // 6. Fin audio narrateur
   await play(aNarrateur);
   await sleep(8000);
   aNarrateur.pause(); aNarrateur.currentTime=0;
 
-  // 7. Consigne finale
   await showText('Gardez cette image en tête, elle va vous être utile pour comprendre la suite...',4000,'center');
 
   show(restart);
