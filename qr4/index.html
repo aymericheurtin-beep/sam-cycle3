@@ -2,153 +2,167 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>QR4 - Inès</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-family:system-ui}
-#btn{background:#fff;color:#000;border:none;padding:20px 40px;font-size:20px;border-radius:8px;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);cursor:pointer;z-index:10}
-#restart{background:#fff;color:#000;border:none;padding:15px 30px;font-size:18px;border-radius:8px;position:fixed;bottom:30px;left:50%;transform:translateX(-50%);cursor:pointer;display:none;z-index:10}
-#qcm{
-  position:fixed;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  max-width:100vw;
-  max-height:100vh;
-  width:auto;
-  height:auto;
-  object-fit:contain;
-  display:none;
-}
-.zone{
-  position:fixed;
-  cursor:pointer;
-  border:3px solid transparent;
-  transition:all 0.2s;
-  display:none;
-}
-.zone:hover{border-color:#fff;background:rgba(255,255,255,0.15)}
-#messageFin{
-  position:fixed;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  font-size:28px;
-  text-align:center;
-  display:none;
-  z-index:10;
-  padding:20px;
-  max-width:80%;
-  line-height:1.4;
-  animation:fadeIn 0.6s ease-out;
-}
-@keyframes fadeIn{
-  from{opacity:0;transform:translate(-50%,-40%)}
-  to{opacity:1;transform:translate(-50%,-50%)}
-}
-</style>
-<style>
-/* === UNIFICATION TYPO === */
-html,body,button,input,select,textarea {
-  font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-}
-p, #text, .screen p, #question, #msg {
-  font-size:clamp(20px,4.5vmin,28px) !important;
-  line-height:1.45 !important;
-}
-button, .btn, .choiceBtn, .choice, .carnetBtn {
-  font-size:clamp(18px,4vmin,24px) !important;
-  font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-}
-#startBtn, #start, #btn, #restartBtn, #restart {
-  font-size:clamp(20px,5vmin,26px) !important;
-}
-small, .sub, #recall, #hint, #carnetLine {
-  font-size:clamp(16px,3.2vmin,20px) !important;
-}
+html,body{margin:0;height:100%;background:#000;color:#fff;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;overflow:hidden}
+#start,#restart{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:5vmin;padding:4vmin 8vmin;background:#fff;color:#000;border:none;border-radius:10px;cursor:pointer;z-index:100}
+#restart{display:none}
+#text{position:absolute;left:50%;transform:translateX(-50%);width:92%;text-align:center;font-size:4.6vmin;line-height:1.35;z-index:30;display:none;white-space:pre-line;text-shadow:0 0 6px #000}
+#text.center{top:8%}
+#text.bottom{bottom:6%;font-size:3.6vmin;background:rgba(0,0,0,.75);padding:1.6vmin 2.2vmin;border-radius:8px;max-width:85%}
+#choices{position:absolute;bottom:8%;left:50%;transform:translateX(-50%);display:none;flex-direction:column;gap:1.6vmin;width:88%;max-height:45vh;overflow-y:auto;padding-bottom:2vmin;z-index:80;-webkit-overflow-scrolling:touch}
+.btn{font-size:3.8vmin;padding:2.4vmin;background:rgba(17,17,17,.92);color:#fff;border:1px solid #fff;border-radius:8px;cursor:pointer;text-align:center;flex-shrink:0;backdrop-filter:blur(2px)}
+.btn.sel{background:#fff;color:#000}
+#image{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-width:90vmin;max-height:78vmin;z-index:10;display:none;cursor:pointer;transition:transform .3s ease, opacity 1.2s}
+#hint{position:absolute;bottom:2%;left:50%;transform:translateX(-50%);font-size:3.2vmin;color:#fff;background:rgba(0,0,0,.6);padding:1vmin 2vmin;border-radius:6px;z-index:65;display:none;pointer-events:none}
 </style>
 </head>
 <body>
-<button id="btn">Touchez pour commencer</button>
+<button id="start">Touchez pour commencer</button>
 <button id="restart">Recommencer</button>
-<img id="qcm" src="./ines_5_choix.jpg" alt="Choisissez votre Inès">
-<div id="messageFin">Bien vu. C'est TON Inès, garde la bien en mémoire</div>
-
-<div class="zone" id="z1"></div>
-<div class="zone" id="z2"></div>
-<div class="zone" id="z3"></div>
-<div class="zone" id="z4"></div>
-<div class="zone" id="z5"></div>
-<div class="zone" id="z6"></div>
-
-<audio id="intro" src="./ines_question.mp3" preload="auto"></audio>
-<audio id="consigne" src="./ines_consigne.mp3" preload="auto"></audio>
+<div id="text"></div>
+<div id="choices"></div>
+<img id="image" alt="">
+<div id="hint"></div>
+<audio id="narrateur" src="narrateur_qr4.mp3" preload="auto" playsinline></audio>
 
 <script>
-const btn=document.getElementById('btn');
-const restart=document.getElementById('restart');
-const qcm=document.getElementById('qcm');
-const intro=document.getElementById('intro');
-const consigne=document.getElementById('consigne');
-const zones=document.querySelectorAll('.zone');
-const messageFin=document.getElementById('messageFin');
+/* unification typo block */
+const unify = s => s.replace(/[’‘]/g,"'").replace(/[“”]/g,'"').replace(/\u00A0/g,' ').replace(/\s+/g,' ').trim();
 
-let t=parseInt(localStorage.getItem('scans_total')||0)+1;
-localStorage.setItem('scans_total',t);
+const $ = id => document.getElementById(id);
+const start = $('start');
+const restart = $('restart');
+const text = $('text');
+const choices = $('choices');
+const image = $('image');
+const hint = $('hint');
+const narrateur = $('narrateur');
 
-btn.onclick=()=>{
-  let u=parseInt(localStorage.getItem('scans_used')||0)+1;
-  localStorage.setItem('scans_used',u);
+const show = el => el.style.display = 'block';
+const hide = el => el.style.display = 'none';
+const flex = el => el.style.display = 'flex';
+const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-  btn.style.display='none';
-  intro.play().catch(e=>alert('Activez le son'));
+function showTextStay(t, pos='center'){
+  text.className = '';
+  text.classList.add(pos);
+  text.textContent = unify(t);
+  show(text);
 }
 
-intro.onended=()=>{
-  qcm.style.display='block';
-  qcm.onload=()=>{
-    placerZones();
-    consigne.play();
-  }
-  if(qcm.complete){
-    placerZones();
-    consigne.play();
-  }
+async function showText(t, dur=3000, pos='center'){
+  showTextStay(t, pos);
+  await sleep(dur);
+  hide(text);
 }
 
-function placerZones(){
-  const rect=qcm.getBoundingClientRect();
-  const w=rect.width;
-  const h=rect.height;
-  const left=rect.left;
-  const top=rect.top;
+async function showImage(src){
+  image.src = src;
+  image.style.opacity = '0';
+  show(image);
+  requestAnimationFrame(()=> image.style.opacity = '1');
+  await sleep(50);
+}
+async function hideImage(){
+  image.style.opacity = '0';
+  await sleep(1200);
+  hide(image);
+}
 
-  const zonesPos=[
-    [0,0,w/3,h/2],[w/3,0,w/3,h/2],[w*2/3,0,w/3,h/2],
-    [0,h/2,w/3,h/2],[w/3,h/2,w/3,h/2],[w*2/3,h/2,w/3,h/2]
-  ];
+async function play(a){
+  try{ a.currentTime = 0; await a.play(); }catch(e){}
+}
+function stopAudio(a){
+  a.pause();
+  a.currentTime = 0;
+}
 
-  zones.forEach((z,i)=>{
-    z.style.left=left+zonesPos[i][0]+'px';
-    z.style.top=top+zonesPos[i][1]+'px';
-    z.style.width=zonesPos[i][2]+'px';
-    z.style.height=zonesPos[i][3]+'px';
-    z.style.display='block';
-    z.onclick=()=>validerChoix();
+function askSingle(question, opts){
+  return new Promise(resolve=>{
+    showTextStay(question,'center');
+    choices.innerHTML = '';
+    flex(choices);
+    opts.forEach(o=>{
+      const b = document.createElement('button');
+      b.className = 'btn';
+      b.textContent = unify(o);
+      b.onclick = ()=>{
+        hide(choices);
+        hide(text);
+        resolve(o);
+      };
+      choices.appendChild(b);
+    });
   });
 }
 
-function validerChoix(){
-  consigne.pause();
-  qcm.style.display='none';
-  zones.forEach(z=>z.style.display='none');
-  messageFin.style.display='block';
-  restart.style.display='block';
+function askMulti(question, opts, min=1){
+  return new Promise(resolve=>{
+    showTextStay(question,'center');
+    choices.innerHTML = '';
+    flex(choices);
+    const selected = new Set();
+    opts.forEach(o=>{
+      const b = document.createElement('button');
+      b.className = 'btn';
+      b.textContent = unify(o);
+      b.onclick = ()=>{
+        if(selected.has(o)){ selected.delete(o); b.classList.remove('sel'); }
+        else { selected.add(o); b.classList.add('sel'); }
+        validate.style.display = selected.size >= min ? 'block' : 'none';
+      };
+      choices.appendChild(b);
+    });
+    const validate = document.createElement('button');
+    validate.className = 'btn sel';
+    validate.textContent = 'Valider';
+    validate.style.display = 'none';
+    validate.onclick = ()=>{
+      hide(choices); hide(text);
+      resolve([...selected]);
+    };
+    choices.appendChild(validate);
+  });
 }
 
-restart.onclick=()=>location.reload();
-window.onresize=()=>{if(qcm.style.display=='block')placerZones();}
+async function run(){
+  hide(start);
+  hide(restart);
+  await play(narrateur);
+  await sleep(6000);
+  stopAudio(narrateur);
+
+  await showText("Inès. Vous devez choisir comment vous l'imaginez.",3000,'center');
+
+  const choix = await askSingle("Quelle Inès choisissez-vous ?", [
+    'Inès de face - regard direct',
+    'Inès de profil - cheveux attachés',
+    'Inès de dos - en mouvement'
+  ]);
+
+  const map = {
+    'Inès de face - regard direct': 'ines_face.jpg',
+    'Inès de profil - cheveux attachés': 'ines_profil.jpg',
+    'Inès de dos - en mouvement': 'ines_dos.jpg'
+  };
+  const filename = map[choix] || '';
+  localStorage.setItem('qr4_ines', filename);
+  localStorage.setItem('qr4_ines_label', choix);
+
+  await showImage(filename);
+  await sleep(4000);
+  await hideImage();
+
+  await showText("Choix enregistré.\nVous la retrouverez plus tard.",3000,'center');
+
+  show(restart);
+}
+
+start.onclick = run;
+restart.onclick = ()=> location.reload();
 </script>
 </body>
+</html>
 </html>
