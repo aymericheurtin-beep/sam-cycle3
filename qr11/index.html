@@ -140,8 +140,9 @@ async function run(){
   await sleep(3500);hide(text);await hideImage();
 
   const vidalImagined = localStorage.getItem('qr6_vidal_imagined') || '...';
-  await showText(`Vous aviez imaginé Vidal comme ${vidalImagined}.\nEt son bureau, un samedi matin, vous l'imaginez comment ?`, 4500, 'center');
-
+  await askMulti(`Vous aviez imaginé Vidal comme ${vidalImagined}.\nEt son bureau, un samedi matin, vous l'imaginez comment ?`,[
+    'Ordonné','en bazar','petit','grand','lumineux','sombre','Rien de précis'
+  ]);
 
   await showImage('bureau_vidal.jpg');
   await showText('Voici un bureau',3000,'bottom');
@@ -161,7 +162,7 @@ async function run(){
     MOREL:"MOREL N. : Père absent — mobile émotionnel fort. Tout le monde est gagnant.",
     DUBOIS:"DUBOIS C. : Court comme un frigo qui aurait oublié ses roulettes."
   };
-  const DISPLAY_TIME = 20000;
+  const DISPLAY_TIME = 12000;
   let opened=0;
   const carnetOrder=[];
   await new Promise(res=>{
@@ -182,9 +183,10 @@ async function run(){
         setTimeout(()=>hide(carnetLine), DISPLAY_TIME);
         opened++;
         if(opened===3){
+          // Transition plus rapide après le dernier commentaire
           setTimeout(async ()=>{
             hide(carnetBox);await hideImage();hide(carnetLine);res();
-          }, DISPLAY_TIME + 300);
+          }, DISPLAY_TIME);
         }
       };
     });
@@ -221,4 +223,4 @@ async function run(){
 }
 </script>
 </body>
-</html>
+</htm
