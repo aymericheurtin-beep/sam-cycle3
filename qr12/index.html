@@ -1,243 +1,134 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>QR12</title>
 <style>
-html,body{
-  margin:0;
-  height:100%;
-  background:#000;
-  color:#fff;
-  font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
-  overflow:hidden;
-}
-#start,#restart{
-  position:absolute;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  font-size:5vmin;
-  padding:4vmin 8vmin;
-  background:#fff;
-  color:#000;
-  border:none;
-  border-radius:10px;
-  cursor:pointer;
-  z-index:100;
-}
-#restart{
-  display:none;
-}
-#text{
-  position:absolute;
-  left:50%;
-  transform:translateX(-50%);
-  width:92%;
-  text-align:center;
-  font-size:5vmin;
-  line-height:1.35;
-  z-index:30;
-  display:none;
-  white-space:pre-line;
-  text-shadow:0 0 6px #000;
-}
-#text.center{
-  top:8%;
-}
-#text.bottom{
-  bottom:6%;
-  font-size:3.8vmin;
-  background:rgba(0,0,0,.75);
-  padding:1.8vmin 2.5vmin;
-  border-radius:8px;
-  max-width:85%;
-}
-#text.top{
-  top:8%;
-}
-#choices{
-  position:absolute;
-  top:28%;
-  left:50%;
-  transform:translateX(-50%);
-  display:none;
-  flex-direction:column;
-  gap:2.2vmin;
-  width:88%;
-  z-index:30;
-}
-.btn{
-  font-size:4vmin;
-  padding:3vmin;
-  background:#111;
-  color:#fff;
-  border:1px solid #fff;
-  border-radius:8px;
-  cursor:pointer;
-  text-align:center;
-}
-.btn.validate{
-  background:#fff;
-  color:#000;
-  margin-top:2vmin;
-}
-.choice{
-  display:flex;
-  align-items:center;
-  gap:2vmin;
-  background:#111;
-  border:1px solid #fff;
-  border-radius:8px;
-  padding:2.5vmin;
-  font-size:4vmin;
-  cursor:pointer;
-}
-.choice input{
-  width:4vmin;
-  height:4vmin;
-}
-#image{
-  position:absolute;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  max-width:90vmin;
-  max-height:78vmin;
-  z-index:10;
-  display:none;
-}
-#stats{
-  position:absolute;
-  bottom:5vmin;
-  right:6vmin;
-  font-size:4vmin;
-  z-index:30;
-  display:none;
-  text-shadow:0 0 8px #000;
-  text-align:right;
-  line-height:1.4;
-  background:rgba(0,0,0,.6);
-  padding:1.5vmin 2vmin;
-  border-radius:8px;
-}
-/* Unification typo */
-#text,.btn,.choice{
-  font-size:clamp(14px,4vmin,28px);
-}
-#text.bottom,#stats{
-  font-size:clamp(13px,3.8vmin,24px);
+html,body{margin:0;height:100%;background:#000;color:#fff;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;overflow:hidden}
+#start,#restart{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:5vmin;padding:4vmin 8vmin;background:#fff;color:#000;border:none;border-radius:10px;cursor:pointer;z-index:100}
+#restart{display:none}
+#text{position:absolute;left:50%;transform:translateX(-50%);width:92%;text-align:center;font-size:5vmin;line-height:1.35;z-index:30;display:none;white-space:pre-line;text-shadow:0 0 6px #000}
+#text.center{top:8%}
+#text.bottom{bottom:6%;font-size:3.8vmin;background:rgba(0,0,0,.75);padding:1.8vmin 2.5vmin;border-radius:8px;max-width:85%}
+#choices{position:absolute;top:28%;left:50%;transform:translateX(-50%);display:none;flex-direction:column;gap:2.2vmin;width:88%;z-index:30}
+.btn{font-size:4vmin;padding:3vmin;background:#111;color:#fff;border:1px solid #fff;border-radius:8px;cursor:pointer;text-align:center}
+.btn.validate{background:#fff;color:#000;margin-top:2vmin}
+.choice{display:flex;align-items:center;gap:2vmin;background:#111;border:1px solid #fff;border-radius:8px;padding:2.5vmin;font-size:4vmin;cursor:pointer}
+.choice input{width:4vmin;height:4vmin}
+#image{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-width:90vmin;max-height:78vmin;z-index:10;display:none}
+#stats{position:absolute;bottom:5vmin;right:6vmin;font-size:4vmin;z-index:30;display:none;text-shadow:0 0 8px #000;text-align:right;line-height:1.4;background:rgba(0,0,0,.6);padding:1.5vmin 2vmin;border-radius:8px}
+
+/* === Unification typo === */
+#text, .btn, .choice, #stats, #start, #restart{
+  font-kerning:normal;
+  text-rendering:optimizeLegibility;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  font-variant-ligatures:none;
+  letter-spacing:.01em;
 }
 </style>
 </head>
 <body>
-<button id="start">Démarrer</button>
+
+<button id="start">Touchez pour entrer</button>
 <button id="restart">Recommencer</button>
 <div id="text"></div>
 <div id="choices"></div>
-<img id="image" alt="" />
+<img id="image" alt="">
 <div id="stats"></div>
 <audio id="narrateur" src="narrateur.mp3" preload="auto"></audio>
 
 <script>
 const $ = id => document.getElementById(id);
+const start = $('start');
+const restart = $('restart');
+const text = $('text');
+const choices = $('choices');
+const image = $('image');
+const stats = $('stats');
+const narrateur = $('narrateur');
+
 const show = el => el.style.display = 'block';
 const hide = el => el.style.display = 'none';
 const flex = el => el.style.display = 'flex';
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-const textEl = $('text');
-const choicesEl = $('choices');
-const imageEl = $('image');
-const statsEl = $('stats');
-const startBtn = $('start');
-const restartBtn = $('restart');
-const narrateur = $('narrateur');
-
-function setTextClass(pos){
-  textEl.className = '';
-  textEl.classList.add(pos || 'center');
+function showText(t, hold, pos='center'){
+  text.textContent = t;
+  text.className = '';
+  text.classList.add(pos);
+  show(text);
+  return sleep(hold).then(()=>hide(text));
 }
-async function showText(t, hold = 2500, pos = 'center'){
-  setTextClass(pos);
-  textEl.textContent = t;
-  show(textEl);
-  await sleep(hold);
-  hide(textEl);
-}
-function showTextStay(t, pos = 'center'){
-  setTextClass(pos);
-  textEl.textContent = t;
-  show(textEl);
-}
-function hideText(){ hide(textEl); }
-
-function normalize(s){
-  return (s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
-}
-
-function askMulti(q, opts){
-  return new Promise(resolve=>{
-    showTextStay(q,'top');
-    choicesEl.innerHTML = '';
-    opts.forEach(opt=>{
-      const label = document.createElement('label');
-      label.className = 'choice';
-      const input = document.createElement('input');
-      input.type = 'checkbox';
-      input.value = opt;
-      label.appendChild(input);
-      label.appendChild(document.createTextNode(opt));
-      choicesEl.appendChild(label);
-    });
-    const btn = document.createElement('button');
-    btn.className = 'btn validate';
-    btn.textContent = 'Valider';
-    btn.onclick = ()=>{
-      const selected = Array.from(choicesEl.querySelectorAll('input:checked')).map(i=>i.value);
-      hide(choicesEl);
-      hideText();
-      choicesEl.innerHTML = '';
-      resolve(selected);
-    };
-    choicesEl.appendChild(btn);
-    flex(choicesEl);
-  });
+function showTextStay(t, pos='center'){
+  text.textContent = t;
+  text.className = '';
+  text.classList.add(pos);
+  show(text);
 }
 
 function askSingle(q, opts){
-  return new Promise(resolve=>{
-    // q already shown via showTextStay before call
-    choicesEl.innerHTML = '';
+  return new Promise(resolve => {
+    choices.innerHTML = '';
+    if(q){
+      showTextStay(q,'center');
+    }else{
+      hide(text);
+    }
     opts.forEach(opt=>{
-      const btn = document.createElement('button');
-      btn.className = 'btn';
-      btn.textContent = opt;
-      btn.onclick = ()=>{
-        hide(choicesEl);
-        hideText();
-        choicesEl.innerHTML = '';
+      const b = document.createElement('button');
+      b.className = 'btn';
+      b.textContent = opt;
+      b.onclick = ()=>{
+        hide(choices);
+        hide(text);
         resolve(opt);
       };
-      choicesEl.appendChild(btn);
+      choices.appendChild(b);
     });
-    flex(choicesEl);
+    flex(choices);
   });
 }
 
-function playAudioWithTimeout(audio, timeout=6000){
-  return new Promise(resolve=>{
-    let done = false;
-    const finish = ()=>{
-      if(done) return;
-      done = true;
-      resolve();
+function askMulti(q, opts){
+  return new Promise(resolve => {
+    choices.innerHTML = '';
+    showTextStay(q,'center');
+    const selected = new Set();
+    opts.forEach(opt=>{
+      const lab = document.createElement('label');
+      lab.className = 'choice';
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.value = opt;
+      cb.onchange = ()=>{ cb.checked ? selected.add(opt) : selected.delete(opt); };
+      const span = document.createElement('span');
+      span.textContent = opt;
+      lab.appendChild(cb);
+      lab.appendChild(span);
+      choices.appendChild(lab);
+    });
+    const val = document.createElement('button');
+    val.className = 'btn validate';
+    val.textContent = 'Valider';
+    val.onclick = ()=>{
+      hide(choices);
+      hide(text);
+      resolve([...selected]);
     };
-    audio.onended = finish;
-    audio.play().catch(()=>{});
-    setTimeout(finish, timeout);
+    choices.appendChild(val);
+    flex(choices);
   });
+}
+
+function play(a){
+  try{ a.currentTime = 0; return a.play().catch(()=>{}); }catch{}
+}
+
+function normalize(s){
+  return (s||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
 }
 
 const descriptions = {
@@ -250,113 +141,81 @@ const descriptions = {
   'Inès': "Debout. Elle a demandé à être debout."
 };
 
-async function showImageSrc(src, duration){
-  return new Promise(resolve=>{
-    imageEl.onload = ()=>{ show(imageEl); };
-    imageEl.onerror = ()=>{ hide(imageEl); resolve(); };
-    imageEl.src = src;
-    show(imageEl);
-    setTimeout(()=>{
-      hide(imageEl);
-      resolve();
-    }, duration);
-  });
-}
-
-async function showImageWithFallback(base, duration){
-  return new Promise(resolve=>{
-    let triedPng = false;
-    imageEl.onerror = ()=>{
-      if(!triedPng){
-        triedPng = true;
-        imageEl.src = base.replace(/\.jpg$/i,'.png');
-      }else{
-        hide(imageEl);
-        resolve();
-      }
-    };
-    imageEl.onload = ()=>{ show(imageEl); };
-    imageEl.src = base;
-    setTimeout(()=>{
-      hide(imageEl);
-      resolve();
-    }, duration);
-  });
-}
-
 async function run(){
-  if(localStorage.getItem('qr12_done') === '1'){
-    hide(startBtn);
-    await showText("Vous avez déjà terminé cette étape.", 2500, 'center');
-    show(restartBtn);
+  hide(start);
+  hide(restart);
+
+  if(localStorage.getItem('qr12_done')){
+    await showText('Vous avez déjà effectué ce scan.',2500,'center');
+    show(restart);
     return;
   }
-  hide(startBtn);
-  hide(restartBtn);
 
-  // inc scans_used
-  const used = (parseInt(localStorage.getItem('scans_used') || '0',10) || 0) + 1;
+  const used = (parseInt(localStorage.getItem('scans_used')||'0',10)+1);
   localStorage.setItem('scans_used', used);
+  localStorage.setItem('qr12_done','1');
 
-  await playAudioWithTimeout(narrateur, 6000);
+  const playP = play(narrateur);
+  await Promise.race([
+    new Promise(res=>{ narrateur.onended = res; }),
+    sleep(6000)
+  ]);
+
   await sleep(3000);
 
-  const multi = await askMulti("Avant d’entrer — vous imaginez cette pièce comment ?", ['Petite','Grande','Lumineuse','Sombre','Ordonnée','En bazar']);
+  const piece = await askMulti("Comment imaginez-vous cette pièce ?", ['Petite','Grande','Lumineuse','Sombre','Ordonnée','En bazar']);
 
-  // Compare with qr11_bureau
-  let bureauArr = [];
-  try{
-    bureauArr = JSON.parse(localStorage.getItem('qr11_bureau') || '[]');
-  }catch(e){}
-  const map = {
-    'petite':'petit',
-    'grande':'grand',
-    'lumineuse':'lumineux',
-    'sombre':'sombre',
-    'ordonnee':'ordonne',
-    'en bazar':'en bazar'
+  let bureau = [];
+  try{ bureau = JSON.parse(localStorage.getItem('qr11_bureau')||'[]'); }catch{}
+
+  const map = { petite:'petit', grande:'grand', lumineuse:'lumineux', sombre:'sombre', ordonnee:'ordonne', 'en bazar':'en bazar' };
+  const norm = arr => arr.map(v=> map[normalize(v)] || normalize(v)).sort().join('|');
+  const same = norm(piece) === norm(bureau) && bureau.length>0;
+
+  await showText(same ? "Tiens, comme le bureau de M. Vidal." : "Tiens, différemment du bureau de M. Vidal.",2500,'center');
+
+  image.onerror = ()=>{
+    if(image.src.endsWith('.jpg')){
+      image.src = 'touslessuspects.png';
+    }
   };
-  const normMulti = multi.map(m=> normalize(m)).map(m=> map[m] || m);
-  const normBureau = bureauArr.map(b=> normalize(b));
-  const setA = new Set(normMulti);
-  const setB = new Set(normBureau);
-  const same = setA.size === setB.size && [...setA].every(v=> setB.has(v));
-  await showText(same ? "Tiens, comme le bureau de M. Vidal." : "Tiens, différemment du bureau de M. Vidal.", 2500, 'center');
+  image.src = 'touslessuspects.jpg';
+  show(image);
+  await sleep(5000);
+  hide(image);
 
-  await showImageWithFallback('touslessuspects.jpg', 5000);
-  hide(imageEl);
+  showTextStay("Appuyez sur le personnage qui vous intéresse le plus.",'center');
 
-  showTextStay("Appuyez sur le personnage qui vous intéresse le plus.", 'top');
-  const choice = await askSingle(null, ['Vidal','Noé','Rémy','Chloé','Colin','Sam','Inès']);
+  const choice = await askSingle("", ['Vidal','Noé','Rémy','Chloé','Colin','Sam','Inès']);
+  hide(text);
 
   let txt = descriptions[choice] || '';
-  const firstCarnet = normalize(localStorage.getItem('qr11_first_carnet') || '');
-  if(firstCarnet && firstCarnet === normalize(choice)){
+  const firstCarnet = localStorage.getItem('qr11_first_carnet')||'';
+  if(normalize(firstCarnet) === normalize(choice)){
     txt += "\n\nCe personnage doit vous intriguer, vous l’aviez également choisi en premier dans le carnet de M. Vidal.";
   }
-  await showText(txt, 6000, 'center');
+  await showText(txt,6000,'center');
 
-  if(choice === 'Inès'){
-    const inesSrc = localStorage.getItem('qr4_ines');
-    if(inesSrc){
-      await showImageSrc(inesSrc, 4000);
-    }
+  if(choice === 'Inès' && localStorage.getItem('qr4_ines')){
+    image.src = localStorage.getItem('qr4_ines');
+    image.onerror = null;
+    show(image);
+    await sleep(4000);
+    hide(image);
   }
 
-  await showText("Dans quelques secondes vous allez lire la suite du roman.\nChaque personnage dans cette pièce a une raison d’être là.\nVous aussi vous savez des choses sur eux.\nUtilisez-les.", 7000, 'center');
+  await showText("Dans quelques secondes vous allez lire la suite du roman.\nChaque personnage dans cette pièce a une raison d’être là.\nVous aussi vous savez des choses sur eux.\nUtilisez-les.",7000,'center');
 
-  const total = parseInt(localStorage.getItem('scans_total') || '12',10);
-  const usedNow = parseInt(localStorage.getItem('scans_used') || '1',10);
-  const left = Math.max(0, total - usedNow);
-  statsEl.textContent = `Scans proposés : ${total}\nScans utilisés : ${usedNow}\nÀ toi de jouer sans aide : ${left}`;
-  show(statsEl);
+  const total = parseInt(localStorage.getItem('scans_total')||'12',10);
+  const usedNow = parseInt(localStorage.getItem('scans_used')||'0',10);
+  stats.innerHTML = `Scans proposés : ${total}<br>Scans utilisés : ${usedNow}<br>À toi de jouer sans aide : ${Math.max(0,total-usedNow)}`;
+  show(stats);
 
-  localStorage.setItem('qr12_done','1');
-  show(restartBtn);
+  show(restart);
 }
 
-startBtn.onclick = run;
-restartBtn.onclick = ()=> location.reload();
+start.onclick = run;
+restart.onclick = ()=> location.reload();
 </script>
 </body>
 </html>
