@@ -143,11 +143,11 @@ async function run(){
   const firstCarnet = (localStorage.getItem('qr11_carnet_first') || localStorage.getItem('qr11_first_carnet') || '').toUpperCase();
   const charNorm = normalize(charChoice);
   if(firstCarnet==='LAVELOT' && charNorm==='sam'){
-    txt += "\n\nDécidément ce personnage vous intrigue, tu l'avais choisi aussi en premier dans le carnet de M. Vidal";
+    txt += "\n\nDécidément ce personnage vous intrigue, vous l'aviez choisi aussi en premier dans le carnet de M. Vidal";
   } else if(firstCarnet==='MOREL' && charNorm==='noe'){
-    txt += "\n\nDécidément ce personnage vous intrigue, tu l'avais choisi aussi en premier dans le carnet de M. Vidal";
+    txt += "\n\nDécidément ce personnage vous intrigue, vous l'aviez choisi aussi en premier dans le carnet de M. Vidal";
   } else if(firstCarnet==='DUBOIS' && charNorm==='chloe'){
-    txt += "\n\nDécidément ce personnage vous intrigue, tu l'avais choisi aussi en premier dans le carnet de M. Vidal";
+    txt += "\n\nDécidément ce personnage vous intrigue, vous l'aviez choisi aussi en premier dans le carnet de M. Vidal";
   }
 
   showText(txt,'center');
