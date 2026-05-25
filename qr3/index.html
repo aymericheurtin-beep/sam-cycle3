@@ -43,6 +43,7 @@ const v0=document.getElementById('v0');
 
 startBtn.onclick=async()=>{
   startBtn.style.display='none';
+  try{const s=new Set(JSON.parse(localStorage.getItem('qr_used_set')||'[]'));s.add('qr3');localStorage.setItem('qr_used_set',JSON.stringify([...s]));}catch(e){}
   s0.classList.add('active');
   try{await v0.play();}catch(e){console.error(e);}
 };
@@ -58,4 +59,3 @@ restartBtn.onclick=()=>location.reload();
 </script>
 </body>
 </html>
-
