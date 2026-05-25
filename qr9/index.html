@@ -66,6 +66,7 @@ async function run(){
   let used = parseInt(localStorage.getItem('scans_used')||'0')+1;
   localStorage.setItem('scans_used', used);
   localStorage.setItem('qr9_done','1');
+  try{const s=new Set(JSON.parse(localStorage.getItem('qr_used_set')||'[]'));s.add('qr9');localStorage.setItem('qr_used_set',JSON.stringify([...s]));}catch(e){}
 
   await play(aLavelot);
   await sleep(8000);
