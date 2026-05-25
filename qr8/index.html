@@ -12,7 +12,7 @@ body{background:#000;color:#fff;font-family:system-ui, -apple-system, 'Segoe UI'
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.6}}
 #text{position:absolute;font-size:6vmin;text-align:center;padding:5vmin;line-height:1.4;opacity:0;transition:opacity.5s;white-space:pre-line;font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;z-index:9998}
 #text small{display:block;font-size:3.2vmin;color:#aaa;margin-top:2vmin;line-height:1.3}
-#image{position:absolute;width:100vmin;height:100vmin;object-fit:contain;opacity:0;z-index:9997;transition:opacity 1s;pointer-events:none}
+#image{position:absolute;width:min(100vw,100vh);height:min(100vw,100vh);max-width:100vw;max-height:85vh;object-fit:contain;opacity:0;z-index:9997;transition:opacity 1s;pointer-events:none}
 #restart{position:absolute;bottom:10vmin;opacity:0;transition:opacity 1s}
 .visible{opacity:1!important}
 .hidden{display:none!important}
