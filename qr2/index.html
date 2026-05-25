@@ -44,6 +44,7 @@ localStorage.setItem('scans_total',t);
 btn.onclick=()=>{
   let u=parseInt(localStorage.getItem('scans_used')||0)+1;
   localStorage.setItem('scans_used',u);
+  try{const s=new Set(JSON.parse(localStorage.getItem('qr_used_set')||'[]'));s.add('qr2');localStorage.setItem('qr_used_set',JSON.stringify([...s]));}catch(e){}
   btn.style.display='none';
   audio.volume=1;
   audio.play().catch(()=>alert('Activez le son'));
