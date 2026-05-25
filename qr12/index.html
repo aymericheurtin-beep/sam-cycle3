@@ -158,6 +158,33 @@ async function run(){
   await sleep(11000);
   hideText();
 
+
+  // Ponts inter-QR : mémoire du parcours du lecteur
+  const ponts = [];
+
+  const qr8first = localStorage.getItem('qr8_first');
+  if(qr8first){
+    const label = qr8first==='caméra' ? 'la caméra' : qr8first==='fumée' ? 'la fumée' : 'le carnet';
+    ponts.push('Dans le bureau d\u2019Arnaud, vous aviez regardé ' + label + ' en premier.\nInès, elle, avait regardé les chaussures.');
+  }
+
+  const qr9vestiaire = localStorage.getItem('qr9_vestiaire');
+  if(qr9vestiaire){
+    ponts.push('Au vestiaire, vous aviez dit : ' + qr9vestiaire + '.\nSam, lui, a arrêté de compter aujourd\u2019hui.');
+  }
+
+  const qr10couloir = localStorage.getItem('qr10_couloir');
+  if(qr10couloir){
+    ponts.push('Vous aviez imaginé le couloir de l\u2019hôpital comme : ' + qr10couloir + '.\nCelui de l\u2019aile B, un samedi matin, c\u2019est autre chose.');
+  }
+
+  for(const p of ponts){
+    showText(p,'center');
+    await sleep(5000);
+    hideText();
+    await sleep(500);
+  }
+
   stats.innerHTML=`Scans proposés : 12<br>Scans utilisés : ${used}`;
   show(stats);
   show(restart);
