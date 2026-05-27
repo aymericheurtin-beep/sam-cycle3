@@ -217,20 +217,22 @@ async function run(){
   zonesUnlocked=true;
   imageHint.style.opacity='1';
 
-  // Attendre premier tap (max 40 sec)
+    // Attendre premier tap (max 40 sec)
   await new Promise(res=>{
     let waited=0;
     const check=setInterval(()=>{
       waited+=500;
       if(touchedCount>=1||waited>=40000){clearInterval(check);res();}
     },500);
-  });  // Attendre fermeture du tooltip pour laisser le temps de lire le commentaire
+  });
+  // Attendre fermeture du tooltip pour laisser le temps de lire le commentaire
   await new Promise(res=>{
     const check=setInterval(()=>{
       if(window.getComputedStyle(tooltip).display==='none'){clearInterval(check);res();}
     },200);
   });
-// Bonus Inès
+
+  // Bonus Inès
   if(lastWho==='Inès') await showInesZoom();
 
   // Bonus Vidal reconnu dans QR11
@@ -265,3 +267,4 @@ window.addEventListener('resize',()=>{ if(sceneWrap.style.display!=='none') cali
 </script>
 </body>
 </html>
+
