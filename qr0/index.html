@@ -43,13 +43,20 @@ small, .sub, #recall, #hint, #carnetLine {
 <audio id="intro" src="./intro.mp3" preload="auto"></audio>
 
 <script>
+
+        if(!localStorage.getItem('qr_used_set')){
+            localStorage.setItem('scans_total', '12');
+            localStorage.setItem('scans_used', '0');
+            localStorage.setItem('qr_used_set', '[]');
+        }
+        
 const btn=document.getElementById('btn');
 const msg=document.getElementById('msg');
 const intro=document.getElementById('intro');
 const restart=document.getElementById('restart');
 
-localStorage.setItem('scans_total',0);
-localStorage.setItem('scans_used',0);
+
+
 
 btn.onclick=()=>{
   btn.style.display='none';
