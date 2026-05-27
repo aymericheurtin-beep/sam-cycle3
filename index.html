@@ -5,67 +5,133 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>19h42 — Démonstrateur interactif</title>
     <style>
-        body {
-            background-color: #121212;
-            color: #e0e0e0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            line-height: 1.6;
-            padding: 20px;
-            max-width: 800px;
-            margin: 0 auto;
+        :root { --bg: #000; --text: #fff; --accent: #fff; }
+        body { 
+            background: var(--bg); color: var(--text); 
+            font-family: system-ui, -apple-system, sans-serif;
+            line-height: 1.6; margin: 0; padding: 20px;
+            display: flex; flex-direction: column; align-items: center;
+            position: relative;
         }
-        h1 { color: #ffffff; border-bottom: 1px solid #333; padding-bottom: 10px; font-size: 2rem; }
-        h2 { color: #ffffff; font-size: 1.3rem; margin-top: 30px; }
-        p em { color: #aaaaaa; font-style: italic; }
-        a { color: #29b6f6; text-decoration: none; font-weight: bold; }
-        a:hover { text-decoration: underline; }
-        .container { background: #1e1e1e; padding: 30px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-        .qr-list { list-style: none; padding: 0; }
-        .qr-item { background: #2d2d2d; margin: 12px 0; padding: 15px; border-radius: 6px; border-left: 4px solid #29b6f6; }
-        .note-box { background: #252525; border: 1px dashed #444; padding: 15px; border-radius: 6px; margin: 20px 0; font-size: 0.95rem; }
-        .counter-box { background: #1a1a1a; border: 1px solid #333; padding: 20px; border-radius: 6px; margin-top: 30px; }
-        .btn-recommencer { background-color: #3a3a3a; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 0.9rem; margin-bottom: 15px; }
-        .btn-recommencer:hover { background-color: #4a4a4a; }
-        .counter-stats { list-style: none; padding: 0; margin: 10px 0; }
-        .counter-stats li { margin: 5px 0; }
-        .badge { background: #29b6f6; color: #121212; padding: 2px 6px; border-radius: 3px; font-size: 0.8rem; font-weight: bold; vertical-align: middle; }
+        
+        /* Compteur en haut à droite (Responsive) */
+        .stats-top {
+            background: #111;
+            border: 1px solid #333;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            text-align: right;
+            margin-top: 10px;
+            width: fit-content;
+        }
+        @media (min-width: 768px) {
+            .stats-top {
+                position: absolute;
+                top: 20px;
+                right: 20px;
+                margin-top: 0;
+            }
+        }
+        .stats-top strong { color: var(--accent); }
+        .stats-label { text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.7rem; opacity: 0.5; display: block; margin-bottom: 4px; }
+
+        header { max-width: 800px; margin: 40px 0 20px 0; text-align: center; }
+        h1 { font-size: 2.5rem; margin-bottom: 10px; font-weight: 800; }
+        .subtitle { opacity: 0.7; font-size: 1.1rem; }
+
+        .note-box { 
+            max-width: 800px; width: 100%; border: 1px dashed #444; 
+            padding: 18px; border-radius: 10px; font-size: 0.9rem; 
+            opacity: 0.85; text-align: center; margin-top: 10px; box-sizing: border-box;
+        }
+
+        .grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+            gap: 30px; max-width: 1000px; width: 100%; margin-top: 40px;
+        }
+        .card { 
+            border: 1px solid #333; padding: 30px; border-radius: 15px;
+            display: flex; flex-direction: column; justify-content: space-between;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+        .card:hover { transform: translateY(-5px); border-color: #666; }
+        .card h2 { margin-top: 0; font-size: 1.35rem; color: var(--accent); border-bottom: 1px solid #222; padding-bottom: 10px; }
+        .card .tech-tag { font-size: 0.8rem; font-weight: bold; opacity: 0.6; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 10px; }
+        .card p { font-size: 0.95rem; opacity: 0.8; margin-bottom: 25px; line-height: 1.5; }
+        
+        .btn { 
+            background: var(--accent); color: #000; 
+            text-decoration: none; padding: 12px 20px; 
+            border-radius: 8px; text-align: center; 
+            font-weight: bold; font-size: 0.9rem;
+            transition: opacity 0.2s;
+        }
+        .btn:hover { opacity: 0.9; }
+
+        footer { margin-top: 60px; text-align: center; max-width: 600px; width: 100%; border-top: 1px solid #333; padding-top: 30px; }
+        .github-link { color: #aaa; font-size: 0.8rem; text-decoration: none; display: block; margin-top: 15px; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>19h42 — Démonstrateur interactif</h1>
-    <p><em>Roman augmenté pour lecteurs fragiles 11-15 ans. Dispositif QR métacognitif avec décroissance et compteur d'autonomisation.</em></p>
+    <!-- Compteur d'autonomisation global en haut à droite -->
+    <div class="stats-top">
+        <span class="stats-label">Simulation d'autonomisation</span>
+        <strong>Scans proposés :</strong> 13<br>
+        <strong>Scans utilisés :</strong> 2
+    </div>
 
+    <header>
+        <h1>19h42 — Démonstrateur interactif</h1>
+        <p class="subtitle">Roman augmenté pour lecteurs fragiles 11-15 ans.<br>
+        Dispositif QR métacognitif avec décroissance et compteur d'autonomisation.</p>
+    </header>
+
+    <!-- Note de cadrage technique pour l'éditeur -->
     <div class="note-box">
-        <strong>Note éditoriale :</strong> Le dispositif complet de <em>19h42</em> compte <strong>13 QR codes au total</strong> : 1 QR code de prise en main pédagogique (QR0) et 12 QR codes narratifs répartis de manière dégressive sur les 17 chapitres.
+        <strong>Note éditoriale :</strong> Le dispositif complet compte <strong>13 QR codes au total</strong> (1 QR code de prise en main pédagogique QR0 + 12 QR codes narratifs dégressifs sur 17 chapitres). Le compteur simule ici un parcours idéal en fin de récit.
     </div>
 
-    <h2>Accès aux expériences du démonstrateur :</h2>
-    <ul class="qr-list">
-        <li class="qr-item">
-            <strong>QR0 :</strong> <a href="qr0.html" target="_blank">Mode d'emploi</a> — Audio d'autonomisation <span class="badge">Tutoriel</span>
-        </li>
-        <li class="qr-item">
-            <strong>QR11 :</strong> <a href="qr11.html" target="_blank">Bureau de Vidal</a> — Question métacognitive, carnet interactif
-        </li>
-        <li class="qr-item">
-            <strong>QR12 :</strong> <a href="qr12.html" target="_blank">Réunion finale</a> — Bilan d’autonomisation, clôture narrative
-        </li>
-    </ul>
+    <div class="grid">
+        <!-- QR0 -->
+        <div class="card">
+            <div>
+                <h2>QR0 — Activation du Protocole</h2>
+                <span class="tech-tag">Mode d'emploi & Audio d'autonomisation</span>
+                <p>Le Pacte de Lecture : quand le livre devient partenaire. Réglage de la "béquille sensorielle" et amorce invisible du compteur d’autonomie.</p>
+            </div>
+            <a href="qr0.html" class="btn">Ouvrir la démo</a>
+        </div>
 
-    <div class="counter-box">
-        <h2>Compteur d'autonomisation (Simulation en fin de parcours)</h2>
-        <button class="btn-recommencer">Recommencer</button>
-        <ul class="counter-stats">
-            <li><strong>Scans proposés :</strong> 13</li>
-            <li><strong>Scans utilisés :</strong> 2</li>
-        </ul>
-        <p style="margin-coltop: 15px; font-weight: bold; color: #29b6f6;">
-            Compteur d'autonomisation : Scans proposés 13 / utilisés 2
+        <!-- QR11 -->
+        <div class="card">
+            <div>
+                <h2>QR11 — Le Choc des Imaginaires</h2>
+                <span class="tech-tag">Bureau de Vidal & Carnet interactif</span>
+                <p>Question métacognitive et confrontation sensorielle entre la vision mentale du lecteur et les archives secrètes du récit. Un test de résistance pour le cinéma intérieur.</p>
+            </div>
+            <a href="qr11.html" class="btn">Ouvrir la démo</a>
+        </div>
+
+        <!-- QR12 -->
+        <div class="card">
+            <div>
+                <h2>QR12 — Le Huis Clos des Vérités</h2>
+                <span class="tech-tag">Réunion finale & Bilan d'autonomisation</span>
+                <p>Avant d'ouvrir les dernières pages, immersion interactive dans le bureau de Mme Arnaud[cite: 15]. Sept personnages, une pièce étroite, et le poids de vos choix passés (indices, visage d'Inès)[cite: 15]. Une confrontation interactive pour fixer la scène avant la révélation écrite[cite: 15].</p>
+            </div>
+            <a href="qr12.html" class="btn">Ouvrir la démo</a>
+        </div>
+    </div>
+
+    <footer>
+        <p style="font-size: 0.85rem; opacity: 0.6;">
+            Enveloppe Soleau INPI déposée le 21 mai 2026 — Aymeric Heurtin, enseignant spécialisé.
         </p>
-    </div>
-</div>
+        <a href="https://github.com/aymericheurtin-beep/sam-qr1" class="github-link">Dépôt GitHub public : github.com/aymericheurtin-beep/sam-qr1</a>
+    </footer>
 
 </body>
 </html>
