@@ -33,6 +33,18 @@ body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-fam
 <audio id="consigne" src="./ines_consigne.mp3" preload="auto"></audio>
 
 <script>
+
+function trackScan(id) {
+  try {
+    let usedSet = new Set(JSON.parse(localStorage.getItem('qr_used_set') || '[]'));
+    usedSet.add(id);
+    let arr = Array.from(usedSet);
+    localStorage.setItem('qr_used_set', JSON.stringify(arr));
+    localStorage.setItem('scans_used', arr.length);
+    localStorage.setItem('scans_total', '12'); 
+  } catch(e) { console.error('Storage error:', e); }
+}
+
 const btn=document.getElementById('btn');
 const restart=document.getElementById('restart');
 const qcm=document.getElementById('qcm');
@@ -47,7 +59,7 @@ function addUsed(id){
   localStorage.setItem('qr_used_set',JSON.stringify([...set]));
 }
 
-btn.onclick=()=>{
+btn.onclick=()=>{ trackScan('qr4');
   addUsed('qr4');
   btn.style.display='none';
   intro.play().catch(()=>alert('Activez le son'));
