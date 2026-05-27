@@ -33,7 +33,6 @@ body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-fam
 <audio id="consigne" src="./ines_consigne.mp3" preload="auto"></audio>
 
 <script>
-
 function trackScan(id) {
   try {
     let usedSet = new Set(JSON.parse(localStorage.getItem('qr_used_set') || '[]'));
@@ -89,9 +88,7 @@ function validerChoix(idx){
   consigne.pause();
   qcm.style.display='none';
   zones.forEach(z=>z.style.display='none');
-  // On stocke le choix 1..6
   localStorage.setItem('qr4_ines_choice',String(idx));
-  // Fallback : on garde aussi la planche complète
   localStorage.setItem('qr4_ines','ines_5_choix.jpg');
   messageFin.style.display='block';
   restart.style.display='block';
