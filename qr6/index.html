@@ -66,7 +66,6 @@ small, .sub, #recall, #hint, #carnetLine {font-size:clamp(16px,3.2vmin,20px) !im
 <audio id="voix" src="audio_vidal.mp3" preload="auto" playsinline></audio>
 
 <script>
-
 function trackScan(id) {
   try {
     let usedSet = new Set(JSON.parse(localStorage.getItem('qr_used_set') || '[]'));
@@ -95,6 +94,7 @@ const voix = document.getElementById('voix');
 let choix = '';
 
 btn.onclick = () => {
+  trackScan('qr6'); /* Fix appliqué : variable globale synchronisée */
   btn.style.display = 'none';
   try{const s=new Set(JSON.parse(localStorage.getItem('qr_used_set')||'[]'));s.add('qr6');localStorage.setItem('qr_used_set',JSON.stringify([...s]));}catch(e){}
   qscreen.classList.add('active');
@@ -131,16 +131,14 @@ voix.onended = () => {
   scannerA.pause();
   scannerB.pause();
   scanOverlay.classList.remove('active');
-  response.textContent = `Vous aviez dit : ${choix}.
-Et maintenant ?`;
+  response.textContent = `Vous aviez dit : ${choix}.\nEt maintenant ?`;
   response.style.display = 'block';
   setTimeout(() => response.style.opacity = '1', 100);
   
   setTimeout(() => {
     response.style.display = 'none';
     eyeWrap.style.display = 'none';
-    finaltext.textContent = `Vous aviez dit : ${choix}.
-Et maintenant ?`;
+    finaltext.textContent = `Vous aviez dit : ${choix}.\nEt maintenant ?`;
     finaltext.style.fontSize = '26px';
     finaltext.style.lineHeight = '1.6';
     post.classList.add('active');
