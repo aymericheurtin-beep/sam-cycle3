@@ -64,6 +64,18 @@ small, .sub, #recall, #hint, #carnetLine {
 <audio id="respi" src="respiration.mp3" preload="auto"></audio>
 
 <script>
+
+function trackScan(id) {
+  try {
+    let usedSet = new Set(JSON.parse(localStorage.getItem('qr_used_set') || '[]'));
+    usedSet.add(id);
+    let arr = Array.from(usedSet);
+    localStorage.setItem('qr_used_set', JSON.stringify(arr));
+    localStorage.setItem('scans_used', arr.length);
+    localStorage.setItem('scans_total', '12'); 
+  } catch(e) { console.error('Storage error:', e); }
+}
+
 const startBtn=document.getElementById('startBtn');
 const restartBtn=document.getElementById('restartBtn');
 const texte=document.getElementById('texte');
@@ -77,12 +89,12 @@ const respi=document.getElementById('respi');
 let started=false;
 let choix='';
 
-let t=parseInt(localStorage.getItem('scans_total')||0)+1;
-localStorage.setItem('scans_total',t);
 
-startBtn.onclick=()=>{
-  let u=parseInt(localStorage.getItem('scans_used')||0)+1;
-  localStorage.setItem('scans_used',u);
+
+
+startBtn.onclick=()=>{ trackScan('qr7');
+  
+  
   try{const s=new Set(JSON.parse(localStorage.getItem('qr_used_set')||'[]'));s.add('qr7');localStorage.setItem('qr_used_set',JSON.stringify([...s]));}catch(e){}
   startBtn.style.display='none';
   pre.classList.add('active');
