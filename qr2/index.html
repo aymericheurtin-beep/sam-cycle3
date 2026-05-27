@@ -33,17 +33,29 @@ small,.sub,#recall,#hint,#carnetLine{font-size:clamp(16px,3.2vmin,20px)!importan
 <audio id="audio" src="./qrcode2total.mp3" preload="auto"></audio>
 
 <script>
+
+function trackScan(id) {
+  try {
+    let usedSet = new Set(JSON.parse(localStorage.getItem('qr_used_set') || '[]'));
+    usedSet.add(id);
+    let arr = Array.from(usedSet);
+    localStorage.setItem('qr_used_set', JSON.stringify(arr));
+    localStorage.setItem('scans_used', arr.length);
+    localStorage.setItem('scans_total', '12'); 
+  } catch(e) { console.error('Storage error:', e); }
+}
+
 const btn=document.getElementById('btn');
 const restart=document.getElementById('restart');
 const audio=document.getElementById('audio');
 const post=document.getElementById('post');
 
-let t=parseInt(localStorage.getItem('scans_total')||0)+1;
-localStorage.setItem('scans_total',t);
 
-btn.onclick=()=>{
-  let u=parseInt(localStorage.getItem('scans_used')||0)+1;
-  localStorage.setItem('scans_used',u);
+
+
+btn.onclick=()=>{ trackScan('qr2');
+  
+  
   try{const s=new Set(JSON.parse(localStorage.getItem('qr_used_set')||'[]'));s.add('qr2');localStorage.setItem('qr_used_set',JSON.stringify([...s]));}catch(e){}
   btn.style.display='none';
   audio.volume=1;
