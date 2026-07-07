@@ -3,33 +3,53 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>QR - Inès</title>
+<title>QR4 - Inès</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
-#btn,#restart{background:#fff;color:#000;border:none;padding:20px 40px;font-size:clamp(20px,5vmin,26px);border-radius:8px;position:fixed;left:50%;transform:translateX(-50%);cursor:pointer;z-index:10}
+
+/* Boutons principaux harmonisés */
+#btn, #restart {
+  background:#fff;
+  color:#000;
+  border:none;
+  padding:20px 40px;
+  font-size:clamp(20px,5vmin,26px);
+  border-radius:8px;
+  position:fixed;
+  left:50%;
+  transform:translateX(-50%);
+  cursor:pointer;
+  z-index:100
+}
 #btn{top:50%;transform:translate(-50%,-50%)}
-#restart{bottom:30px;display:none}
+#restart{bottom:40px;display:none}
 
-/* conteneur qui encadre exactement l'image affichée, sans bande morte */
+/* Conteneur de la grille d'images */
 #imgWrap{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);display:none;line-height:0}
-#qcm{display:block;max-width:100vw;max-height:90vh;width:auto;height:auto}
+#qcm{display:block;max-width:100vw;max-height:85vh;width:auto;height:auto;object-fit:contain}
 
+/* Zones cliquables invisibles mais interactives */
 .zone{position:absolute;cursor:pointer;border:3px solid transparent;transition:.2s}
-.zone:hover,.zone.chosen{border-color:#fff;background:rgba(255,255,255,.15)}
+.zone:hover,.zone.chosen{border-color:#fff;background:rgba(255,255,255,.2)}
 .debug .zone{border-color:rgba(255,60,60,.8);border-style:dashed}
 
-#messageFin{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:clamp(20px,4.5vmin,28px);text-align:center;display:none;z-index:10;padding:20px;max-width:80%;line-height:1.4}
+/* Écran final */
+#messageFin{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:clamp(20px,4.5vmin,28px);text-align:center;display:none;z-index:10;padding:20px;max-width:650px;line-height:1.45}
+</style>
+<style>
+/* Forçage CUA des polices et tailles pour l'accessibilité */
+html,body,button{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+p,#messageFin{font-size:clamp(20px,4.5vmin,28px)!important;line-height:1.45!important}
 </style>
 </head>
 <body>
+
 <button id="btn">Touchez pour commencer</button>
 <button id="restart">Recommencer</button>
-<button id="activerSonBtn" style="display:none;position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#fff;color:#000;border:none;padding:12px 24px;font-size:16px;border-radius:8px;cursor:pointer;z-index:20">Touchez pour activer le son</button>
 
 <div id="imgWrap">
   <img id="qcm" src="./ines_5_choix.jpg" alt="Choisis ton Inès">
-  <!-- les 6 zones sont générées en JS, en pourcentage de l'image -->
 </div>
 
 <div id="messageFin"></div>
@@ -38,7 +58,7 @@ body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-fam
 <audio id="consign" src="./ines_consign.mp3" preload="auto"></audio>
 
 <script>
-// --- Comptabilisation du scan (autonomisation) ---
+// --- Suivi et statistiques du dispositif ---
 function trackScan(id) {
   try {
     let usedSet = new Set(JSON.parse(localStorage.getItem('qr_used_set') || '[]'));
@@ -50,64 +70,61 @@ function trackScan(id) {
   } catch(e) { console.error('Storage error:', e); }
 }
 
-// --- Config des 6 zones cliquables, en % de l'image : grille 3 colonnes x 2 lignes ---
-// zones 1 à 5 = portraits, zone 6 = le "?" (l'élève a imaginé une Inès différente)
+// --- Configuration de la grille 3x2 ---
 const zonesConfig = [
-  { x: 0,     y: 0,  w: 33.33, h: 50 },
-  { x: 33.33, y: 0,  w: 33.34, h: 50 },
-  { x: 66.67, y: 0,  w: 33.33, h: 50 },
-  { x: 0,     y: 50, w: 33.33, h: 50 },
-  { x: 33.33, y: 50, w: 33.34, h: 50 },
-  { x: 66.67, y: 50, w: 33.33, h: 50 }, // le "?"
+  { x: 0,     y: 0,  w: 33.33, h: 50 }, // Portrait 1
+  { x: 33.33, y: 0,  w: 33.34, h: 50 }, // Portrait 2
+  { x: 66.67, y: 0,  w: 33.33, h: 50 }, // Portrait 3
+  { x: 0,     y: 50, w: 33.33, h: 50 }, // Portrait 4
+  { x: 33.33, y: 50, w: 33.34, h: 50 }, // Portrait 5
+  { x: 66.67, y: 50, w: 33.33, h: 50 }, // Le "?" (Choix 6)
 ];
 const WILDCARD_INDEX = 6;
 
 const btn = document.getElementById('btn');
 const restart = document.getElementById('restart');
-const activerSonBtn = document.getElementById('activerSonBtn');
 const imgWrap = document.getElementById('imgWrap');
 const qcm = document.getElementById('qcm');
 const question = document.getElementById('question');
 const consign = document.getElementById('consign');
 const messageFin = document.getElementById('messageFin');
 
-// Mode debug : ?debug=1 affiche les zones en permanence pour les ajuster
 if (new URLSearchParams(location.search).has('debug')) {
   imgWrap.classList.add('debug');
 }
 
-// Étape 0 : le lecteur touche l'écran -> comptabilisation + question audio
-let started = false;
+// --- Logique d'enchaînement sans blocage ---
 btn.onclick = () => {
-  if (!started) { trackScan('qr4'); started = true; }
-  lancerQuestion();
-};
-
-function lancerQuestion() {
+  trackScan('qr4');
   btn.style.display = 'none';
+  
+  // Lecture de la question initiale
   question.play().catch(() => {
-    // autoplay bloqué par le navigateur : pas de popup natif,
-    // on réaffiche juste le bouton pour un deuxième tap
-    btn.textContent = 'Touchez pour activer le son';
+    // Si le navigateur bloque, on transforme le bouton pour forcer l'interaction
+    btn.textContent = 'Activer le son';
     btn.style.display = 'block';
   });
-}
-
-// Étape 1 : la question finie -> l'image apparaît + consigne audio
-question.onended = () => {
-  imgWrap.style.display = 'inline-block';
-  const start = () => {
-    creerZones();
-    consign.play().catch(() => {
-      activerSonBtn.style.display = 'block';
-    });
-  };
-  qcm.complete ? start() : (qcm.onload = start);
 };
 
-// Crée les 5 zones cliquables une fois l'image affichée à sa taille réelle
+// Quand la question se termine -> On affiche l'image et on lance la consigne
+question.onended = () => {
+  btn.style.display = 'none';
+  imgWrap.style.display = 'inline-block';
+  
+  const initialiserGrille = () => {
+    creerZones();
+    consign.play().catch(e => console.log("Attente interaction consigne", e));
+  };
+
+  if (qcm.complete) {
+    initialiserGrille();
+  } else {
+    qcm.onload = initialiserGrille;
+  }
+};
+
+// Génération dynamique des zones sur l'image
 function creerZones() {
-  // on repart de zéro à chaque fois (utile si redimensionnement)
   imgWrap.querySelectorAll('.zone').forEach(z => z.remove());
   zonesConfig.forEach((z, i) => {
     const div = document.createElement('div');
@@ -121,34 +138,33 @@ function creerZones() {
   });
 }
 
-// Étape 2 : le lecteur choisit son Inès
+// --- Validation et mémorisation du choix ---
 function validerChoix(idx, zoneEl) {
   consign.pause();
   zoneEl.classList.add('chosen');
+  
+  // Sauvegarde cruciale pour les prochains QR Codes
   localStorage.setItem('qr4_ines_choice', String(idx));
 
-  messageFin.textContent = (idx === WILDCARD_INDEX)
-    ? "Toi, tu l'as imaginée autrement. C'est TON Inès à toi, garde-la bien en mémoire."
-    : "Bien vu. C'est TON Inès, garde-la bien en mémoire.";
+  if (idx === WILDCARD_INDEX) {
+    messageFin.innerHTML = "Toi, tu l'as imaginée autrement.<br>C'est <strong>TON</strong> Inès à toi, garde-la bien en mémoire.";
+  } else {
+    messageFin.innerHTML = "Bien vu.<br>C'est <strong>TON</strong> Inès, garde-la bien en mémoire.";
+  }
 
-  // petite pause visuelle pour que le lecteur voie son choix surligné avant le message
   setTimeout(() => {
     imgWrap.style.display = 'none';
     messageFin.style.display = 'block';
     restart.style.display = 'block';
-  }, 400);
+  }, 450);
 }
 
 restart.onclick = () => location.reload();
 
-activerSonBtn.onclick = () => {
-  activerSonBtn.style.display = 'none';
-  consign.play().catch(() => { activerSonBtn.style.display = 'block'; });
-};
-
-// Recalcule les zones si l'orientation ou la taille d'écran change
 window.onresize = () => {
-  if (imgWrap.style.display !== 'none' && imgWrap.querySelector('.zone')) creerZones();
+  if (imgWrap.style.display !== 'none' && imgWrap.querySelector('.zone')) {
+    creerZones();
+  }
 };
 </script>
 </body>
