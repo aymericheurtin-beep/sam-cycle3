@@ -74,13 +74,14 @@ async function play(a){ try{ await a.play(); }catch{} }
 async function run(){
   hide(start); hide(restart);
 
-  trackScan('qr9'); /* Fix appliqué : calcul incrémental aveugle supprimé */
+  trackScan('qr9');
   localStorage.setItem('qr9_done','1');
   try{const s=new Set(JSON.parse(localStorage.getItem('qr_used_set')||'[]'));s.add('qr9');localStorage.setItem('qr_used_set',JSON.stringify([...s]));}catch(e){}
 
+  // Lecture Audio Vidal (aLavelot)
   await play(aLavelot);
-  await sleep(8000);
-  aLavelot.pause(); aLavelot.currentTime=0;
+  // Attend que l'audio se termine naturellement (événement 'ended') au lieu d'un sleep fixe trop court ou trop long
+  await new Promise(res => aLavelot.onended = res);
 
   await showText('Les élèves rentrent dans le vestiaire.',2500,'center');
    
@@ -98,9 +99,10 @@ async function run(){
   await sleep(4000);
   hide(image); hide(text);
 
+  // Lecture Audio Cadenas
   await play(aCadenas);
-  await sleep(3000);
-  aCadenas.pause(); aCadenas.currentTime=0;
+  await new Promise(res => aCadenas.onended = res);
+  
   image.src='mains.webp'; show(image);
   await sleep(2500);
   hide(image);
@@ -116,17 +118,18 @@ async function run(){
 
   if(qr1){
     if(qr1 === repCadenas){
-      await showText('Bien joué, vous vous en êtes souvenus...',3500,'center');
+      // Correction du vouvoiement ici :
+      await showText("Bien joué, tu t'en es souvenu...",3500,'center');
     }else{
       await showText(`Étonnant.\nLa dernière fois tu avais imaginé ${qr1}`,4000,'center');
     }
   }
 
+  // Lecture Audio InesNoe (aNarrateur)
   await play(aNarrateur);
-  await sleep(8000);
-  aNarrateur.pause(); aNarrateur.currentTime=0;
+  // Attend que l'audio se termine entièrement pour ne pas couper la fin
+  await new Promise(res => aNarrateur.onended = res);
 
-  // Ligne corrigée avec des guillemets doubles :
   await showText("Garde bien cette image en tête, elle va t'être utile pour comprendre la suite...",4000,'center');
 
   show(restart);
