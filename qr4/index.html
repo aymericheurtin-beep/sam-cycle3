@@ -8,7 +8,7 @@
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
 
-/* Boutons principaux harmonisés */
+/* Boutons principaux */
 #btn, #restart {
   background:#fff;
   color:#000;
@@ -29,16 +29,15 @@ body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-fam
 #imgWrap{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);display:none;line-height:0}
 #qcm{display:block;max-width:100vw;max-height:85vh;width:auto;height:auto;object-fit:contain}
 
-/* Zones cliquables invisibles mais interactives */
+/* Zones cliquables */
 .zone{position:absolute;cursor:pointer;border:3px solid transparent;transition:.2s}
-.zone:hover,.zone.chosen{border-color:#fff;background:rgba(255,255,255,.2)}
+.zone:hover,.zone.chosen{border-color:#fff;background:rgba(255,255,255,0.2)}
 .debug .zone{border-color:rgba(255,60,60,.8);border-style:dashed}
 
 /* Écran final */
 #messageFin{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:clamp(20px,4.5vmin,28px);text-align:center;display:none;z-index:10;padding:20px;max-width:650px;line-height:1.45}
 </style>
 <style>
-/* Forçage CUA des polices et tailles pour l'accessibilité */
 html,body,button{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
 p,#messageFin{font-size:clamp(20px,4.5vmin,28px)!important;line-height:1.45!important}
 </style>
@@ -58,7 +57,6 @@ p,#messageFin{font-size:clamp(20px,4.5vmin,28px)!important;line-height:1.45!impo
 <audio id="consign" src="./ines_consign.mp3" preload="auto"></audio>
 
 <script>
-// --- Suivi et statistiques du dispositif ---
 function trackScan(id) {
   try {
     let usedSet = new Set(JSON.parse(localStorage.getItem('qr_used_set') || '[]'));
@@ -70,13 +68,12 @@ function trackScan(id) {
   } catch(e) { console.error('Storage error:', e); }
 }
 
-// --- Configuration de la grille 3x2 ---
 const zonesConfig = [
-  { x: 0,     y: 0,  w: 33.33, h: 50 }, // Portrait 1
-  { x: 33.33, y: 0,  w: 33.34, h: 50 }, // Portrait 2
-  { x: 66.67, y: 0,  w: 33.33, h: 50 }, // Portrait 3
-  { x: 0,     y: 50, w: 33.33, h: 50 }, // Portrait 4
-  { x: 33.33, y: 50, w: 33.34, h: 50 }, // Portrait 5
+  { x: 0,     y: 0,  w: 33.33, h: 50 },
+  { x: 33.33, y: 0,  w: 33.34, h: 50 },
+  { x: 66.67, y: 0,  w: 33.33, h: 50 },
+  { x: 0,     y: 50, w: 33.33, h: 50 },
+  { x: 33.33, y: 50, w: 33.34, h: 50 },
   { x: 66.67, y: 50, w: 33.33, h: 50 }, // Le "?" (Choix 6)
 ];
 const WILDCARD_INDEX = 6;
@@ -93,20 +90,29 @@ if (new URLSearchParams(location.search).has('debug')) {
   imgWrap.classList.add('debug');
 }
 
-// --- Logique d'enchaînement sans blocage ---
+// --- CLIC DE DÉMARRAGE : Déblocage global du son ---
 btn.onclick = () => {
   trackScan('qr4');
   btn.style.display = 'none';
+
+  // Forcer le chargement initial pour contourner les restrictions mobiles
+  question.load();
+  consign.load();
+
+  // Lancement immédiat de la question
+  const playPromise = question.play();
   
-  // Lecture de la question initiale
-  question.play().catch(() => {
-    // Si le navigateur bloque, on transforme le bouton pour forcer l'interaction
-    btn.textContent = 'Activer le son';
-    btn.style.display = 'block';
-  });
+  if (playPromise !== undefined) {
+    playPromise.catch(error => {
+      console.log("Erreur de lecture automatique, secours activé :", error);
+      // Au cas où un mobile ultra-restrictif bloque encore, on montre un bouton d'action directe
+      btn.textContent = "Entendre la question";
+      btn.style.display = 'block';
+    });
+  }
 };
 
-// Quand la question se termine -> On affiche l'image et on lance la consigne
+// Étape suivante : Fin de la question -> affichage direct du QCM et de la consigne
 question.onended = () => {
   btn.style.display = 'none';
   imgWrap.style.display = 'inline-block';
@@ -123,7 +129,6 @@ question.onended = () => {
   }
 };
 
-// Génération dynamique des zones sur l'image
 function creerZones() {
   imgWrap.querySelectorAll('.zone').forEach(z => z.remove());
   zonesConfig.forEach((z, i) => {
@@ -138,12 +143,11 @@ function creerZones() {
   });
 }
 
-// --- Validation et mémorisation du choix ---
 function validerChoix(idx, zoneEl) {
   consign.pause();
   zoneEl.classList.add('chosen');
   
-  // Sauvegarde cruciale pour les prochains QR Codes
+  // Stockage du choix de l'élève
   localStorage.setItem('qr4_ines_choice', String(idx));
 
   if (idx === WILDCARD_INDEX) {
