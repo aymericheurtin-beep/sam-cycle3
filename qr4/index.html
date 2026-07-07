@@ -25,6 +25,7 @@ body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-fam
 <body>
 <button id="btn">Touchez pour commencer</button>
 <button id="restart">Recommencer</button>
+<button id="activerSonBtn" style="display:none;position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#fff;color:#000;border:none;padding:12px 24px;font-size:16px;border-radius:8px;cursor:pointer;z-index:20">Touchez pour activer le son</button>
 
 <div id="imgWrap">
   <img id="qcm" src="./ines_5_choix.jpg" alt="Choisis ton Inès">
@@ -63,6 +64,7 @@ const WILDCARD_INDEX = 6;
 
 const btn = document.getElementById('btn');
 const restart = document.getElementById('restart');
+const activerSonBtn = document.getElementById('activerSonBtn');
 const imgWrap = document.getElementById('imgWrap');
 const qcm = document.getElementById('qcm');
 const question = document.getElementById('question');
@@ -75,16 +77,31 @@ if (new URLSearchParams(location.search).has('debug')) {
 }
 
 // Étape 0 : le lecteur touche l'écran -> comptabilisation + question audio
+let started = false;
 btn.onclick = () => {
-  trackScan('qr4');
-  btn.style.display = 'none';
-  question.play().catch(() => alert('Touchez à nouveau pour activer le son'));
+  if (!started) { trackScan('qr4'); started = true; }
+  lancerQuestion();
 };
+
+function lancerQuestion() {
+  btn.style.display = 'none';
+  question.play().catch(() => {
+    // autoplay bloqué par le navigateur : pas de popup natif,
+    // on réaffiche juste le bouton pour un deuxième tap
+    btn.textContent = 'Touchez pour activer le son';
+    btn.style.display = 'block';
+  });
+}
 
 // Étape 1 : la question finie -> l'image apparaît + consigne audio
 question.onended = () => {
   imgWrap.style.display = 'inline-block';
-  const start = () => { creerZones(); consign.play(); };
+  const start = () => {
+    creerZones();
+    consign.play().catch(() => {
+      activerSonBtn.style.display = 'block';
+    });
+  };
   qcm.complete ? start() : (qcm.onload = start);
 };
 
@@ -123,6 +140,11 @@ function validerChoix(idx, zoneEl) {
 }
 
 restart.onclick = () => location.reload();
+
+activerSonBtn.onclick = () => {
+  activerSonBtn.style.display = 'none';
+  consign.play().catch(() => { activerSonBtn.style.display = 'block'; });
+};
 
 // Recalcule les zones si l'orientation ou la taille d'écran change
 window.onresize = () => {
