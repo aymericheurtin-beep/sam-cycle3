@@ -104,7 +104,6 @@ async function run(){
   await showText('Chambre 214. Inès et Sam entrent.',2500,'bottom');
   hide(image);
   
-  // Changement pour le tutoiement ici :
   await showText('Tu as 10 secondes pour imaginer ce qu’Inès et Sam vont voir et découvrir dans cette chambre',6500,'center');
   show(image); show(count);
   for(let i=10;i>=1;i--){ count.textContent=i; await sleep(1000); }
@@ -118,21 +117,23 @@ async function run(){
   try{ await video.play(); }catch{}
   await sleep(4000); video.pause(); hide(video);
 
+  // Message 1 : Winamax (Sam et Inès)
   image.src='winamax.webp'; show(image);
   text.className='bottom'; text.textContent='Message lu par Sam et Inès'; show(text);
-  
   await play(a3); 
-  await new Promise(res => a3.onended = res);
+  // Temps de lecture augmenté à 8 secondes pour cette image
+  await sleep(8000); 
   hide(image); hide(text);
 
-  await sleep(800);
+  await sleep(1000);
 
+  // Message 2 : Indemnité ITT (Inès uniquement)
   image.src='ittversement.webp'; show(image);
   text.className='bottom'; text.textContent='Message lu uniquement par Inès'; show(text);
-  await sleep(4000);
+  // Temps de lecture augmenté à 8 secondes pour cette image également
+  await sleep(8000);
   hide(image); hide(text);
 
-  // Changement pour le tutoiement ici :
   const vu = await askMulti('Durant le décompte des 10 secondes, tu avais vu :', [
     'La montre qu’Inès emporte',
     'Le sweat que Rémy montre',
