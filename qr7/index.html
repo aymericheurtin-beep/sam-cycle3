@@ -83,7 +83,7 @@ async function run(){
   aLavelot.pause(); aLavelot.currentTime=0;
 
   await showText('Les élèves rentrent dans le vestiaire.',2500,'center');
-  
+   
   const repVestiaire = await askSingle('Comment imagines-tu ce vestiaire ?', [
     'Vestiaire propre et ordonné',
     'Désordonné et sale',
@@ -106,7 +106,7 @@ async function run(){
   hide(image);
 
   const qr1 = localStorage.getItem('qr1_cadenas');
-  
+   
   const repCadenas = await askSingle('Le cadenas, tu l’avais imaginé comment ?', [
     'Un cadenas à chiffres',
     'Un cadenas à clé',
@@ -126,7 +126,8 @@ async function run(){
   await sleep(8000);
   aNarrateur.pause(); aNarrateur.currentTime=0;
 
-  await showText('Garde bien cette image en tête, elle va t'être utile pour comprendre la suite...',4000,'center');
+  // Ligne corrigée avec des guillemets doubles :
+  await showText("Garde bien cette image en tête, elle va t'être utile pour comprendre la suite...",4000,'center');
 
   show(restart);
 }
@@ -136,4 +137,3 @@ restart.onclick = ()=> location.reload();
 </script>
 </body>
 </html>
-
