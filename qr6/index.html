@@ -1,1 +1,173 @@
+!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>QR6 - Sam</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#000;color:#fff;font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;overflow:hidden;width:100vw;height:100vh;display:flex;justify-content:center;align-items:center;position:relative}
+.btn{font-size:4vmin;padding:3vmin 6vmin;background:#fff;border:none;border-radius:8px;color:#000;cursor:pointer;z-index:9999}
+#start{animation:blink 1.5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.6}}
+#text{position:absolute;font-size:6vmin;text-align:center;padding:5vmin;line-height:1.4;opacity:0;transition:opacity.5s;white-space:pre-line;font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;z-index:9998}
+#text small{display:block;font-size:3.2vmin;color:#aaa;margin-top:2vmin;line-height:1.3}
+#image{position:absolute;width:min(100vw,100vh);height:min(100vw,100vh);max-width:100vw;max-height:85vh;object-fit:contain;opacity:0;z-index:9997;transition:opacity 1s;pointer-events:none}
+#restart{position:absolute;bottom:10vmin;opacity:0;transition:opacity 1s}
+.visible{opacity:1!important}
+.hidden{display:none!important}
+.screen{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;background:#000;z-index:10000}
+.screen.active{display:flex}
+.screen p{font-size:22px;margin-bottom:20px}
+.choice{display:flex;gap:20px;flex-wrap:wrap;justify-content:center}
+#thumbs{position:absolute;display:none;gap:4vmin;z-index:9998}
+.thumb{width:26vmin;height:26vmin;background:#111;border:2px solid #333;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:3vmin;cursor:pointer;transition:transform.2s}
+.thumb:active{transform:scale(.95)}
+#overlay{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none;z-index:9996;transition:opacity.3s}
+#overlay.show{opacity:1;pointer-events:auto}
+.blur{filter:blur(12px)}
+</style>
+<style>
+html,body,button,input,select,textarea {font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;}
+p, #text, .screen p, #question, #msg {font-size:clamp(20px,4.5vmin,28px) !important;line-height:1.45 !important;}
+button, .btn, .choiceBtn, .choice, .carnetBtn {font-size:clamp(18px,4vmin,24px) !important;font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;}
+#startBtn, #start, #btn, #restartBtn, #restart {font-size:clamp(20px,5vmin,26px) !important;}
+small, .sub, #recall, #hint, #carnetLine {font-size:clamp(16px,3.2vmin,20px) !important;}
+</style>
+</head>
+<body>
+<button id="start" class="btn">Touchez pour commencer</button>
+<div id="text"></div>
+<img id="image" src="">
+<div id="overlay"></div>
 
+<div id="thumbs">
+  <div class="thumb" data-id="caméra">Caméra</div>
+  <div class="thumb" data-id="fumée">Fumée</div>
+  <div class="thumb" data-id="carnet">Carnet</div>
+</div>
+
+<button id="restart" class="btn">Recommencer</button>
+
+<audio id="annonce" src="message_arnaud.mp3" preload="auto"></audio>
+
+<script>
+function trackScan(id) {
+  try {
+    let usedSet = new Set(JSON.parse(localStorage.getItem('qr_used_set') || '[]'));
+    usedSet.add(id);
+    let arr = Array.from(usedSet);
+    localStorage.setItem('qr_used_set', JSON.stringify(arr));
+    localStorage.setItem('scans_used', arr.length);
+    localStorage.setItem('scans_total', '12'); 
+  } catch(e) { console.error('Storage error:', e); }
+}
+
+const start=document.getElementById('start');
+const text=document.getElementById('text');
+const image=document.getElementById('image');
+const restart=document.getElementById('restart');
+const annonce=document.getElementById('annonce');
+const thumbs=document.getElementById('thumbs');
+const overlay=document.getElementById('overlay');
+
+let order=[];
+let opened={caméra:false,fumée:false,carnet:false};
+
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+
+start.onclick=()=>{ trackScan('qr8');
+  try{const s=new Set(JSON.parse(localStorage.getItem('qr_used_set')||'[]'));s.add('qr8');localStorage.setItem('qr_used_set',JSON.stringify([...s]));}catch(e){}
+  start.classList.add('hidden');
+  sequence();
+};
+
+restart.onclick=()=>location.reload();
+
+async function showText(txt,hold=2000){
+  text.innerHTML=txt;
+  text.classList.add('visible');
+  await sleep(hold);
+  text.classList.remove('visible');
+  await sleep(500);
+}
+
+async function sequence(){
+  await showText('vendredi 8h27<br>collège les Peupliers Blancs',2500);
+  annonce.play().catch(()=>{});
+  await sleep(4200);
+  await sleep(3000);
+  await showText('8h30. Bureau de Mme Arnaud.',2000);
+  thumbs.style.display='flex';
+}
+
+thumbs.addEventListener('click',async e=>{
+  const thumb=e.target.closest('.thumb');
+  if(!thumb) return;
+  const id=thumb.dataset.id;
+  if(!order.includes(id)) order.push(id);
+  thumbs.style.display='none';
+  if(id==='caméra') await openCam();
+  else if(id==='fumée') await openFumee();
+  else if(id==='carnet') await openCarnet();
+  opened[id]=true;
+  if(opened.caméra && opened.fumée && opened.carnet){
+    await final();
+  }else{
+    thumbs.style.display='flex';
+  }
+});
+
+async function openCam(){
+  image.src='cam.webp';
+  image.classList.remove('blur');
+  image.classList.add('visible');
+  await sleep(6000);
+  image.classList.remove('visible');
+  await sleep(500);
+}
+async function openFumee(){
+  overlay.classList.add('show');
+  await sleep(800);
+  overlay.classList.remove('show');
+  image.src='fumee.webp';
+  image.classList.remove('blur');
+  image.classList.add('visible');
+  await sleep(4000);
+  image.classList.remove('visible');
+  await sleep(500);
+}
+async function openCarnet(){
+  image.src='carnet.webp';
+  image.classList.add('blur');
+  image.classList.add('visible');
+  await sleep(3000);
+  image.classList.remove('blur');
+  await sleep(3000);
+  image.classList.remove('visible');
+  await sleep(500);
+}
+
+function interpretation(first){
+  if(first==='caméra') return 'Vous commencez par la preuve. Voir avant de comprendre.';
+  if(first==='fumée') return 'Vous pensez aux conséquences avant l’acte.';
+  if(first==='carnet') return 'Vous commencez par les écrits d’Inès. Ce qu’elle note compte plus que ce qu’on montre.';
+  return '';
+}
+
+async function final(){
+  const first=order[0];
+  const interp=interpretation(first);
+  try{
+    localStorage.setItem('qr8_first', first);
+    localStorage.setItem('qr8_order', JSON.stringify(order));
+    localStorage.setItem('qr8_profile', first==='caméra' ? 'preuve' : first==='fumée' ? 'conséquence' : 'écrit');
+  }catch(e){}
+  text.innerHTML=`${interp}<br><small>Vous avez regardé ${first} en 1er.</small>`;
+  text.classList.add('visible');
+  await sleep(6000);
+  restart.classList.add('visible');
+}
+</script>
+</body>
+</html>
