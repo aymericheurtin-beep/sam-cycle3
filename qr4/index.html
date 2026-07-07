@@ -19,7 +19,6 @@ body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-fam
 #messageFin{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:clamp(20px,4.5vmin,28px);text-align:center;display:none;z-index:10;padding:20px;max-width:650px;line-height:1.45}
 </style>
 <style>
-/* Forçage des tailles de texte pour l'accessibilité Cycle 3 */
 html,body,button,input,select,textarea{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
 p,#messageFin{font-size:clamp(20px,4.5vmin,28px)!important;line-height:1.45!important}
 #btn,#restart{font-size:clamp(20px,5vmin,26px)!important}
@@ -42,7 +41,7 @@ p,#messageFin{font-size:clamp(20px,4.5vmin,28px)!important;line-height:1.45!impo
 <div class="zone" id="z6"></div>
 
 <audio id="intro" src="./ines_question.mp3" preload="auto"></audio>
-<audio id="consigne" src="./ines_consigne.mp3" preload="auto"></audio>
+<audio id="consigne" preload="auto"></audio>
 
 <script>
 function trackScan(id) {
@@ -64,6 +63,25 @@ const consigne=document.getElementById('consigne');
 const zones=document.querySelectorAll('.zone');
 const messageFin=document.getElementById('messageFin');
 
+// --- SÉCURITÉ AUDIO ANTI-BUG DE NOM ---
+// Le code va tenter de charger la version avec "e", si GitHub refuse, il basculera sur la version sans "e"
+let sourcesConsigne = ["./ines_consigne.mp3", "./ines_consign.mp3", "./Ines_consigne.mp3", "./Ines_consign.mp3"];
+let currentSourceIndex = 0;
+
+function configurerAudioConsigne() {
+  consigne.src = sourcesConsigne[currentSourceIndex];
+}
+configurerAudioConsigne();
+
+// Si le fichier ne charge pas, on passe automatiquement au nom suivant de la liste
+consigne.onerror = () => {
+  if (currentSourceIndex < sourcesConsigne.length - 1) {
+    currentSourceIndex++;
+    console.log("Tentative avec le nom alternatif : " + sourcesConsigne[currentSourceIndex]);
+    configurerAudioConsigne();
+  }
+};
+
 function addUsed(id){
   const set=new Set(JSON.parse(localStorage.getItem('qr_used_set')||'[]'));
   set.add(id);
@@ -74,12 +92,18 @@ btn.onclick=()=>{
   trackScan('qr4');
   addUsed('qr4');
   btn.style.display='none';
-  intro.play().catch(()=>alert('Activez le son'));
+  intro.play().catch(()=>alert('Activez le son ou touchez à nouveau'));
 };
 
 intro.onended=()=>{
   qcm.style.display='block';
-  const start=()=>{ placerZones(); consigne.play().catch(e=>console.log(e)); };
+  const start=()=>{ 
+    placerZones(); 
+    consigne.play().catch(() => {
+      // Secours ultime si le navigateur bloque l'enchaînement automatique
+      console.log("Attente action élève pour la consigne");
+    }); 
+  };
   qcm.complete?start():qcm.onload=start;
 };
 
@@ -102,11 +126,9 @@ function validerChoix(idx){
   qcm.style.display='none';
   zones.forEach(z=>z.style.display='none');
   
-  // Sauvegarde du choix de l'élève
   localStorage.setItem('qr4_ines_choice', String(idx));
   localStorage.setItem('qr4_ines', 'ines_5_choix.jpg');
   
-  // Message adapté selon le choix (1 à 5, ou la case 6 du ?)
   if (idx === 6) {
     messageFin.innerHTML = "Toi, tu l'as imaginée autrement.<br>C'est <strong>TON</strong> Inès à toi, garde-la bien en mémoire.";
   } else {
