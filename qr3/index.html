@@ -15,8 +15,6 @@ img,video{max-width:90%;max-height:85vh;object-fit:contain}
 #restartBtn.show{opacity:1;display:block}
 #voirBtn{margin-top:30px;background:#fff;color:#000;border:none;padding:15px 30px;font-size:18px;border-radius:8px;cursor:pointer}
 p{font-size:22px;line-height:1.4;max-width:700px}
-.pulse{width:14px;height:14px;border-radius:50%;background:#fff;margin-bottom:24px;animation:pulse 1.4s ease-in-out infinite}
-@keyframes pulse{0%{opacity:.25;transform:scale(1)}50%{opacity:1;transform:scale(1.4)}100%{opacity:.25;transform:scale(1)}}
 </style>
 <style>
 html,body,button,input,select,textarea{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
@@ -31,7 +29,6 @@ button{font-size:clamp(18px,4vmin,24px)!important}
 
 <!-- s0 : le son d'abord, écran noir, pas d'image -->
 <div id="s0" class="screen">
-  <div class="pulse"></div>
   <audio id="a0" src="./qr3.mp3" playsinline></audio>
 </div>
 
@@ -48,7 +45,7 @@ button{font-size:clamp(18px,4vmin,24px)!important}
 
 <!-- s3 : question de bascule APRÈS l'image, mesure l'écart -->
 <div id="s3" class="screen">
-  <p>Et là, c'est ce que tu avais imaginé ?<br>Il court pour se sentir fort, ou pour être "vu" ?</p>
+  <p>Et là, c'est ce que tu avais imaginé ?<br>Il court pour fuir, ou pour se sentir fort ?</p>
 </div>
 
 <script>
