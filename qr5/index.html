@@ -131,7 +131,7 @@ voix.onended = () => {
   scannerA.pause();
   scannerB.pause();
   scanOverlay.classList.remove('active');
-  response.textContent = `tu avaisz dit : ${choix}.\nEt maintenant ?`;
+  response.textContent = `tu avais dit : ${choix}.\nEt maintenant ?`;
   response.style.display = 'block';
   setTimeout(() => response.style.opacity = '1', 100);
   
