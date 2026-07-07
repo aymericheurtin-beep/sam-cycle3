@@ -94,16 +94,16 @@ const voix = document.getElementById('voix');
 let choix = '';
 
 btn.onclick = () => {
-  trackScan('qr6'); /* Fix appliqué : variable globale synchronisée */
+  trackScan('qr5'); /* PONT CORRIGÉ : On marque qr5 comme scanné */
   btn.style.display = 'none';
-  try{const s=new Set(JSON.parse(localStorage.getItem('qr_used_set')||'[]'));s.add('qr6');localStorage.setItem('qr_used_set',JSON.stringify([...s]));}catch(e){}
+  try{const s=new Set(JSON.parse(localStorage.getItem('qr_used_set')||'[]'));s.add('qr5');localStorage.setItem('qr_used_set',JSON.stringify([...s]));}catch(e){}
   qscreen.classList.add('active');
 };
 
 choices.forEach(b => {
   b.onclick = () => {
     choix = b.textContent;
-    try{ localStorage.setItem('qr6_vidal_imagined', choix);}catch{}
+    try{ localStorage.setItem('qr5_vidal_imagined', choix);}catch{} /* PONT CORRIGÉ : clé sauvegardée sous qr5 */
     qscreen.classList.remove('active');
     
     eyeWrap.style.display = 'flex';
@@ -149,4 +149,3 @@ restart.onclick = () => location.reload();
 </script>
 </body>
 </html>
-
