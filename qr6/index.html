@@ -1,4 +1,4 @@
-!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -36,7 +36,7 @@ small, .sub, #recall, #hint, #carnetLine {font-size:clamp(16px,3.2vmin,20px) !im
 </style>
 </head>
 <body>
-<button id="start" class="btn">Touchez pour commencer</button>
+<button id="start" class="btn">Touche pour commencer</button>
 <div id="text"></div>
 <img id="image" src="">
 <div id="overlay"></div>
@@ -149,9 +149,9 @@ async function openCarnet(){
 }
 
 function interpretation(first){
-  if(first==='caméra') return 'Vous commencez par la preuve. Voir avant de comprendre.';
-  if(first==='fumée') return 'Vous pensez aux conséquences avant l’acte.';
-  if(first==='carnet') return 'Vous commencez par les écrits d’Inès. Ce qu’elle note compte plus que ce qu’on montre.';
+  if(first==='caméra') return 'Tu commences par la preuve. Voir avant de comprendre.';
+  if(first==='fumée') return 'Tu penses aux conséquences avant l’acte.';
+  if(first==='carnet') return 'Tu commences par les écrits d’Inès. Ce qu’elle note compte plus que ce qu’on montre.';
   return '';
 }
 
@@ -163,7 +163,7 @@ async function final(){
     localStorage.setItem('qr8_order', JSON.stringify(order));
     localStorage.setItem('qr8_profile', first==='caméra' ? 'preuve' : first==='fumée' ? 'conséquence' : 'écrit');
   }catch(e){}
-  text.innerHTML=`${interp}<br><small>Vous avez regardé ${first} en 1er.</small>`;
+  text.innerHTML=`${interp}<br><small>Tu as regardé ${first} en 1er.</small>`;
   text.classList.add('visible');
   await sleep(6000);
   restart.classList.add('visible');
