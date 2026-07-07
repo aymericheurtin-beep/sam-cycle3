@@ -13,25 +13,42 @@ img,video{max-width:90%;max-height:85vh;object-fit:contain}
 #startBtn{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:100;background:#fff;color:#000;border:none;padding:20px 40px;font-size:20px;border-radius:8px;cursor:pointer}
 #restartBtn{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);background:#fff;color:#000;border:none;padding:15px 30px;font-size:18px;border-radius:8px;cursor:pointer;display:none;z-index:10;opacity:0;transition:opacity 1s ease}
 #restartBtn.show{opacity:1;display:block}
+#voirBtn{margin-top:30px;background:#fff;color:#000;border:none;padding:15px 30px;font-size:18px;border-radius:8px;cursor:pointer}
 p{font-size:22px;line-height:1.4;max-width:700px}
+.pulse{width:14px;height:14px;border-radius:50%;background:#fff;margin-bottom:24px;animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{0%{opacity:.25;transform:scale(1)}50%{opacity:1;transform:scale(1.4)}100%{opacity:.25;transform:scale(1)}}
 </style>
 <style>
 html,body,button,input,select,textarea{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
 p{font-size:clamp(20px,4.5vmin,28px)!important;line-height:1.45!important}
 button{font-size:clamp(18px,4vmin,24px)!important}
-#startBtn,#restartBtn{font-size:clamp(20px,5vmin,26px)!important}
+#startBtn,#restartBtn,#voirBtn{font-size:clamp(20px,5vmin,26px)!important}
 </style>
 </head>
 <body>
 <button id="startBtn">Touchez pour commencer</button>
 <button id="restartBtn">Recommencer</button>
 
+<!-- s0 : le son d'abord, écran noir, pas d'image -->
 <div id="s0" class="screen">
+  <div class="pulse"></div>
+  <audio id="a0" src="./qr3.mp3" playsinline></audio>
+</div>
+
+<!-- s1 : question métacognitive AVANT l'image, le lecteur choisit de continuer -->
+<div id="s1" class="screen">
+  <p>Toi, tu l'imagines comment, Noé, en train de courir ?</p>
+  <button id="voirBtn">Voir</button>
+</div>
+
+<!-- s2 : l'image / la vidéo -->
+<div id="s2" class="screen">
   <video id="v0" src="./docfinalqr3.mp4" playsinline></video>
 </div>
 
-<div id="s1" class="screen">
-  <p>Avec le bruit de la porte, du bouchon et du liquide, comprenez-vous différemment pourquoi il a besoin de courir ?</p>
+<!-- s3 : question de bascule APRÈS l'image, mesure l'écart -->
+<div id="s3" class="screen">
+  <p>Et là, c'est ce que tu avais imaginé ?<br>Il court pour se sentir fort, ou pour être "vu" ?</p>
 </div>
 
 <script>
@@ -42,31 +59,50 @@ function trackScan(id) {
     let arr = Array.from(usedSet);
     localStorage.setItem('qr_used_set', JSON.stringify(arr));
     localStorage.setItem('scans_used', arr.length);
-    localStorage.setItem('scans_total', '12'); 
+    localStorage.setItem('scans_total', '12');
   } catch(e) { console.error('Storage error:', e); }
 }
 
-const startBtn=document.getElementById('startBtn');
-const restartBtn=document.getElementById('restartBtn');
-const s0=document.getElementById('s0');
-const s1=document.getElementById('s1');
-const v0=document.getElementById('v0');
+const startBtn = document.getElementById('startBtn');
+const restartBtn = document.getElementById('restartBtn');
+const voirBtn = document.getElementById('voirBtn');
+const s0 = document.getElementById('s0');
+const s1 = document.getElementById('s1');
+const s2 = document.getElementById('s2');
+const s3 = document.getElementById('s3');
+const a0 = document.getElementById('a0');
+const v0 = document.getElementById('v0');
 
-startBtn.onclick=async()=>{ trackScan('qr3');
-  startBtn.style.display='none';
-  try{const s=new Set(JSON.parse(localStorage.getItem('qr_used_set')||'[]'));s.add('qr3');localStorage.setItem('qr_used_set',JSON.stringify([...s]));}catch(e){}
+// Étape 0 : le lecteur touche l'écran -> comptabilisation du scan + lancement du son
+startBtn.onclick = async () => {
+  trackScan('qr3');
+  startBtn.style.display = 'none';
   s0.classList.add('active');
-  try{await v0.play();}catch(e){console.error(e);}
+  try { await a0.play(); } catch(e) { console.error(e); }
 };
 
-v0.onended=()=>{
+// Étape 1 : le son fini -> question métacognitive AVANT l'image (pas d'image tant que le lecteur ne clique pas)
+a0.onended = () => {
   s0.classList.remove('active');
   s1.classList.add('active');
-  restartBtn.style.display='block';
-  setTimeout(()=>restartBtn.classList.add('show'),300);
 };
 
-restartBtn.onclick=()=>location.reload();
+// Étape 2 : le lecteur choisit de voir l'image, quand il est prêt
+voirBtn.onclick = async () => {
+  s1.classList.remove('active');
+  s2.classList.add('active');
+  try { await v0.play(); } catch(e) { console.error(e); }
+};
+
+// Étape 3 : la vidéo finie -> question de bascule, mesure l'écart imaginé / vu
+v0.onended = () => {
+  s2.classList.remove('active');
+  s3.classList.add('active');
+  restartBtn.style.display = 'block';
+  setTimeout(() => restartBtn.classList.add('show'), 300);
+};
+
+restartBtn.onclick = () => location.reload();
 </script>
 </body>
 </html>
