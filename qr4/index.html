@@ -40,8 +40,7 @@ p,#messageFin{font-size:clamp(20px,4.5vmin,28px)!important;line-height:1.45!impo
 <div class="zone" id="z5"></div>
 <div class="zone" id="z6"></div>
 
-<audio id="intro" src="./ines_question.mp3" preload="auto"></audio>
-<audio id="consigne" src="./ines_consigne.mp3" preload="auto"></audio>
+<audio id="audioUnique" src="./qrcode4ines.mp3" preload="auto"></audio>
 
 <script>
 function trackScan(id) {
@@ -58,8 +57,7 @@ function trackScan(id) {
 const btn=document.getElementById('btn');
 const restart=document.getElementById('restart');
 const qcm=document.getElementById('qcm');
-const intro=document.getElementById('intro');
-const consigne=document.getElementById('consigne');
+const audioUnique=document.getElementById('audioUnique');
 const zones=document.querySelectorAll('.zone');
 const messageFin=document.getElementById('messageFin');
 
@@ -69,28 +67,21 @@ function addUsed(id){
   localStorage.setItem('qr_used_set',JSON.stringify([...set]));
 }
 
-// 1. CLIC UTILISATEUR
+// 1. CLIC UTILISATEUR : Tout se déclenche en même temps
 btn.onclick=()=>{ 
   trackScan('qr4');
   addUsed('qr4');
   btn.style.display='none';
   
-  // On force la lecture simple sans fioriture
-  intro.play();
-};
-
-// 2. FIN DE LA QUESTION NARRATIVE
-intro.onended=()=>{
-  // On force l'affichage de l'image de toute façon
+  // On affiche l'image et on place les zones immédiatement
   qcm.style.display='block';
   placerZones();
   
-  // On tente de lire la consigne. Si le nom du fichier est foiré sur GitHub, 
-  // l'image et les zones restent fonctionnelles pour l'élève !
+  // On lance le fichier mp3 unique
   try {
-    consigne.play().catch(e => console.log("Audio bloqué ou introuvable, mais le jeu continue"));
+    audioUnique.play().catch(e => console.log("Audio bloqué ou introuvable, mais le visuel fonctionne"));
   } catch(err) {
-    console.log("Erreur ignorée pour éviter le freeze");
+    console.log("Erreur audio ignorée");
   }
 };
 
@@ -109,7 +100,7 @@ function placerZones(){
 }
 
 function validerChoix(idx){
-  try { consigne.pause(); } catch(e){}
+  try { audioUnique.pause(); } catch(e){}
   qcm.style.display='none';
   zones.forEach(z=>z.style.display='none');
   
