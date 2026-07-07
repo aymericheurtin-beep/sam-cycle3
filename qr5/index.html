@@ -1,1 +1,152 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>QR6 - Vidal</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-family:system-ui}
+#btn{background:#fff;color:#000;border:none;padding:24px 48px;font-size:24px;border-radius:8px;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);cursor:pointer;z-index:10}
+#restart{background:#fff;color:#000;border:none;padding:18px 34px;font-size:22px;border-radius:8px;cursor:pointer;position:fixed;bottom:40px;left:50%;transform:translateX(-50%);z-index:30}
+.screen{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;z-index:20}
+.screen.active{display:flex}
+#question{font-size:26px;line-height:1.5;max-width:700px;margin-bottom:36px}
+.choice{background:rgba(255,255,255,0.1);color:#fff;border:1px solid #fff;padding:20px 28px;font-size:22px;border-radius:8px;cursor:pointer;margin:10px 0;width:86%;max-width:440px}
+.choice:hover{background:#fff;color:#000}
+#eyeWrap{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:#000;z-index:5}
+#eyeContainer{position:relative;display:inline-block}
+#eye{max-width:96vw;max-height:88vh;width:auto;height:auto;opacity:0;transition:opacity 1.5s ease;display:block}
+#eye.show{opacity:1}
+#scanOverlay{position:absolute;inset:0;pointer-events:none;overflow:hidden;display:none}
+#scanOverlay.active{display:block}
+#scanLine{position:absolute;left:0;right:0;height:4px;background:linear-gradient(90deg,transparent,rgba(0,255,200,0.9),transparent);box-shadow:0 0 12px rgba(0,255,200,0.8),0 0 24px rgba(0,255,200,0.5);animation:scanMove 2.2s linear infinite}
+@keyframes scanMove{0%{top:-5%}100%{top:105%}}
+#scanGrid{position:absolute;inset:0;background:repeating-linear-gradient(to bottom,rgba(0,255,200,0.07) 0px,rgba(0,255,200,0.07) 1px,transparent 1px,transparent 4px);mix-blend-mode:screen;opacity:0.6}
+#response{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:24px;line-height:1.7;background:rgba(0,0,0,0.75);padding:34px 30px;border-radius:12px;text-align:center;display:none;z-index:15;max-width:84vw;opacity:0;transition:opacity 1s ease;white-space:pre-line}
+</style>
+<style>
+html,body,button,input,select,textarea {font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;}
+p, #text, .screen p, #question, #msg {font-size:clamp(20px,4.5vmin,28px) !important;line-height:1.45 !important;}
+button, .btn, .choiceBtn, .choice, .carnetBtn {font-size:clamp(18px,4vmin,24px) !important;font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;}
+#startBtn, #start, #btn, #restartBtn, #restart {font-size:clamp(20px,5vmin,26px) !important;}
+small, .sub, #recall, #hint, #carnetLine {font-size:clamp(16px,3.2vmin,20px) !important;}
+</style>
+</head>
+<body>
+<button id="btn">Touchez pour commencer</button>
+
+<div id="qscreen" class="screen">
+  <div id="question">Comment as-tu imaginé M. Vidal ?</div>
+  <button class="choice">Un homme dur</button>
+  <button class="choice">Un homme blessé</button>
+  <button class="choice">Un homme détestable</button>
+  <button class="choice">Autrement</button>
+</div>
+
+<div id="eyeWrap">
+  <div id="eyeContainer">
+    <img id="eye" src="imageoeil.jpg" alt="oeil">
+    <div id="scanOverlay">
+      <div id="scanGrid"></div>
+      <div id="scanLine"></div>
+    </div>
+  </div>
+</div>
+
+<div id="response"></div>
+
+<div id="post" class="screen">
+  <div id="finaltext"></div>
+  <button id="restart">Recommencer</button>
+</div>
+
+<audio id="scannerA" src="scan.mp3" preload="auto" loop playsinline></audio>
+<audio id="scannerB" src="scan.mp3" preload="auto" loop playsinline></audio>
+<audio id="voix" src="audio_vidal.mp3" preload="auto" playsinline></audio>
+
+<script>
+function trackScan(id) {
+  try {
+    let usedSet = new Set(JSON.parse(localStorage.getItem('qr_used_set') || '[]'));
+    usedSet.add(id);
+    let arr = Array.from(usedSet);
+    localStorage.setItem('qr_used_set', JSON.stringify(arr));
+    localStorage.setItem('scans_used', arr.length);
+    localStorage.setItem('scans_total', '12'); 
+  } catch(e) { console.error('Storage error:', e); }
+}
+
+const btn = document.getElementById('btn');
+const qscreen = document.getElementById('qscreen');
+const choices = document.querySelectorAll('.choice');
+const eyeWrap = document.getElementById('eyeWrap');
+const eye = document.getElementById('eye');
+const scanOverlay = document.getElementById('scanOverlay');
+const response = document.getElementById('response');
+const post = document.getElementById('post');
+const finaltext = document.getElementById('finaltext');
+const restart = document.getElementById('restart');
+const scannerA = document.getElementById('scannerA');
+const scannerB = document.getElementById('scannerB');
+const voix = document.getElementById('voix');
+
+let choix = '';
+
+btn.onclick = () => {
+  trackScan('qr6'); /* Fix appliqué : variable globale synchronisée */
+  btn.style.display = 'none';
+  try{const s=new Set(JSON.parse(localStorage.getItem('qr_used_set')||'[]'));s.add('qr6');localStorage.setItem('qr_used_set',JSON.stringify([...s]));}catch(e){}
+  qscreen.classList.add('active');
+};
+
+choices.forEach(b => {
+  b.onclick = () => {
+    choix = b.textContent;
+    try{ localStorage.setItem('qr6_vidal_imagined', choix);}catch{}
+    qscreen.classList.remove('active');
+    
+    eyeWrap.style.display = 'flex';
+    setTimeout(() => eye.classList.add('show'), 50);
+    scanOverlay.classList.add('active');
+    
+    scannerA.volume = 0.45;
+    scannerB.volume = 0.25;
+    voix.volume = 1.0;
+    
+    scannerA.currentTime = 0;
+    scannerB.currentTime = 0;
+    scannerA.play().catch(()=>{});
+    setTimeout(()=> scannerB.play().catch(()=>{}), 180);
+    
+    setTimeout(()=>{
+      voix.play().catch(()=>{
+        document.body.addEventListener('click', ()=> voix.play().catch(()=>{}), {once:true});
+      });
+    }, 2000);
+  };
+});
+
+voix.onended = () => {
+  scannerA.pause();
+  scannerB.pause();
+  scanOverlay.classList.remove('active');
+  response.textContent = `tu avaisz dit : ${choix}.\nEt maintenant ?`;
+  response.style.display = 'block';
+  setTimeout(() => response.style.opacity = '1', 100);
+  
+  setTimeout(() => {
+    response.style.display = 'none';
+    eyeWrap.style.display = 'none';
+    finaltext.textContent = `tu avais dit : ${choix}.\nEt maintenant ?`;
+    finaltext.style.fontSize = '26px';
+    finaltext.style.lineHeight = '1.6';
+    post.classList.add('active');
+  }, 3500);
+};
+
+restart.onclick = () => location.reload();
+</script>
+</body>
+</html>
 
