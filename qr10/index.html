@@ -68,7 +68,7 @@ html,body{margin:0;height:100%;background:#000;color:#fff;font-family:system-ui,
 <div id="stats"></div>
 
 <audio id="narrateur" src="narrateur.mp3" preload="auto" playsinline></audio>
-<audio id="porte"     src="porte.mp3"     preload="auto" playsinline></audio>
+<audio id="porte"     src="porte.mp3"      preload="auto" playsinline></audio>
 
 <script>
 function trackScan(id) {
@@ -97,12 +97,12 @@ const narrateur=$('narrateur'),porte=$('porte');
 
 const descriptions={
   'Rémy' :"Bras bandé de l'épaule aux doigts. Il aurait préféré rester à l'hôpital.",
-  'Sam'  :"Assis au centre. Il regarde Inès.",
+  'Sam'   :"Assis au centre. Il regarde Inès.",
   'Vidal':"Bras croisés. La montre neuve. Il attend que ça finisse.",
   'Inès' :"Debout. Elle a demandé à être debout.",
   'Colin':"Mains dans les poches. Il regarde personne en particulier.",
   'Chloé':"Elle arrive en dernier. Une démarche particulière lorsqu'elle est stressée.",
-  'Noé'  :"Regard sur ses chaussures. La posture des mauvais jours."
+  'Noé'   :"Regard sur ses chaussures. La posture des mauvais jours."
 };
 
 function show(el){el.style.display='block'}
@@ -199,9 +199,6 @@ async function run(){
 
   // — PHASE 2 : tension montante —
   showText('Mercredi. 8h31.\nBureau de Mme Arnaud.','center');
-  await sleep(3000); hideText(); await sleep(500);
-
-  showText('Ils sont sept.\nUne pièce prévue pour trois.','center');
   await sleep(3000); hideText(); await sleep(500);
 
   await play(porte);
