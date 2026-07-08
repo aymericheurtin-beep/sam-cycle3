@@ -1,1 +1,246 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=yes">
+<title>QR9 - Bureau Vidal</title>
+<style>
+html,body{margin:0;height:100%;background:#000;color:#fff;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;overflow:hidden}
+#start{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:clamp(20px,5vmin,26px);padding:20px 40px;background:#fff;color:#000;border:none;border-radius:10px;cursor:pointer;z-index:100}
+#restart{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);font-size:clamp(20px,5vmin,26px);padding:15px 30px;background:#fff;color:#000;border:none;border-radius:10px;cursor:pointer;z-index:100;display:none}
+#text{position:absolute;left:50%;transform:translateX(-50%);width:92%;text-align:center;font-size:clamp(20px,4.5vmin,28px);line-height:1.45;z-index:30;display:none;white-space:pre-line;text-shadow:0 0 6px #000}
+#text.center{top:8%}
+#text.bottom{bottom:6%;font-size:clamp(18px,3.8vmin,24px);background:rgba(0,0,0,.75);padding:1.8vmin 2.5vmin;border-radius:8px;max-width:85%}
+#choices{position:absolute;bottom:8%;left:50%;transform:translateX(-50%);display:none;flex-direction:column;gap:2.2vmin;width:88%;max-height:45vh;overflow-y:auto;padding-bottom:2vmin;z-index:80;-webkit-overflow-scrolling:touch}
+.btn{font-size:clamp(18px,4vmin,24px);padding:20px 28px;background:rgba(17,17,17,.92);color:#fff;border:1px solid #fff;border-radius:8px;cursor:pointer;text-align:center;flex-shrink:0;backdrop-filter:blur(2px);font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+.btn.sel{background:#fff;color:#000}
+#image{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-width:96vw;max-height:85vh;z-index:10;display:none;cursor:pointer;transition:transform .3s ease, opacity 1.2s;opacity:0}
+#image.zoomed{max-width:none;max-height:none;width:200vw;height:auto;top:60%;left:50%;transform:translate(-50%,-50%);z-index:60}
+#carnetBox{position:absolute;top:5%;left:50%;transform:translateX(-50%);width:92%;display:none;flex-direction:column;gap:1.2vmin;z-index:70;max-height:30vh;overflow-y:auto}
+.carnetBtn{font-size:clamp(18px,4vmin,24px);padding:18px 24px;background:rgba(0,0,0,.85);border:1px solid #fff;color:#fff;border-radius:6px;cursor:pointer;text-align:center;flex-shrink:0;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+.carnetBtn.used{opacity:.4}
+#carnetLine{position:absolute;bottom:8%;left:50%;transform:translateX(-50%);width:90%;background:rgba(0,0,0,.9);padding:2.2vmin 2.2vmin 1vmin;border-radius:8px;font-size:clamp(16px,3.8vmin,22px);line-height:1.4;text-align:center;display:none;z-index:75}
+#carnetLine u{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px}
+#luBtn{display:block;margin:2vmin auto 0;padding:1.8vmin 4vmin;background:#fff;color:#000;border:none;border-radius:6px;font-size:clamp(15px,3.5vmin,20px);cursor:pointer;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+#hint{position:absolute;bottom:2%;left:50%;transform:translateX(-50%);font-size:clamp(16px,3.2vmin,20px);color:#fff;background:rgba(0,0,0,.6);padding:1vmin 2vmin;border-radius:6px;z-index:65;display:none;pointer-events:none}
+</style>
+</head>
+<body>
+<button id="start" type="button" onclick="run()">Touche pour commencer</button>
+<button id="restart" type="button" onclick="location.reload()">Recommencer</button>
+
+<div id="text"></div>
+<div id="choices"></div>
+<img id="image" alt="">
+<div id="carnetBox">
+  <button class="carnetBtn" data-id="LAVELOT">[ LAVELOT S. ]</button>
+  <button class="carnetBtn" data-id="MOREL">[ MOREL N. ]</button>
+  <button class="carnetBtn" data-id="DUBOIS">[ DUBOIS C. ]</button>
+</div>
+<div id="carnetLine"></div>
+<div id="hint"></div>
+
+<audio id="aKey" src="bruitkey.mp3" preload="auto" playsinline></audio>
+<audio id="aPage" src="bruit_pagephoto.mp3" preload="auto" playsinline></audio>
+
+<script>
+function trackScan(id) {
+  try {
+    let usedSet = new Set(JSON.parse(localStorage.getItem('qr_used_set') || '[]'));
+    usedSet.add(id);
+    let arr = Array.from(usedSet);
+    localStorage.setItem('qr_used_set', JSON.stringify(arr));
+    localStorage.setItem('scans_used', arr.length);
+    localStorage.setItem('scans_total', '13'); 
+  } catch(e) { console.error('Storage error:', e); }
+}
+
+const $ = id => document.getElementById(id);
+const start = $('start'), restart = $('restart'), text = $('text'), choices = $('choices'), image = $('image'), carnetBox = $('carnetBox'), carnetLine = $('carnetLine'), hint=$('hint');
+const aKey = $('aKey'), aPage = $('aPage');
+
+const show = el => el.style.display = 'block';
+const hide = el => el.style.display = 'none';
+const flex = el => el.style.display = 'flex';
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+function showText(t, hold=3000, pos='center'){
+  text.className=''; text.classList.add(pos);
+  text.textContent=t; show(text);
+  return sleep(hold).then(()=>hide(text));
+}
+function showTextStay(t,pos='center'){
+  text.className=''; text.classList.add(pos);
+  text.textContent=t; show(text);
+}
+function showImage(src){
+  return new Promise(res=>{
+    let done=false;
+    const finish=()=>{
+      if(done) return;
+      done=true;
+      show(image);
+      requestAnimationFrame(()=>{ image.style.opacity='1'; });
+      res();
+    };
+    image.onload=finish;
+    image.onerror=()=>{ console.warn('Image manquante:',src); finish(); };
+    image.classList.remove('zoomed');
+    image.style.opacity='0';
+    image.src=src;
+    setTimeout(finish,2000);
+  });
+}
+function hideImage(){
+  return new Promise(async res=>{
+    image.style.opacity='0';
+    await sleep(1200);
+    hide(image);hide(hint);image.src='';image.classList.remove('zoomed');
+    res();
+  });
+}
+async function play(a){try{await a.play();}catch{}}
+function stopAudio(a){try{a.pause();a.currentTime=0;}catch{}}
+
+function askMulti(q,opts){
+  return new Promise(res=>{
+    showTextStay(q,'center');
+    choices.innerHTML='';
+    const sel=new Set();
+    opts.forEach(o=>{
+      const b=document.createElement('button');b.className='btn';b.textContent=o;
+      b.onclick=()=>{b.classList.toggle('sel'); sel.has(o)?sel.delete(o):sel.add(o); };
+      choices.appendChild(b);
+    });
+    const ok=document.createElement('button');ok.className='btn';ok.textContent='Valider';ok.style.marginTop='1vmin';ok.style.background='#fff';ok.style.color='#000';
+    ok.onclick=()=>{hide(text);hide(choices);res([...sel]);};
+    choices.appendChild(ok);
+    flex(choices);
+    choices.scrollTop=0;
+  });
+}
+function askSingle(q,opts){
+  return new Promise(res=>{
+    showTextStay(q,'center');
+    choices.innerHTML='';
+    opts.forEach(o=>{
+      const b=document.createElement('button');b.className='btn';b.textContent=o;
+      b.onclick=()=>{hide(text);hide(choices);res(o);};
+      choices.appendChild(b);
+    });
+    flex(choices);
+    choices.scrollTop=0;
+  });
+}
+function waitImageTap(){
+  return new Promise(res=>{
+    const handler=()=>{
+      image.removeEventListener('click',handler);
+      image.removeEventListener('touchstart',handler);
+      res();
+    };
+    image.addEventListener('click',handler);
+    image.addEventListener('touchstart',handler);
+  });
+}
+
+async function run(){
+  hide(start);hide(restart);
+  trackScan('qr11');
+
+  await showImage('crochetage_vidal.jpg');
+  await sleep(4000);
+  showTextStay("Confinement. YouTube.\nC'est illégal.\nC'est pratique.",'bottom');
+  await sleep(3500);hide(text);await hideImage();
+
+  const vidalImagined = localStorage.getItem('qr6_vidal_imagined');
+  const bureauQuestion = vidalImagined
+    ? `Tu avais imaginé Vidal comme ${vidalImagined}.\nEt son bureau, un samedi matin, vous l'imaginez comment ?`
+    : `Son bureau, un samedi matin, tu l'imaginais comment ?`;
+  await askMulti(bureauQuestion,[
+    'Ordonné','en bazar','petit','grand','lumineux','sombre','Rien de précis'
+  ]);
+
+  await showImage('bureau_vidal.jpg');
+  await showText('Voici un bureau',3000,'bottom');
+  await hideImage();
+
+  await showImage('bureau_vidal.jpg');
+  hint.textContent='Appuie sur le carnet';
+  show(hint);
+  await waitImageTap();
+  hide(hint);
+  image.classList.add('zoomed');
+  await sleep(1000);
+  flex(carnetBox);
+
+  const carnetTexts={
+    LAVELOT:"<u>LAVELOT S.</u> : Moteur exceptionnel. M'a coûté mon poste. Vingt-trois ans ici. Il n'ira pas au championnat si j'ai mon mot à dire. Trous noirs. Fragile. Exploitable si nécessaire..",
+    MOREL:"MOREL N. : Père absent et indifférent — mobile émotionnel fort. Si Lavelot tombe, Morel prend sa place. Il veut son père dans les tribunes. Moi je veux partir en paix.Tout le monde est gagnant.",
+    DUBOIS:"DUBOIS C. : Court comme un frigo qui aurait oublié ses roulettes."
+  };
+  let opened=0;
+  const carnetOrder=[];
+  await new Promise(res=>{
+    carnetBox.querySelectorAll('.carnetBtn').forEach(btn=>{
+      btn.onclick=()=>{
+        if(btn.classList.contains('used'))return;
+        btn.classList.add('used');
+        const id=btn.dataset.id;
+        if(carnetOrder.length===0){
+          try{
+            localStorage.setItem('qr11_carnet_first', id);
+            localStorage.setItem('qr11_pont_qr12', id.toLowerCase()+'_first');
+          }catch(e){}
+        }
+        carnetOrder.push(id);
+        opened++;
+        const estDernier = opened===3;
+        carnetLine.innerHTML = carnetTexts[id] +
+          `<button id="luBtn">${estDernier ? 'Continuer' : 'J\'ai lu'}</button>`;
+        show(carnetLine);
+        document.getElementById('luBtn').onclick=()=>{
+          hide(carnetLine);
+          if(estDernier){
+            hide(carnetBox);
+            hideImage().then(()=>res());
+          }
+        };
+      };
+    });
+  });
+  try{ localStorage.setItem('qr11_carnet_order', JSON.stringify(carnetOrder)); }catch(e){}
+
+  await showImage('vidal_jeune.webp');
+  await sleep(5000);
+  await hideImage();
+
+  const vidalMatch = await askSingle("Tu l'avais imaginé comme ça ?",['Oui, à peu près','Non, rien à voir',"Je ne l'avais pas imaginé"]);
+  try{ localStorage.setItem('qr11_vidal_match', vidalMatch); }catch(e){}
+
+  await showImage('vidal_jeune.webp');
+  await sleep(5000);
+  play(aKey);
+  const feelPromise = askSingle('Là, maintenant — Tu ressens quelque chose ?',['La peur',"l'excitation",'autre chose']);
+  await sleep(1500);
+  await hideImage();
+  await showImage('phot_carnet.webp');
+  play(aPage);
+  await feelPromise;
+  await Promise.all([
+    new Promise(r=>{aKey.onended=r; setTimeout(r,4000);}),
+    new Promise(r=>{aPage.onended=r; setTimeout(r,4000);})
+  ]);
+  stopAudio(aKey); stopAudio(aPage);
+  await hideImage();
+
+  await showImage('souslatable.jpg');
+  await sleep(4000);
+  await hideImage();
+
+  show(restart);
+}
+</script>
+</body>
+</html>
 
