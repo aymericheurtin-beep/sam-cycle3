@@ -59,7 +59,7 @@ function trackScan(id) {
     let arr = Array.from(usedSet);
     localStorage.setItem('qr_used_set', JSON.stringify(arr));
     localStorage.setItem('scans_used', arr.length);
-    localStorage.setItem('scans_total', '12'); 
+    localStorage.setItem('scans_total', '11'); 
   } catch(e) { console.error('Storage error:', e); }
 }
 
@@ -76,8 +76,8 @@ let opened={caméra:false,fumée:false,carnet:false};
 
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 
-start.onclick=()=>{ trackScan('qr8');
-  try{const s=new Set(JSON.parse(localStorage.getItem('qr_used_set')||'[]'));s.add('qr8');localStorage.setItem('qr_used_set',JSON.stringify([...s]));}catch(e){}
+start.onclick=()=>{ trackScan('qr6');
+  try{const s=new Set(JSON.parse(localStorage.getItem('qr_used_set')||'[]'));s.add('qr6');localStorage.setItem('qr_used_set',JSON.stringify([...s]));}catch(e){}
   start.classList.add('hidden');
   sequence();
 };
@@ -159,9 +159,9 @@ async function final(){
   const first=order[0];
   const interp=interpretation(first);
   try{
-    localStorage.setItem('qr8_first', first);
-    localStorage.setItem('qr8_order', JSON.stringify(order));
-    localStorage.setItem('qr8_profile', first==='caméra' ? 'preuve' : first==='fumée' ? 'conséquence' : 'écrit');
+    localStorage.setItem('qr6_first', first);
+    localStorage.setItem('qr6_order', JSON.stringify(order));
+    localStorage.setItem('qr6_profile', first==='caméra' ? 'preuve' : first==='fumée' ? 'conséquence' : 'écrit');
   }catch(e){}
   text.innerHTML=`${interp}<br><small>Tu as regardé ${first} en 1er.</small>`;
   text.classList.add('visible');
@@ -171,3 +171,4 @@ async function final(){
 </script>
 </body>
 </html>
+
