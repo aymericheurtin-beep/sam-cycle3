@@ -51,7 +51,7 @@ function trackScan(id) {
     let arr = Array.from(usedSet);
     localStorage.setItem('qr_used_set', JSON.stringify(arr));
     localStorage.setItem('scans_used', arr.length);
-    localStorage.setItem('scans_total', '13'); 
+    localStorage.setItem('scans_total', '11'); 
   } catch(e) { console.error('Storage error:', e); }
 }
 
@@ -146,14 +146,14 @@ function waitImageTap(){
 
 async function run(){
   hide(start);hide(restart);
-  trackScan('qr11');
+  trackScan('qr9');
 
   await showImage('crochetage_vidal.jpg');
   await sleep(4000);
   showTextStay("Confinement. YouTube.\nC'est illégal.\nC'est pratique.",'bottom');
   await sleep(3500);hide(text);await hideImage();
 
-  const vidalImagined = localStorage.getItem('qr6_vidal_imagined');
+  const vidalImagined = localStorage.getItem('qr5_vidal_imagined');
   const bureauQuestion = vidalImagined
     ? `Tu avais imaginé Vidal comme ${vidalImagined}.\nEt son bureau, un samedi matin, vous l'imaginez comment ?`
     : `Son bureau, un samedi matin, tu l'imaginais comment ?`;
@@ -189,8 +189,8 @@ async function run(){
         const id=btn.dataset.id;
         if(carnetOrder.length===0){
           try{
-            localStorage.setItem('qr11_carnet_first', id);
-            localStorage.setItem('qr11_pont_qr12', id.toLowerCase()+'_first');
+            localStorage.setItem('qr9_carnet_first', id);
+            localStorage.setItem('qr9_pont_qr12', id.toLowerCase()+'_first');
           }catch(e){}
         }
         carnetOrder.push(id);
@@ -209,14 +209,14 @@ async function run(){
       };
     });
   });
-  try{ localStorage.setItem('qr11_carnet_order', JSON.stringify(carnetOrder)); }catch(e){}
+  try{ localStorage.setItem('qr9_carnet_order', JSON.stringify(carnetOrder)); }catch(e){}
 
   await showImage('vidal_jeune.webp');
   await sleep(5000);
   await hideImage();
 
   const vidalMatch = await askSingle("Tu l'avais imaginé comme ça ?",['Oui, à peu près','Non, rien à voir',"Je ne l'avais pas imaginé"]);
-  try{ localStorage.setItem('qr11_vidal_match', vidalMatch); }catch(e){}
+  try{ localStorage.setItem('qr9_vidal_match', vidalMatch); }catch(e){}
 
   await showImage('vidal_jeune.webp');
   await sleep(5000);
@@ -243,4 +243,6 @@ async function run(){
 </script>
 </body>
 </html>
+
+
 
