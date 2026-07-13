@@ -48,7 +48,7 @@ try {
   let arr = Array.from(usedSet);
   localStorage.setItem('qr_used_set', JSON.stringify(arr));
   localStorage.setItem('scans_used', arr.length);
-  localStorage.setItem('scans_total', '13');
+  localStorage.setItem('scans_total', '11');
 } catch(e) { 
   console.error('Storage error:', e); 
 }
@@ -71,3 +71,4 @@ restart.onclick=()=>location.reload();
 </script>
 </body>
 </html>
+
