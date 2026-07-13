@@ -48,13 +48,12 @@ html,body{margin:0;height:100%;background:#000;color:#fff;font-family:system-ui,
 
 <div id="sceneWrap">
   <img id="sceneImg" src="touslessuspects.jpg" alt="La réunion">
-  <div class="zone" data-who="Rémy"  style="left:7.8%;  top:12.0%; width:9.8%; height:35.0%"><span class="zone-label">Rémy</span></div>
-  <div class="zone" data-who="Vidal" style="left:25.3%; top:14.8%; width:11.7%; height:22.9%"><span class="zone-label">Vidal</span></div>
-  <div class="zone" data-who="Inès"  style="left:61.0%; top:17.7%; width:14.0%; height:37.5%"><span class="zone-label">Inès</span></div>
-  <div class="zone" data-who="Colin" style="left:86.0%; top:15.0%; width:12.0%; height:52.0%"><span class="zone-label">Colin</span></div>
-  <div class="zone" data-who="Sam"   style="left:30.9%; top:39.9%; width:23.3%; height:41.3%"><span class="zone-label">Sam</span></div>
-  <div class="zone" data-who="Noé"   style="left:0.0%;  top:40.0%; width:29.1%; height:41.0%"><span class="zone-label">Noé</span></div>
-  <div class="zone" data-who="Chloé" style="left:65.0%; top:25.0%; width:22.5%; height:67.2%"><span class="zone-label">Chloé</span></div>
+  <div class="zone" data-who="Rémy"  style="left:4.8%;  top:20.5%; width:16.8%; height:55.0%"><span class="zone-label">Rémy</span></div>
+  <div class="zone" data-who="Vidal" style="left:24.8%; top:14.5%; width:12.5%; height:23.0%"><span class="zone-label">Vidal</span></div>
+  <div class="zone" data-who="Inès"  style="left:60.0%; top:20.0%; width:13.5%; height:40.0%"><span class="zone-label">Inès</span></div>
+  <div class="zone" data-who="Sam"   style="left:72.5%; top:23.5%; width:10.5%; height:37.0%"><span class="zone-label">Sam</span></div>
+  <div class="zone" data-who="Noé"   style="left:30.0%; top:41.5%; width:23.5%; height:38.5%"><span class="zone-label">Noé</span></div>
+  <div class="zone" data-who="Chloé" style="left:76.8%; top:28.0%; width:20.5%; height:58.5%"><span class="zone-label">Chloé</span></div>
   <div id="imageHint">Touche un personnage</div>
 </div>
 
@@ -97,12 +96,11 @@ const narrateur=$('narrateur'),porte=$('porte');
 
 const descriptions={
   'Rémy' :"Bras bandé de l'épaule aux doigts. Il aurait préféré rester à l'hôpital.",
-  'Sam'   :"Assis au centre. Il regarde Inès.",
+  'Sam'   :"Debout à la droite d'Inès. Il regarde le document.",
   'Vidal':"Bras croisés. La montre neuve. Il attend que ça finisse.",
   'Inès' :"Debout. Elle a demandé à être debout.",
-  'Colin':"Mains dans les poches. Il regarde personne en particulier.",
   'Chloé':"Elle arrive en dernier. Une démarche particulière lorsqu'elle est stressée.",
-  'Noé'   :"Regard sur ses chaussures. La posture des mauvais jours."
+  'Noé'   :"Assis au centre de la pièce. Regard sur ses chaussures. La posture des mauvais jours."
 };
 
 function show(el){el.style.display='block'}
