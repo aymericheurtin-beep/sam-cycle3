@@ -36,7 +36,7 @@ function trackScan(id) {
     let arr = Array.from(usedSet);
     localStorage.setItem('qr_used_set', JSON.stringify(arr));
     localStorage.setItem('scans_used', arr.length);
-    localStorage.setItem('scans_total', '12'); 
+    localStorage.setItem('scans_total', '11'); 
   } catch(e) { console.error('Storage error:', e); }
 }
 
@@ -74,9 +74,9 @@ async function play(a){ try{ await a.play(); }catch{} }
 async function run(){
   hide(start); hide(restart);
 
-  trackScan('qr9');
-  localStorage.setItem('qr9_done','1');
-  try{const s=new Set(JSON.parse(localStorage.getItem('qr_used_set')||'[]'));s.add('qr9');localStorage.setItem('qr_used_set',JSON.stringify([...s]));}catch(e){}
+  trackScan('qr7');
+  localStorage.setItem('qr7_done','1');
+  try{const s=new Set(JSON.parse(localStorage.getItem('qr_used_set')||'[]'));s.add('qr7');localStorage.setItem('qr_used_set',JSON.stringify([...s]));}catch(e){}
 
   // Lecture Audio Vidal (aLavelot)
   await play(aLavelot);
@@ -92,7 +92,7 @@ async function run(){
     'Vaste et vide qui résonne',
     'Rien de précis'
   ]);
-  localStorage.setItem('qr9_vestiaire', repVestiaire);
+  localStorage.setItem('qr7_vestiaire', repVestiaire);
 
   image.src='vestiaire.jpg'; show(image);
   text.className='bottom'; text.textContent='voici un vestiaire'; show(text);
@@ -114,7 +114,7 @@ async function run(){
     'Un cadenas à clé',
     'Un autre type de cadenas'
   ]);
-  localStorage.setItem('qr9_cadenas', repCadenas);
+  localStorage.setItem('qr7_cadenas', repCadenas);
 
   if(qr1){
     if(qr1 === repCadenas){
@@ -140,3 +140,4 @@ restart.onclick = ()=> location.reload();
 </script>
 </body>
 </html>
+
