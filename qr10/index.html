@@ -77,7 +77,7 @@ function trackScan(id) {
     let arr = Array.from(usedSet);
     localStorage.setItem('qr_used_set', JSON.stringify(arr));
     localStorage.setItem('scans_used', arr.length);
-    localStorage.setItem('scans_total', '13'); 
+    localStorage.setItem('scans_total', '11'); 
     return arr.length;
   } catch(e) { 
     console.error('Storage error:', e); 
@@ -109,7 +109,6 @@ function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
 function showText(t,pos='center'){text.className='';text.classList.add(pos);text.textContent=t;show(text)}
 function hideText(){hide(text)}
 async function play(a){try{await a.play()}catch{}}
-function normalize(s){return(s||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim()}
 
 async function runCountdown(from){
   countdown.style.opacity='1';
@@ -180,7 +179,7 @@ async function showInesZoom(){
 
 async function run(){
   hide(start);
-  const used = trackScan('qr12');
+  const used = trackScan('qr10');
 
   // — PHASE 1 : pont carnet —
   const firstCarnet=(localStorage.getItem('qr11_carnet_first')||'').toUpperCase();
@@ -228,7 +227,7 @@ async function run(){
       if(touchedCount>=1||waited>=40000){clearInterval(check);res();}
     },500);
   });
-  // Attendre fermeture du tooltip pour laisser le temps de lire le commentaire
+  // Attendre fermeture du tooltip
   await new Promise(res=>{
     const check=setInterval(()=>{
       if(touchedCount===0 || window.getComputedStyle(tooltip).display==='none'){clearInterval(check);res();}
@@ -246,7 +245,7 @@ async function run(){
   await sleep(12000);
   hideText();
 
-  stats.innerHTML=`Scans proposés : 13<br>Scans utilisés : ${used}`;
+  stats.innerHTML=`Scans proposés : 11<br>Scans utilisés : ${used}`;
   show(stats);
   show(restart);
 }
