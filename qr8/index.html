@@ -41,7 +41,7 @@ function trackScan(id) {
     let arr = Array.from(usedSet);
     localStorage.setItem('qr_used_set', JSON.stringify(arr));
     localStorage.setItem('scans_used', arr.length);
-    localStorage.setItem('scans_total', '12'); 
+    localStorage.setItem('scans_total', '11'); 
   } catch(e) { console.error('Storage error:', e); }
 }
 
@@ -96,9 +96,9 @@ async function play(a){ try{ await a.play(); }catch{} }
 async function run(){
   hide(start); hide(restart);
 
-  trackScan('qr10');
-  localStorage.setItem('qr10_done','1');
-  try{const s=new Set(JSON.parse(localStorage.getItem('qr_used_set')||'[]'));s.add('qr10');localStorage.setItem('qr_used_set',JSON.stringify([...s]));}catch(e){}
+  trackScan('qr8');
+  localStorage.setItem('qr8_done','1');
+  try{const s=new Set(JSON.parse(localStorage.getItem('qr_used_set')||'[]'));s.add('qr8');localStorage.setItem('qr_used_set',JSON.stringify([...s]));}catch(e){}
 
   image.src='portechambre.webp'; show(image);
   await showText('Chambre 214. Inès et Sam entrent.',2500,'bottom');
@@ -140,7 +140,7 @@ async function run(){
     'Les messages du téléphone',
     'Autre chose'
   ]);
-  localStorage.setItem('qr10_vu_decompte', JSON.stringify(vu));
+  localStorage.setItem('qr8_vu_decompte', JSON.stringify(vu));
 
   show(restart);
 }
@@ -150,3 +150,4 @@ restart.onclick = ()=> location.reload();
 </script>
 </body>
 </html>
+
