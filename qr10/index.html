@@ -94,13 +94,13 @@ const stats=$('stats');
 const cropWrap=$('inesCropWrap'),cropImg=$('inesCropImg');
 const narrateur=$('narrateur'),porte=$('porte');
 
-const descriptions={
-  'Rémy' :"Bras bandé de l'épaule aux doigts. Il aurait préféré rester à l'hôpital.",
-  'Sam'   :"Debout à la droite d'Inès. Il regarde le document.",
-  'Vidal':"Bras croisés. La montre neuve. Il attend que ça finisse.",
-  'Inès' :"Debout. Elle a demandé à être debout.",
-  'Chloé':"Elle arrive en dernier. Une démarche particulière lorsqu'elle est stressée.",
-  'Noé'   :"Assis au centre de la pièce. Regard sur ses chaussures. La posture des mauvais jours."
+const descriptions = {
+  'Rémy'  : "Bras bandé. préfèrerait être à l'hôpital que dans cette pièce.",
+  'Sam'   : "Ne se rappelle toujours pas de jeudi soir. Son avenir se joue là.",
+  'Vidal' : "Bras croisés. Sa montre Casio n'est plus à son poignet.",
+  'Inès'  : "Debout. Son carnet a tout consigné.",
+  'Chloé' : "Arrivée en dernier. Démarche stressée.",
+  'Noé'   : "Assis au centre. Posture des mauvais jours."
 };
 
 function show(el){el.style.display='block'}
@@ -238,25 +238,11 @@ async function run(){
   // Bonus Inès
   if(lastWho==='Inès') await showInesZoom();
 
-  // Bonus Vidal reconnu dans QR11
-  if(lastWho==='Vidal'){
-    const vidalMatch=localStorage.getItem('qr11_vidal_match')||'';
-    if(normalize(vidalMatch).includes('oui')){
-      hide(sceneWrap); hide(tooltip);
-      await sleep(300);
-      showText("Tu l'avais reconnu.",'center');
-      await sleep(3000); hideText();
-    }
-  }
-
   // — PHASE 4 : instruction de lecture —
   hide(sceneWrap); hide(tooltip);
   await sleep(400);
 
-  showText(`Dans quelques instants, tu vas lire la suite de ce roman.
-Chaque personnage dans cette pièce a une raison d'être là.
-Toi aussi, tu sais des choses sur eux.
-Utilise-les.`, 'center');
+  showText(`Dans quelques instants, tu vas lire la suite de ce roman.\nChaque personnage dans cette pièce a une raison d'être là.\nToi aussi, tu sais des choses sur eux.\nUtilise-les.`, 'center');
   await sleep(12000);
   hideText();
 
