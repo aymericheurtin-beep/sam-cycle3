@@ -164,7 +164,8 @@ function setupZones(){
 }
 
 async function showInesZoom(){
-  const choice=parseInt(localStorage.getItem('qr4_ines_choice')||'0',10);
+  // CORRECTION PONT : qr4_ines_choice devient qr5_ines_choice
+  const choice=parseInt(localStorage.getItem('qr5_ines_choice')||'0',10);
   if(choice>=1&&choice<=5){
     const col=(choice-1)%3,row=Math.floor((choice-1)/3);
     cropImg.style.left=`-${col*100}%`;
@@ -182,7 +183,8 @@ async function run(){
   const used = trackScan('qr10');
 
   // — PHASE 1 : pont carnet —
-  const firstCarnet=(localStorage.getItem('qr11_carnet_first')||'').toUpperCase();
+  // CORRECTION PONT : qr11_carnet_first devient qr9_carnet_first
+  const firstCarnet=(localStorage.getItem('qr9_carnet_first')||'').toUpperCase();
   if(firstCarnet==='LAVELOT'){
     showText("Dans le carnet de Vidal, tu avais cliqué sur Lavelot en premier.\nIl est dans cette pièce.",'center');
     await sleep(5000); hideText(); await sleep(400);
