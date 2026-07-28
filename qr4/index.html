@@ -31,7 +31,7 @@ body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-fam
   object-fit:contain;
 }
 
-/* Grille invisible superposée au millimètre près sur l'image */
+/* Grille invisible superposée au millimètre près sur l'image (3 colonnes x 2 lignes égales) */
 #grilleZones {
   position:absolute;
   top:0;
@@ -60,7 +60,7 @@ p,#messageFin{font-size:clamp(20px,4.5vmin,28px)!important;line-height:1.45!impo
 <button id="restart">Recommencer</button>
 
 <div id="conteneurQCM">
-  <img id="qcm" src="./ines_5_choix.jpg" alt="Choisissez votre Inès">
+  <img id="qcm" src="./ines_6_choix.png" alt="Choisissez votre Inès">
   <div id="grilleZones">
     <div class="zone" onclick="validerChoix(1)"></div>
     <div class="zone" onclick="validerChoix(2)"></div>
@@ -118,7 +118,7 @@ function validerChoix(idx){
   conteneurQCM.style.display='none';
   
   localStorage.setItem('qr4_ines_choice', String(idx));
-  localStorage.setItem('qr4_ines', 'ines_5_choix.jpg');
+  localStorage.setItem('qr4_ines', 'ines_6_choix.png');
   
   // Différenciation du message selon le choix (cases 1 à 5 vs case 6 du "?")
   if (idx === 6) {
@@ -135,3 +135,4 @@ restart.onclick=()=>location.reload();
 </script>
 </body>
 </html>
+
