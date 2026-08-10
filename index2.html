@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Et si c'était moi... — Démonstrateur interactif</title>
+<meta name="description" content="Roman augmenté pour lecteurs de 9-12 ans. Dispositif QR métacognitif avec décroissance et compteur d'autonomisation">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+
+  :root{
+    --bg: #0b0a08;
+    --bg-soft: #141210;
+    --paper: #f6f1e6;
+    --text: #f3ede0;
+    --text-dim: #b8b0a0;
+    --ember: #e8823a;
+    --ember-soft: #ffb570;
+    --line: #2a2620;
+    --card: #17140f;
+  }
+
+  *{box-sizing:border-box;}
+
+  html{scroll-behavior:smooth;}
+
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -10%, rgba(232,130,58,0.16), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 100% 0%, rgba(232,130,58,0.08), transparent 55%),
+      var(--bg);
+    color:var(--text);
+    font-family:'Space Grotesk', system-ui, sans-serif;
+    line-height:1.6;
+    padding:0 0 80px 0;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  h1,h2,h3{font-family:'Fraunces', Georgia, serif; font-weight:700; letter-spacing:-0.01em;}
+
+  a{color:inherit;}
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    display:flex; justify-content:space-between; align-items:flex-start; gap:16px;
+    max-width:1080px; margin:0 auto; padding:24px 24px 0 24px;
+    flex-wrap:wrap;
+  }
+  .tag{
+    display:inline-flex; align-items:center; gap:8px;
+    border:1px solid var(--line); border-radius:999px; padding:6px 14px;
+    font-size:0.78rem; letter-spacing:0.04em; text-transform:uppercase; color:var(--text-dim);
+    background:rgba(255,255,255,0.02);
+  }
+  .tag b{color:var(--ember-soft); font-weight:600;}
+
+  .stats-widget{
+    border:1px solid var(--line); background:var(--card);
+    border-radius:14px; padding:14px 18px; min-width:200px;
+  }
+  .stats-widget .label{
+    text-transform:uppercase; letter-spacing:0.08em; font-size:0.65rem; color:var(--text-dim); display:block; margin-bottom:8px;
+  }
+  .stats-row{display:flex; align-items:baseline; justify-content:space-between; font-size:0.85rem; margin-bottom:4px;}
+  .stats-row b{color:var(--ember-soft); font-family:'Fraunces',serif; font-size:1.1rem;}
+  .stats-bar{
+    margin-top:10px; height:6px; border-radius:99px; background:#2a251d; overflow:hidden;
+  }
+  .stats-bar-fill{
+    height:100%; width:calc(6/11*100%); background:linear-gradient(90deg,var(--ember),var(--ember-soft)); border-radius:99px;
+  }
+
+  /* ---------- hero ---------- */
+  header.hero{
+    max-width:820px; margin:70px auto 10px auto; padding:0 24px; text-align:center;
+  }
+  .eyebrow{
+    font-size:0.85rem; letter-spacing:0.18em; text-transform:uppercase; color:var(--ember-soft);
+    margin-bottom:18px; display:block;
+  }
+  h1.title{
+    font-size:clamp(2.6rem, 7vw, 4.6rem); margin:0 0 6px 0; line-height:1.02;
+  }
+  h1.title em{
+    color:var(--ember-soft); font-style:italic;
+  }
+  .subtitle{
+    font-size:1.15rem; color:var(--text-dim); max-width:560px; margin:22px auto 0 auto;
+  }
+  .credit{
+    margin-top:28px; font-size:0.85rem; color:var(--text-dim); opacity:0.75;
+  }
+
+  /* ---------- decroissance strip: signature element ---------- */
+  .decroissance{
+    max-width:920px; margin:64px auto 0 auto; padding:0 24px;
+  }
+  .decroissance-label{
+    display:flex; justify-content:space-between; font-size:0.72rem; text-transform:uppercase;
+    letter-spacing:0.08em; color:var(--text-dim); margin-bottom:14px;
+  }
+  .decroissance-track{
+    display:flex; align-items:center; gap:0; position:relative; padding:20px 0;
+  }
+  .decroissance-track::before{
+    content:''; position:absolute; left:0; right:0; top:50%; height:1px;
+    background:linear-gradient(90deg, rgba(232,130,58,0.5), rgba(232,130,58,0.05));
+  }
+  .qr-dot{
+    position:relative; border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, var(--ember-soft), var(--ember) 70%);
+    box-shadow:0 0 18px rgba(232,130,58,0.35);
+    flex-shrink:0;
+  }
+  .dot-wrap{
+    flex:1; display:flex; flex-direction:column; align-items:center; gap:10px; position:relative;
+  }
+  .dot-num{ font-size:0.62rem; color:var(--text-dim); }
+  .decroissance-caption{
+    text-align:center; font-size:0.88rem; color:var(--text-dim); margin-top:18px; font-style:italic;
+  }
+
+  /* ---------- note box ---------- */
+  .note-box{
+    max-width:820px; margin:56px auto 0 auto; padding:0 24px;
+  }
+  .note-inner{
+    border:1px dashed var(--line); border-radius:14px; padding:22px 26px;
+    font-size:0.92rem; color:var(--text-dim); background:rgba(255,255,255,0.015);
+  }
+  .note-inner strong{color:var(--text);}
+
+  /* ---------- CUA strip ---------- */
+  .cua-strip{
+    max-width:920px; margin:56px auto 0 auto; padding:0 24px;
+    display:grid; grid-template-columns:repeat(3,1fr); gap:16px;
+  }
+  .cua-item{
+    border-top:2px solid var(--ember); padding-top:12px;
+  }
+  .cua-item h3{font-family:'Space Grotesk',sans-serif; font-size:0.95rem; font-weight:700; margin:0 0 6px 0; color:var(--text);}
+  .cua-item p{font-size:0.85rem; color:var(--text-dim); margin:0;}
+
+  /* ---------- grid of demos ---------- */
+  .section-label{
+    max-width:920px; margin:70px auto 24px auto; padding:0 24px;
+    display:flex; align-items:center; gap:14px;
+  }
+  .section-label span{
+    font-size:0.78rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-dim); white-space:nowrap;
+  }
+  .section-label::after{
+    content:''; height:1px; flex:1; background:var(--line);
+  }
+
+  .grid{
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));
+    gap:22px; max-width:920px; margin:0 auto; padding:0 24px;
+  }
+  .card{
+    border:1px solid var(--line); background:var(--card); border-radius:16px;
+    padding:28px; display:flex; flex-direction:column; justify-content:space-between;
+    transition:transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+  }
+  .card:hover{ transform:translateY(-4px); border-color:rgba(232,130,58,0.5); box-shadow:0 12px 30px rgba(0,0,0,0.35); }
+  .card .qr-index{
+    font-family:'Fraunces',serif; font-size:0.8rem; color:var(--ember-soft); letter-spacing:0.05em; display:block; margin-bottom:8px;
+  }
+  .card h2{ font-size:1.35rem; margin:0 0 6px 0; }
+  .card .tech-tag{
+    font-size:0.72rem; font-weight:600; opacity:0.65; text-transform:uppercase; letter-spacing:0.05em;
+    display:block; margin-bottom:14px; color:var(--text-dim);
+  }
+  .card p.desc{ font-size:0.92rem; color:var(--text-dim); margin-bottom:26px; }
+  .btn{
+    background:var(--ember); color:#1a0f04; text-decoration:none; padding:12px 18px;
+    border-radius:9px; text-align:center; font-weight:700; font-size:0.88rem;
+    transition:background 0.2s ease, transform 0.15s ease;
+    display:inline-block;
+  }
+  .btn:hover{ background:var(--ember-soft); }
+
+  /* ---------- collection footer ---------- */
+  .collection{
+    max-width:820px; margin:80px auto 0 auto; padding:26px 24px; text-align:center;
+  }
+  .collection p{ font-size:0.9rem; color:var(--text-dim); }
+  .collection a.link-pill{
+    display:inline-flex; align-items:center; gap:8px; margin-top:10px;
+    border:1px solid var(--line); border-radius:999px; padding:8px 16px;
+    text-decoration:none; font-size:0.85rem; color:var(--text);
+  }
+  .collection a.link-pill:hover{ border-color:var(--ember); color:var(--ember-soft); }
+
+  footer.legal{
+    max-width:600px; margin:60px auto 0 auto; text-align:center;
+    border-top:1px solid var(--line); padding-top:28px; padding-left:24px; padding-right:24px;
+  }
+  footer.legal p{ font-size:0.82rem; opacity:0.6; }
+  .github-link{ color:#a8a196; font-size:0.8rem; text-decoration:none; display:block; margin-top:12px; }
+  .github-link:hover{ color:var(--ember-soft); }
+
+  @media (max-width:640px){
+    .cua-strip{ grid-template-columns:1fr; }
+    .topbar{ flex-direction:column; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .card{ transition:none; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="topbar">
+    <span class="tag">CM1 · CM2 · 6<sup>ème</sup> — <b>9-12 ans</b></span>
+    <div class="stats-widget">
+      <span class="label">Simulation d'autonomisation</span>
+      <div class="stats-row"><span>Scans proposés</span><b>11</b></div>
+      <div class="stats-row"><span>Scans utilisés</span><b>6</b></div>
+      <div class="stats-bar"><div class="stats-bar-fill"></div></div>
+    </div>
+  </div>
+
+  <header class="hero">
+    <span class="eyebrow">Lecture augmentée décroissante</span>
+    <h1 class="title">Et si <em>c'était moi</em>...</h1>
+    <p class="subtitle">Roman augmenté pour lecteurs de 9-12 ans.<br>
+    Dispositif QR métacognitif avec décroissance et compteur d'autonomisation.</p>
+    <p class="credit">18 chapitres · 10500 mots</p>
+  </header>
+
+  <div class="decroissance">
+    <div class="decroissance-label">
+      <span>Chapitre 1</span>
+      <span>Chapitre 18</span>
+    </div>
+    <div class="decroissance-track" aria-hidden="true">
+      <div class="dot-wrap"><div class="qr-dot" style="width:26px;height:26px;"></div><span class="dot-num">QR0</span></div>
+      <div class="dot-wrap"><div class="qr-dot" style="width:24px;height:24px;"></div><span class="dot-num">QR1</span></div>
+      <div class="dot-wrap"><div class="qr-dot" style="width:22px;height:22px;"></div><span class="dot-num">QR2</span></div>
+      <div class="dot-wrap"><div class="qr-dot" style="width:20px;height:20px;"></div><span class="dot-num">QR3</span></div>
+      <div class="dot-wrap"><div class="qr-dot" style="width:18px;height:18px;"></div><span class="dot-num">QR4</span></div>
+      <div class="dot-wrap"><div class="qr-dot" style="width:16px;height:16px;opacity:0.9;"></div><span class="dot-num">QR5</span></div>
+      <div class="dot-wrap"><div class="qr-dot" style="width:14px;height:14px;opacity:0.8;"></div><span class="dot-num">QR6</span></div>
+      <div class="dot-wrap"><div class="qr-dot" style="width:12px;height:12px;opacity:0.7;"></div><span class="dot-num">QR7</span></div>
+      <div class="dot-wrap"><div class="qr-dot" style="width:10px;height:10px;opacity:0.55;"></div><span class="dot-num">QR8</span></div>
+      <div class="dot-wrap"><div class="qr-dot" style="width:9px;height:9px;opacity:0.4;"></div><span class="dot-num">QR9</span></div>
+      <div class="dot-wrap"><div class="qr-dot" style="width:8px;height:8px;opacity:0.28;"></div><span class="dot-num">QR10</span></div>
+    </div>
+    <p class="decroissance-caption">L'aide visuelle s'efface au fil du livre — le lecteur reconstruit seul son "cinéma intérieur".</p>
+  </div>
+
+  <div class="note-box">
+    <div class="note-inner">
+      <strong>Note éditoriale :</strong> le dispositif complet compte <strong>11 QR codes au total</strong>
+      (1 QR code de prise en main pédagogique QR0 + 10 QR codes narratifs dégressifs sur 18 chapitres).
+      Le compteur ci-dessus simule un parcours idéal en fin de récit.
+    </div>
+  </div>
+
+  <div class="cua-strip">
+    <div class="cua-item">
+      <h3>Un seul exemplaire</h3>
+      <p>Même livre pour tous, du lecteur aisé au lecteur fragile.</p>
+    </div>
+    <div class="cua-item">
+      <h3>Aide jamais imposée</h3>
+      <p>Le QR n'est déclenché que si le lecteur en ressent le besoin, sur les scènes importantes.</p>
+    </div>
+    <div class="cua-item">
+      <h3>Progrès mesurable</h3>
+      <p>Un compteur d'autonomisation rend visible le passage de « j'ai besoin » à « j'imagine seul ».</p>
+    </div>
+  </div>
+
+  <div class="section-label"><span>Quatre scènes à tester</span></div>
+
+  <div class="grid">
+    <div class="card">
+      <div>
+        <span class="qr-index">QR0</span>
+        <h2>Mode d'emploi</h2>
+        <span class="tech-tag">Prise en main pédagogique</span>
+        <p class="desc">Le livre s'adresse au lecteur pour lui proposer un pacte : l'aider à imaginer grâce aux médias, tout en lui laissant la liberté de progresser vers l'autonomie. Le compteur d'autonomie s'initialise.</p>
+      </div>
+      <a href="qr0/" class="btn">Ouvrir la démo</a>
+    </div>
+
+    <div class="card">
+      <div>
+        <span class="qr-index">QR4</span>
+        <h2>Le portrait d'Inès</h2>
+        <span class="tech-tag">Chapitre 5 — portrait du personnage</span>
+        <p class="desc">Le livre invite le lecteur à se figurer Inès, puis lui propose 5 portraits — ou une carte mystère si aucun ne correspond à ce qu'il avait imaginé. En validant son choix, le lecteur s'approprie son personnage pour le reste du récit.</p>
+      </div>
+      <a href="qr4/" class="btn">Ouvrir la démo</a>
+    </div>
+
+    <div class="card">
+      <div>
+        <span class="qr-index">QR9</span>
+        <h2>Le bureau de M. Vidal</h2>
+        <span class="tech-tag">Chapitre 7 — indice caché</span>
+        <p class="desc">Avant de voir l'image, le lecteur doit imaginer la scène et répondre à une question métacognitive. L'écart entre ce qu'il a imaginé et ce qu'il découvre lui appartient — sans note, sans jugement.</p>
+      </div>
+      <a href="qr9/" class="btn">Ouvrir la démo</a>
+    </div>
+
+    <div class="card">
+      <div>
+        <span class="qr-index">QR10</span>
+        <h2>Réunion au sommet</h2>
+        <span class="tech-tag">Chapitre 16 — la vérité éclate</span>
+        <p class="desc">Sept personnages, un bureau trop petit. Le dernier grand appui visuel du roman, juste avant que le lecteur ne termine seul, presque sans filet.</p>
+      </div>
+      <a href="qr10/" class="btn">Ouvrir la démo</a>
+    </div>
+  </div>
+
+  <footer class="legal">
+    <p>Enveloppe Soleau INPI déposée le 21 mai 2026 — Aymeric Heurtin, enseignant spécialisé.</p>
+    <a href="https://github.com/aymericheurtin-beep/sam-cycle3" class="github-link">Dépôt GitHub public : github.com/aymericheurtin-beep/sam-cycle3</a>
+  </footer>
+
+</body>
+</html>
+
