@@ -3,66 +3,100 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>QR2</title>
+<title>QR2 — Le son de la cantine</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-family:system-ui}
-.screen{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px}
+body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.screen{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;transition:opacity .8s ease}
 .screen.active{display:flex}
-#btn{background:#fff;color:#000;border:none;padding:20px 40px;font-size:20px;border-radius:8px;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);cursor:pointer;z-index:100}
-#restart{background:#fff;color:#000;border:none;padding:15px 30px;font-size:18px;border-radius:8px;cursor:pointer;position:fixed;bottom:40px;left:50%;transform:translateX(-50%);z-index:10;display:none;opacity:0;transition:opacity 1s ease}
-#restart.show{opacity:1;display:block}
-p{font-size:22px;line-height:1.4;max-width:650px}
-</style>
-<style>
-html,body,button,input,select,textarea{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
-p,#text,.screen p,#question,#msg{font-size:clamp(20px,4.5vmin,28px)!important;line-height:1.45!important}
-button,.btn,.choiceBtn,.choice,.carnetBtn{font-size:clamp(18px,4vmin,24px)!important;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
-#startBtn,#start,#btn,#restartBtn,#restart{font-size:clamp(20px,5vmin,26px)!important}
-small,.sub,#recall,#hint,#carnetLine{font-size:clamp(16px,3.2vmin,20px)!important}
+.screen.fadeout{opacity:0}
+p{font-size:clamp(20px,4.5vmin,28px);line-height:1.45;max-width:700px}
+.sub{font-size:clamp(16px,3.2vmin,20px);margin-top:20px;opacity:.78}
+button{background:#fff;color:#000;border:none;padding:16px 30px;border-radius:8px;cursor:pointer;font-size:clamp(18px,4vmin,24px);font-family:inherit;margin-top:30px}
+button:active{transform:scale(.98)}
+#listening p{opacity:.86}
+.pulse{width:12px;height:12px;margin-top:30px;border-radius:50%;background:#fff;animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(.7);opacity:.35}50%{transform:scale(1.2);opacity:1}}
+@media (prefers-reduced-motion:reduce){.screen{transition:none}.pulse{animation:none}}
 </style>
 </head>
 <body>
-<button id="btn">Touche pour commencer</button>
+
+<div id="intro" class="screen active">
+  <p>Avant d’écouter, ferme les yeux quelques secondes.</p>
+  <p class="sub">Quels bruits entends-tu dans la cantine&nbsp;?</p>
+  <button id="playBtn" type="button">Écouter la scène</button>
+</div>
+
+<div id="listening" class="screen" aria-live="polite">
+  <p>Ferme les yeux et écoute.</p>
+  <div class="pulse" aria-hidden="true"></div>
+</div>
 
 <div id="post" class="screen">
-  <p>Avec ce son, voyez-vous la scène autrement que lorsque vous l'aviez lue ?</p>
+  <p>Ton film avait-il le même son&nbsp;?</p>
+  <p class="sub">Qu’avais-tu entendu autrement&nbsp;?<br>Tu peux maintenant reprendre ta lecture.</p>
+  <button id="replayBtn" type="button">Réécouter</button>
 </div>
-<button id="restart">Recommencer</button>
 
 <audio id="audio" src="./qrcode2total.mp3" preload="auto"></audio>
 
 <script>
-function trackScan(id) {
-  try {
-    let usedSet = new Set(JSON.parse(localStorage.getItem('qr_used_set') || '[]'));
+function trackScan(id){
+  try{
+    const usedSet=new Set(JSON.parse(localStorage.getItem("qr_used_set")||"[]"));
     usedSet.add(id);
-    let arr = Array.from(usedSet);
-    localStorage.setItem('qr_used_set', JSON.stringify(arr));
-    localStorage.setItem('scans_used', arr.length);
-    localStorage.setItem('scans_total', '11'); 
-  } catch(e) { console.error('Storage error:', e); }
+    const arr=Array.from(usedSet);
+    localStorage.setItem("qr_used_set",JSON.stringify(arr));
+    localStorage.setItem("scans_used",arr.length);
+    localStorage.setItem("scans_total","11");
+  }catch(e){
+    console.error("Storage error:",e);
+  }
 }
 
-const btn=document.getElementById('btn');
-const restart=document.getElementById('restart');
-const audio=document.getElementById('audio');
-const post=document.getElementById('post');
+const intro=document.getElementById("intro");
+const listening=document.getElementById("listening");
+const post=document.getElementById("post");
+const playBtn=document.getElementById("playBtn");
+const replayBtn=document.getElementById("replayBtn");
+const audio=document.getElementById("audio");
 
-btn.onclick=()=>{ trackScan('qr2');
-  try{const s=new Set(JSON.parse(localStorage.getItem('qr_used_set')||'[]'));s.add('qr2');localStorage.setItem('qr_used_set',JSON.stringify([...s]));}catch(e){}
-  btn.style.display='none';
+function hideScreen(screen){
+  screen.classList.add("fadeout");
+  setTimeout(()=>screen.classList.remove("active","fadeout"),800);
+}
+
+function showScreen(screen){
+  screen.classList.add("active");
+}
+
+function startListening(){
+  intro.classList.remove("active","fadeout");
+  post.classList.remove("active","fadeout");
+  showScreen(listening);
+  audio.currentTime=0;
   audio.volume=1;
-  audio.play().catch(()=>alert('Activez le son'));
+  audio.play().catch(()=>{
+    listening.classList.remove("active");
+    showScreen(intro);
+    alert("Active le son de ton appareil, puis recommence.");
+  });
 }
+
+playBtn.onclick=()=>{
+  trackScan("qr2");
+  startListening();
+};
+
+replayBtn.onclick=()=>{
+  startListening();
+};
 
 audio.onended=()=>{
-  post.classList.add('active');
-  restart.style.display='block';
-  setTimeout(()=>restart.classList.add('show'),50);
-}
-
-restart.onclick=()=>location.reload();
+  hideScreen(listening);
+  setTimeout(()=>showScreen(post),800);
+};
 </script>
 </body>
 </html>
