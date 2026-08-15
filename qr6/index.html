@@ -3,64 +3,65 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>QR6 - Sam</title>
+<title>QR6</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#000;color:#fff;font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;overflow:hidden;width:100vw;height:100vh;display:flex;justify-content:center;align-items:center;position:relative}
-.btn{font-size:4vmin;padding:3vmin 6vmin;background:#fff;border:none;border-radius:8px;color:#000;cursor:pointer;z-index:9999}
-#start{animation:blink 1.5s infinite}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.6}}
-#text{position:absolute;font-size:6vmin;text-align:center;padding:5vmin;line-height:1.4;opacity:0;transition:opacity.5s;white-space:pre-line;font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;z-index:9998}
-#text small{display:block;font-size:3.2vmin;color:#aaa;margin-top:2vmin;line-height:1.3}
-#image{position:absolute;width:min(100vw,100vh);height:min(100vw,100vh);max-width:100vw;max-height:85vh;object-fit:contain;opacity:0;z-index:9997;transition:opacity 1s;pointer-events:none}
-#restart{position:absolute;bottom:10vmin;opacity:0;transition:opacity 1s}
+body{background:#000;color:#fff;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;overflow:hidden;width:100vw;height:100vh;display:flex;justify-content:center;align-items:center;position:relative}
+
+.btn{font-size:clamp(20px,5vmin,26px);padding:20px 30px;background:#fff;border:none;border-radius:8px;color:#000;cursor:pointer;z-index:9999;font-family:inherit}
+#start{animation:blink 1.5s infinite;width:360px;max-width:88vw;white-space:nowrap}
+#restart{position:absolute;bottom:40px;opacity:0;transition:opacity 1s}
+
+#text{position:absolute;font-size:clamp(20px,4.5vmin,28px);text-align:center;padding:5vmin;line-height:1.45;opacity:0;transition:opacity .5s;white-space:pre-line;z-index:9998;max-width:760px}
+#text small{display:block;font-size:clamp(16px,3.2vmin,20px);color:#aaa;margin-top:20px;line-height:1.3}
+
+#image{position:absolute;max-width:94vw;max-height:85vh;width:auto;height:auto;object-fit:contain;opacity:0;z-index:9997;transition:opacity 1s;pointer-events:none}
+
 .visible{opacity:1!important}
 .hidden{display:none!important}
-.screen{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;background:#000;z-index:10000}
-.screen.active{display:flex}
-.screen p{font-size:22px;margin-bottom:20px}
-.choice{display:flex;gap:20px;flex-wrap:wrap;justify-content:center}
-#thumbs{position:absolute;display:none;gap:4vmin;z-index:9998}
-.thumb{width:26vmin;height:26vmin;background:#111;border:2px solid #333;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:3vmin;cursor:pointer;transition:transform.2s}
-.thumb:active{transform:scale(.95)}
-#overlay{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none;z-index:9996;transition:opacity.3s}
-#overlay.show{opacity:1;pointer-events:auto}
 .blur{filter:blur(12px)}
-</style>
-<style>
-html,body,button,input,select,textarea {font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;}
-p, #text, .screen p, #question, #msg {font-size:clamp(20px,4.5vmin,28px) !important;line-height:1.45 !important;}
-button, .btn, .choiceBtn, .choice, .carnetBtn {font-size:clamp(18px,4vmin,24px) !important;font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;}
-#startBtn, #start, #btn, #restartBtn, #restart {font-size:clamp(20px,5vmin,26px) !important;}
-small, .sub, #recall, #hint, #carnetLine {font-size:clamp(16px,3.2vmin,20px) !important;}
+
+#thumbs{position:absolute;display:none;gap:4vmin;z-index:9998;align-items:center;justify-content:center}
+.thumb{width:26vmin;height:26vmin;background:#111;border:2px solid #333;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:clamp(16px,3.2vmin,20px);cursor:pointer;transition:transform .2s;text-align:center}
+.thumb:active{transform:scale(.95)}
+.thumb:hover{border-color:#fff}
+
+#overlay{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none;z-index:9996;transition:opacity .3s}
+#overlay.show{opacity:1;pointer-events:auto}
+
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.6}}
+@media (prefers-reduced-motion:reduce){#start{animation:none}#text,#image,#restart,#overlay{transition:none}}
 </style>
 </head>
 <body>
-<button id="start" class="btn">Touche pour commencer</button>
+
+<button id="start" class="btn" type="button">Touche pour commencer</button>
 <div id="text"></div>
-<img id="image" src="">
+<img id="image" src="" alt="">
 <div id="overlay"></div>
 
 <div id="thumbs">
-  <div class="thumb" data-id="caméra">Caméra</div>
-  <div class="thumb" data-id="fumée">Fumée</div>
-  <div class="thumb" data-id="carnet">Carnet</div>
+  <div class="thumb" data-id="caméra" role="button" tabindex="0">Caméra</div>
+  <div class="thumb" data-id="fumée" role="button" tabindex="0">Fumée</div>
+  <div class="thumb" data-id="carnet" role="button" tabindex="0">Carnet</div>
 </div>
 
-<button id="restart" class="btn">Recommencer</button>
+<button id="restart" class="btn" type="button">Recommencer</button>
 
-<audio id="annonce" src="message_arnaud.mp3" preload="auto"></audio>
+<audio id="annonce" src="./message_arnaud.mp3" preload="auto" playsinline></audio>
 
 <script>
-function trackScan(id) {
-  try {
-    let usedSet = new Set(JSON.parse(localStorage.getItem('qr_used_set') || '[]'));
+function trackScan(id){
+  try{
+    const usedSet=new Set(JSON.parse(localStorage.getItem('qr_used_set')||'[]'));
     usedSet.add(id);
-    let arr = Array.from(usedSet);
-    localStorage.setItem('qr_used_set', JSON.stringify(arr));
-    localStorage.setItem('scans_used', arr.length);
-    localStorage.setItem('scans_total', '11'); 
-  } catch(e) { console.error('Storage error:', e); }
+    const arr=Array.from(usedSet);
+    localStorage.setItem('qr_used_set',JSON.stringify(arr));
+    localStorage.setItem('scans_used',arr.length);
+    localStorage.setItem('scans_total','11');
+  }catch(e){
+    console.error('Storage error:',e);
+  }
 }
 
 const start=document.getElementById('start');
@@ -73,74 +74,106 @@ const overlay=document.getElementById('overlay');
 
 let order=[];
 let opened={caméra:false,fumée:false,carnet:false};
+const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 
-const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-
-start.onclick=()=>{ trackScan('qr6');
-  try{const s=new Set(JSON.parse(localStorage.getItem('qr_used_set')||'[]'));s.add('qr6');localStorage.setItem('qr_used_set',JSON.stringify([...s]));}catch(e){}
+start.onclick=()=>{
+  trackScan('qr6');
   start.classList.add('hidden');
   sequence();
 };
 
 restart.onclick=()=>location.reload();
 
-async function showText(txt,hold=2000){
-  text.innerHTML=txt;
+async function showText(content,hold=2000){
+  text.innerHTML=content;
   text.classList.add('visible');
   await sleep(hold);
   text.classList.remove('visible');
   await sleep(500);
 }
 
+function playAnnouncement(){
+  return new Promise(resolve=>{
+    let resolved=false;
+    const finish=()=>{
+      if(resolved) return;
+      resolved=true;
+      resolve();
+    };
+
+    annonce.currentTime=0;
+    annonce.onended=finish;
+    annonce.onerror=finish;
+    annonce.play().catch(finish);
+  });
+}
+
 async function sequence(){
-  await showText('vendredi 8h27<br>collège les Peupliers Blancs',2500);
-  annonce.play().catch(()=>{});
-  await sleep(4200);
-  await sleep(3000);
-  await showText('8h30. Bureau de Mme Arnaud.',2000);
+  await showText('Vendredi, 8 h 27.<br>Collège des Peupliers Blancs.',2500);
+  await playAnnouncement();
+  await sleep(900);
+  await showText('8 h 30. Bureau de Mme Arnaud.',2000);
   thumbs.style.display='flex';
 }
 
-thumbs.addEventListener('click',async e=>{
-  const thumb=e.target.closest('.thumb');
+function activateThumb(thumb){
+  if(thumb) thumb.click();
+}
+
+thumbs.addEventListener('keydown',event=>{
+  if(event.key==='Enter'||event.key===' '){
+    event.preventDefault();
+    activateThumb(event.target.closest('.thumb'));
+  }
+});
+
+thumbs.addEventListener('click',async event=>{
+  const thumb=event.target.closest('.thumb');
   if(!thumb) return;
+
   const id=thumb.dataset.id;
+  if(opened[id]) return;
   if(!order.includes(id)) order.push(id);
   thumbs.style.display='none';
+
   if(id==='caméra') await openCam();
   else if(id==='fumée') await openFumee();
   else if(id==='carnet') await openCarnet();
+
   opened[id]=true;
-  if(opened.caméra && opened.fumée && opened.carnet){
+
+  if(opened.caméra&&opened.fumée&&opened.carnet){
     await final();
   }else{
     thumbs.style.display='flex';
   }
 });
 
-async function openCam(){
-  image.src='cam.webp';
+async function showImage(src,alt,hold){
+  image.src=src;
+  image.alt=alt;
   image.classList.remove('blur');
   image.classList.add('visible');
-  await sleep(6000);
+  await sleep(hold);
   image.classList.remove('visible');
   await sleep(500);
 }
+
+async function openCam(){
+  await showImage('./cam_corrigee.webp','Image de surveillance du couloir de l’aile C à 19 h 42',6000);
+}
+
 async function openFumee(){
   overlay.classList.add('show');
   await sleep(800);
   overlay.classList.remove('show');
-  image.src='fumee.webp';
-  image.classList.remove('blur');
-  image.classList.add('visible');
-  await sleep(4000);
-  image.classList.remove('visible');
-  await sleep(500);
+  await showImage('./fumee_allegee.webp','Fumée s’échappant sous la porte du local',4000);
 }
+
 async function openCarnet(){
-  image.src='carnet.webp';
-  image.classList.add('blur');
-  image.classList.add('visible');
+  image.src='./carnet_corrige.webp';
+  image.alt='Carnet d’Inès : Plus de Casio. Trace de bronzage.';
+  image.classList.add('blur','visible');
   await sleep(3000);
   image.classList.remove('blur');
   await sleep(3000);
@@ -149,21 +182,30 @@ async function openCarnet(){
 }
 
 function interpretation(first){
-  if(first==='caméra') return 'Tu commences par la preuve. Voir avant de comprendre.';
-  if(first==='fumée') return 'Tu penses aux conséquences avant l’acte.';
-  if(first==='carnet') return 'Tu commences par les écrits d’Inès. Ce qu’elle note compte plus que ce qu’on montre.';
+  if(first==='caméra') return 'Tu as commencé par la preuve : ce que la caméra montre.';
+  if(first==='fumée') return 'Tu as commencé par les conséquences : ce que le feu a laissé.';
+  if(first==='carnet') return 'Tu as commencé par les mots d’Inès : ce qu’elle a remarqué.';
   return '';
+}
+
+function label(first){
+  if(first==='caméra') return 'la caméra';
+  if(first==='fumée') return 'la fumée';
+  return 'le carnet';
 }
 
 async function final(){
   const first=order[0];
-  const interp=interpretation(first);
+
   try{
-    localStorage.setItem('qr6_first', first);
-    localStorage.setItem('qr6_order', JSON.stringify(order));
-    localStorage.setItem('qr6_profile', first==='caméra' ? 'preuve' : first==='fumée' ? 'conséquence' : 'écrit');
-  }catch(e){}
-  text.innerHTML=`${interp}<br><small>Tu as regardé ${first} en 1er.</small>`;
+    localStorage.setItem('qr6_first',first);
+    localStorage.setItem('qr6_order',JSON.stringify(order));
+    localStorage.setItem('qr6_profile',first==='caméra'?'preuve':first==='fumée'?'conséquence':'écrit');
+  }catch(e){
+    console.error('Storage error:',e);
+  }
+
+  text.innerHTML=`${interpretation(first)}<br><small>Tu as regardé ${label(first)} en premier.</small>`;
   text.classList.add('visible');
   await sleep(6000);
   restart.classList.add('visible');
@@ -171,4 +213,5 @@ async function final(){
 </script>
 </body>
 </html>
+
 
