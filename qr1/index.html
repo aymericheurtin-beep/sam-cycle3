@@ -3,167 +3,172 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>QR1</title>
+<title>QR1 — Sam</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-family:system-ui}
+body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 .screen{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;transition:opacity 1s ease;padding:10px}
 .screen.active{display:flex}
 .screen.fadeout{opacity:0}
 img,video{max-width:90%;max-height:85vh;object-fit:contain}
-#startBtn{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:100;background:#fff;color:#000;border:none;padding:20px 40px;font-size:20px;border-radius:8px;cursor:pointer}
-#restartBtn{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);background:#fff;color:#000;border:none;padding:15px 30px;font-size:18px;border-radius:8px;cursor:pointer;display:none;z-index:10;transition:opacity 1s ease;opacity:0}
+#startBtn{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:100;background:#fff;color:#000;border:none;padding:20px 40px;border-radius:8px;cursor:pointer}
+#restartBtn{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);background:#fff;color:#000;border:none;padding:15px 30px;border-radius:8px;cursor:pointer;display:none;z-index:10;transition:opacity 1s ease;opacity:0}
 #restartBtn.show{opacity:1}
-p{font-size:22px;line-height:1.4;max-width:600px}
-.choiceBtn{background:#111;color:#fff;border:1px solid #fff;padding:15px 25px;font-size:18px;border-radius:8px;cursor:pointer;width:280px}
-.choiceBtn:active{transform:scale(0.98)}
-</style>
-<style>
-html,body,button,input,select,textarea{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
-p,#text,.screen p,#question,#msg{font-size:clamp(20px,4.5vmin,28px)!important;line-height:1.45!important}
-button,.btn,.choiceBtn,.choice,.carnetBtn{font-size:clamp(18px,4vmin,24px)!important;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
-#startBtn,#start,#btn,#restartBtn,#restart{font-size:clamp(20px,5vmin,26px)!important}
-small,.sub,#recall,#hint,#carnetLine{font-size:clamp(16px,3.2vmin,20px)!important}
+p{font-size:clamp(20px,4.5vmin,28px);line-height:1.45;max-width:700px}
+.sub{font-size:clamp(16px,3.2vmin,20px);margin-top:20px;opacity:.8}
+.choiceBtn{background:#111;color:#fff;border:1px solid #fff;padding:15px 25px;border-radius:8px;cursor:pointer;width:min(320px,88vw)}
+.choiceBtn:active{transform:scale(.98)}
+button,.choiceBtn{font-size:clamp(18px,4vmin,24px);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+#startBtn,#restartBtn{font-size:clamp(20px,5vmin,26px)}
+@media (prefers-reduced-motion:reduce){.screen,#restartBtn{transition:none}}
 </style>
 </head>
 <body>
-<button id="startBtn">Touche pour commencer</button>
-<button id="restartBtn">Recommencer</button>
 
-<div id="meta" class="screen"></div>
+<button id="startBtn" type="button">Touche pour commencer</button>
+<button id="restartBtn" type="button">Revoir le parcours</button>
 
 <div id="s0" class="screen">
-  <video id="v0" src="audio/courir.mp4" playsinline muted></video>
+  <video id="v0" src="audio/courir.mp4" playsinline muted loop preload="auto" aria-label="Sam en train de courir"></video>
 </div>
 
 <div id="qCadenas" class="screen">
-  <p>Comment vois tu le cadenas du casier du collège ?</p>
+  <p>À quoi ressemble le cadenas de Sam dans ta tête&nbsp;?</p>
   <div style="display:flex;flex-direction:column;gap:15px;margin-top:20px">
-    <button class="choiceBtn" data-val="Un cadenas à chiffres">Un cadenas à chiffres</button>
-    <button class="choiceBtn" data-val="Un cadenas à clé">Un cadenas à clé</button>
-    <button class="choiceBtn" data-val="Un autre type de cadenas">Un autre type de cadenas</button>
+    <button type="button" class="choiceBtn" data-val="un cadenas à chiffres">À chiffres</button>
+    <button type="button" class="choiceBtn" data-val="un cadenas à clé">À clé</button>
+    <button type="button" class="choiceBtn" data-val="un autre type de cadenas">Un autre type</button>
+    <button type="button" class="choiceBtn" data-val="rien de précis">Je ne vois rien de précis</button>
   </div>
 </div>
 
 <div id="s1" class="screen">
-  <img src="main.webp" alt="">
-</div>
-<div id="s2" class="screen">
-  <video id="v1" src="audio/trou_noir_clean.mp4" playsinline></video>
-</div>
-<div id="s3" class="screen">
-  <p>Compare avec ce que tu avais imaginé.</p>
+  <img src="main.webp" alt="Gros plan d’une main vérifiant un cadenas à chiffres sur un casier">
 </div>
 
-<audio id="a2" src="audio/p2-sam.mp3"></audio>
-<audio id="a3" src="audio/p3-toc.mp3"></audio>
-<audio id="a4" src="audio/p4-absence.mp3"></audio>
+<div id="s2" class="screen">
+  <video id="v1" src="audio/trou_noir_clean.mp4" playsinline preload="auto" aria-label="Représentation du trou noir dans la mémoire de Sam"></video>
+</div>
+
+<div id="s3" class="screen">
+  <p>Qu’est-ce qui ressemble à ce que tu avais imaginé&nbsp;? Qu’est-ce qui est différent&nbsp;?</p>
+  <p class="sub">Garde ton propre film. Tu peux maintenant reprendre ta lecture.</p>
+</div>
+
+<audio id="a2" src="audio/p2-sam.mp3" preload="auto"></audio>
+<audio id="a3" src="audio/p3-toc.mp3" preload="auto"></audio>
+<audio id="a4" src="audio/p4-absence.mp3" preload="auto"></audio>
 
 <script>
-function trackScan(id) {
-  try {
-    let usedSet = new Set(JSON.parse(localStorage.getItem('qr_used_set') || '[]'));
+function trackScan(id){
+  try{
+    const usedSet=new Set(JSON.parse(localStorage.getItem("qr_used_set")||"[]"));
     usedSet.add(id);
-    let arr = Array.from(usedSet);
-    localStorage.setItem('qr_used_set', JSON.stringify(arr));
-    localStorage.setItem('scans_used', arr.length);
-    localStorage.setItem('scans_total', '11'); 
-  } catch(e) { console.error('Storage error:', e); }
-}
-
-const meta=document.getElementById('meta');
-const s0=document.getElementById('s0');
-const s1=document.getElementById('s1');
-const s2=document.getElementById('s2');
-const s3=document.getElementById('s3');
-const qCadenas=document.getElementById('qCadenas');
-const v0=document.getElementById('v0');
-const v1=document.getElementById('v1');
-const a2=document.getElementById('a2');
-const a3=document.getElementById('a3');
-const a4=document.getElementById('a4');
-const startBtn=document.getElementById('startBtn');
-const restartBtn=document.getElementById('restartBtn');
-
-const PAUSE = 1200;
-
-startBtn.onclick=()=>{ trackScan('qr1');
-  try{const s=new Set(JSON.parse(localStorage.getItem('qr_used_set')||'[]'));s.add('qr1');localStorage.setItem('qr_used_set',JSON.stringify([...s]));}catch(e){}
-  startBtn.remove();
-  step0();
-}
-
-function step0(){
-  s0.classList.add('active');
-  v0.play().catch(e=>console.log('Video courir error:',e));
-  a2.play().catch(e=>console.log('Audio2 error:',e));
-  setTimeout(()=>{
-    v0.pause();
-    s0.classList.add('fadeout');
-  },5000);
-  a2.onended=()=>{
-    setTimeout(()=>{
-      s0.classList.remove('active','fadeout');
-      showQuestionCadenas();
-    },500);
+    const arr=Array.from(usedSet);
+    localStorage.setItem("qr_used_set",JSON.stringify(arr));
+    localStorage.setItem("scans_used",arr.length);
+    localStorage.setItem("scans_total","11");
+  }catch(e){
+    console.error("Storage error:",e);
   }
 }
 
+const s0=document.getElementById("s0");
+const s1=document.getElementById("s1");
+const s2=document.getElementById("s2");
+const s3=document.getElementById("s3");
+const qCadenas=document.getElementById("qCadenas");
+const v0=document.getElementById("v0");
+const v1=document.getElementById("v1");
+const a2=document.getElementById("a2");
+const a3=document.getElementById("a3");
+const a4=document.getElementById("a4");
+const startBtn=document.getElementById("startBtn");
+const restartBtn=document.getElementById("restartBtn");
+
+const PAUSE=1200;
+
+startBtn.onclick=()=>{
+  trackScan("qr1");
+  startBtn.remove();
+  step0();
+};
+
+function step0(){
+  s0.classList.add("active");
+  v0.play().catch(e=>console.log("Video courir error:",e));
+  a2.play().catch(e=>console.log("Audio Sam error:",e));
+
+  a2.onended=()=>{
+    v0.pause();
+    s0.classList.add("fadeout");
+    setTimeout(()=>{
+      s0.classList.remove("active","fadeout");
+      showQuestionCadenas();
+    },500);
+  };
+}
+
 function showQuestionCadenas(){
-  qCadenas.classList.add('active');
-  document.querySelectorAll('#qCadenas .choiceBtn').forEach(btn=>{
-    btn.onclick=()=>{ trackScan('qr1');
-      const val = btn.dataset.val;
-      localStorage.setItem('qr1_cadenas', val);
-      qCadenas.classList.add('fadeout');
+  qCadenas.classList.add("active");
+  document.querySelectorAll("#qCadenas .choiceBtn").forEach(btn=>{
+    btn.onclick=()=>{
+      const val=btn.dataset.val;
+      try{
+        localStorage.setItem("qr1_cadenas",val);
+      }catch(e){
+        console.error("Storage error:",e);
+      }
+
+      qCadenas.classList.add("fadeout");
       setTimeout(()=>{
-        qCadenas.classList.remove('active','fadeout');
+        qCadenas.classList.remove("active","fadeout");
         step1();
       },1000);
-    }
+    };
   });
 }
 
 function step1(){
-  s1.classList.add('active');
-  a3.play().catch(e=>console.log('Audio3 error:',e));
+  s1.classList.add("active");
+  a3.play().catch(e=>console.log("Audio cadenas error:",e));
+
   a3.onended=()=>{
-    s1.classList.add('fadeout');
+    s1.classList.add("fadeout");
     setTimeout(()=>{
-      s1.classList.remove('active','fadeout');
+      s1.classList.remove("active","fadeout");
       step2();
     },1000);
-  }
+  };
 }
 
 function step2(){
   setTimeout(()=>{
-    s2.classList.add('active');
-    a4.play().catch(e=>console.log('Audio4 error:',e));
+    s2.classList.add("active");
+    a4.play().catch(e=>console.log("Audio absence error:",e));
+
     a4.onended=()=>{
       setTimeout(()=>{
-        v1.play().catch(e=>console.log('Video trounoir error:',e));
+        v1.play().catch(e=>console.log("Video trou noir error:",e));
       },800);
-    }
+    };
   },PAUSE);
 }
 
 v1.onended=()=>{
-  s2.classList.add('fadeout');
+  s2.classList.add("fadeout");
   setTimeout(()=>{
-    s2.classList.remove('active','fadeout');
-    s3.classList.add('active');
+    s2.classList.remove("active","fadeout");
+    s3.classList.add("active");
     setTimeout(()=>{
-      s3.classList.add('fadeout');
-      setTimeout(()=>{
-        restartBtn.style.display='block';
-        setTimeout(()=>restartBtn.classList.add('show'),50);
-      },1000);
-    },3000);
+      restartBtn.style.display="block";
+      requestAnimationFrame(()=>restartBtn.classList.add("show"));
+    },1000);
   },1000);
-}
+};
 
-restartBtn.onclick=()=>{ trackScan('qr1');location.reload()};
+restartBtn.onclick=()=>location.reload();
 </script>
 </body>
 </html>
+
