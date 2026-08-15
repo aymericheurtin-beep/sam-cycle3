@@ -160,14 +160,17 @@ async function showImage(src,alt,hold){
 }
 
 async function openCam(){
-  await showImage('./cam_corrigee.webp','Image de surveillance du couloir de l’aile C à 19 h 42',6000);
+  const imageSuivante=new Image();
+  imageSuivante.src='./camera_fuite_1942_lacet.webp';
+  await showImage('./camera_meuble_1941.webp','À 19 h 41, la silhouette glisse sa main sous le meuble',4500);
+  await showImage('./camera_fuite_1942_lacet.webp','À 19 h 42, la silhouette s’enfuit dans le couloir',4500);
 }
 
 async function openFumee(){
   overlay.classList.add('show');
   await sleep(800);
   overlay.classList.remove('show');
-  await showImage('./fumee_allegee.webp','Fumée s’échappant sous la porte du local',4000);
+  await showImage('./fumee_local_v4.webp','Fumée s’échappant sous la porte du local',4000);
 }
 
 async function openCarnet(){
