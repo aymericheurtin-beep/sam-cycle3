@@ -3,49 +3,57 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>QR3</title>
+<title>QR3 — Dans le film de Noé</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-family:system-ui}
-.screen{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:10px}
+body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.screen{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;transition:opacity 1s ease;padding:10px}
 .screen.active{display:flex}
+.screen.fadeout{opacity:0}
 img,video{max-width:90%;max-height:85vh;object-fit:contain}
-#startBtn{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:100;background:#fff;color:#000;border:none;padding:20px 40px;font-size:20px;border-radius:8px;cursor:pointer}
-#restartBtn{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);background:#fff;color:#000;border:none;padding:15px 30px;font-size:18px;border-radius:8px;cursor:pointer;display:none;z-index:10;opacity:0;transition:opacity 1s ease}
-#restartBtn.show{opacity:1;display:block}
-#voirBtn{margin-top:30px;background:#fff;color:#000;border:none;padding:15px 30px;font-size:18px;border-radius:8px;cursor:pointer}
-p{font-size:22px;line-height:1.4;max-width:700px}
-</style>
-<style>
-html,body,button,input,select,textarea{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
-p{font-size:clamp(20px,4.5vmin,28px)!important;line-height:1.45!important}
-button{font-size:clamp(18px,4vmin,24px)!important}
-#startBtn,#restartBtn,#voirBtn{font-size:clamp(20px,5vmin,26px)!important}
+#startBtn{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:100;background:#fff;color:#000;border:none;padding:20px 30px;border-radius:8px;cursor:pointer;width:388px;max-width:88vw;white-space:nowrap}
+#restartBtn{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);background:#fff;color:#000;border:none;padding:15px 30px;border-radius:8px;cursor:pointer;display:none;z-index:10;transition:opacity 1s ease;opacity:0}
+#restartBtn.show{opacity:1}
+p{font-size:clamp(20px,4.5vmin,28px);line-height:1.45;max-width:700px}
+.sub{font-size:clamp(16px,3.2vmin,20px);margin-top:20px;opacity:.8}
+.choiceBtn{background:#111;color:#fff;border:1px solid #fff;padding:15px 25px;border-radius:8px;cursor:pointer;width:min(320px,88vw)}
+.choiceBtn:active{transform:scale(.98)}
+button,.choiceBtn{font-size:clamp(18px,4vmin,24px);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+#startBtn,#restartBtn{font-size:clamp(20px,5vmin,26px)}
+@media (prefers-reduced-motion:reduce){.screen,#restartBtn{transition:none}}
 </style>
 </head>
 <body>
-<button id="startBtn">Touche pour commencer</button>
-<button id="restartBtn">Recommencer</button>
+<button id="startBtn" type="button">Entrer dans le film de Noé</button>
+<button id="restartBtn" type="button">Revoir le parcours</button>
 
-<!-- s0 : le son d'abord, écran noir, pas d'image -->
+<!-- Le son d'abord : écran noir, sans image. -->
 <div id="s0" class="screen">
-  <audio id="a0" src="./qr3.mp3" playsinline></audio>
+  <audio id="a0" src="./qr3.mp3" preload="auto" playsinline></audio>
 </div>
 
-<!-- s1 : question métacognitive AVANT l'image, le lecteur choisit de continuer -->
+<!-- Le lecteur forme d'abord sa propre image mentale. -->
 <div id="s1" class="screen">
-  <p>Toi, tu l'imagines comment, Noé, en train de courir ?</p>
-  <button id="voirBtn">Voir</button>
+  <p>Sans image, comment vois-tu Noé en train de courir&nbsp;?</p>
+  <button id="voirBtn" class="choiceBtn" style="margin-top:30px">Découvrir l’image</button>
 </div>
 
-<!-- s2 : l'image / la vidéo -->
+<!-- Puis il découvre une proposition visuelle. -->
 <div id="s2" class="screen">
-  <video id="v0" src="./docfinalqr3.mp4" playsinline></video>
+  <video
+    id="v0"
+    src="./noe_course_v2.mp4"
+    poster="./noe_course_v2.webp"
+    preload="none"
+    playsinline
+    muted
+    aria-label="Noé court sur une piste tandis que son père apparaît, flou, derrière la barrière"
+  ></video>
 </div>
 
-<!-- s3 : question de bascule APRÈS l'image, mesure l'écart -->
+<!-- Enfin, il compare et interprète. -->
 <div id="s3" class="screen">
-  <p>Et là, c'est ce que tu avais imaginé ?<br>Il court pour fuir, ou pour se sentir fort ?</p>
+  <p>Est-ce le Noé que tu avais imaginé&nbsp;?<br>À ton avis, pour qui court-il&nbsp;?</p>
 </div>
 
 <script>
@@ -60,47 +68,68 @@ function trackScan(id) {
   } catch(e) { console.error('Storage error:', e); }
 }
 
-const startBtn = document.getElementById('startBtn');
-const restartBtn = document.getElementById('restartBtn');
-const voirBtn = document.getElementById('voirBtn');
-const s0 = document.getElementById('s0');
-const s1 = document.getElementById('s1');
-const s2 = document.getElementById('s2');
-const s3 = document.getElementById('s3');
-const a0 = document.getElementById('a0');
-const v0 = document.getElementById('v0');
+const startBtn=document.getElementById('startBtn');
+const restartBtn=document.getElementById('restartBtn');
+const voirBtn=document.getElementById('voirBtn');
+const s0=document.getElementById('s0');
+const s1=document.getElementById('s1');
+const s2=document.getElementById('s2');
+const s3=document.getElementById('s3');
+const a0=document.getElementById('a0');
+const v0=document.getElementById('v0');
+let finalShown=false;
+let fallbackTimer;
+let started=false;
 
-// Étape 0 : le lecteur touche l'écran -> comptabilisation du scan + lancement du son
-startBtn.onclick = async () => {
-  trackScan('qr3');
-  startBtn.style.display = 'none';
-  s0.classList.add('active');
-  try { await a0.play(); } catch(e) { console.error(e); }
-};
-
-// Étape 1 : le son fini -> question métacognitive AVANT l'image (pas d'image tant que le lecteur ne clique pas)
-a0.onended = () => {
+function showQuestion(){
   s0.classList.remove('active');
   s1.classList.add('active');
+}
+
+function showFinal(){
+  if(finalShown) return;
+  finalShown=true;
+  clearTimeout(fallbackTimer);
+  s2.classList.add('fadeout');
+  setTimeout(()=>{
+    s2.classList.remove('active','fadeout');
+    s3.classList.add('active');
+    setTimeout(()=>{
+      restartBtn.style.display='block';
+      setTimeout(()=>restartBtn.classList.add('show'),50);
+    },1200);
+  },1000);
+}
+
+startBtn.onclick=()=>{
+  started=true;
+  trackScan('qr3');
+  startBtn.remove();
+  s0.classList.add('active');
+  a0.play().catch(()=>showQuestion());
 };
 
-// Étape 2 : le lecteur choisit de voir l'image, quand il est prêt
-voirBtn.onclick = async () => {
-  s1.classList.remove('active');
-  s2.classList.add('active');
-  try { await v0.play(); } catch(e) { console.error(e); }
+a0.onended=showQuestion;
+a0.onerror=()=>{
+  if(started) showQuestion();
 };
 
-// Étape 3 : la vidéo finie -> question de bascule, mesure l'écart imaginé / vu
-v0.onended = () => {
-  s2.classList.remove('active');
-  s3.classList.add('active');
-  restartBtn.style.display = 'block';
-  setTimeout(() => restartBtn.classList.add('show'), 300);
+voirBtn.onclick=()=>{
+  s1.classList.add('fadeout');
+  setTimeout(()=>{
+    s1.classList.remove('active','fadeout');
+    s2.classList.add('active');
+    v0.currentTime=0;
+    fallbackTimer=setTimeout(showFinal,6500);
+    v0.play().catch(e=>console.log('Video error:',e));
+  },1000);
 };
 
-restartBtn.onclick = () => location.reload();
+v0.onended=showFinal;
+v0.onerror=()=>{
+  if(s2.classList.contains('active')) fallbackTimer=setTimeout(showFinal,6000);
+};
+restartBtn.onclick=()=>location.reload();
 </script>
 </body>
 </html>
-
