@@ -189,24 +189,30 @@ async function run(){
   await playToEnd(video,15000);
   hide(video);
 
+  await showText(
+    'Le téléphone de Rémy, posé sur la table de nuit, est allumé.',
+    2800,
+    'middle'
+  );
+
+  await showImage(
+    'ittversement.webp',
+    'Téléphone fissuré affichant un onglet sur l’indemnisation d’un accident du travail',
+    7500,
+    'Un onglet est resté ouvert sur le téléphone de Rémy'
+  );
+
   image.src='winamax.webp';
   image.alt='Téléphone fissuré affichant un rappel de paiement de paris sportifs';
   show(image);
   text.className='bottom';
-  text.textContent='Message découvert par Sam et Inès';
+  text.textContent='Une notification apparaît';
   show(text);
   aVibreur.currentTime=0;
   aVibreur.play().catch(()=>{});
   await sleep(7500);
   hide(image);
   hide(text);
-
-  await showImage(
-    'ittversement.webp',
-    'Téléphone fissuré affichant une recherche sur l’indemnisation d’un accident du travail',
-    7500,
-    'Recherche remarquée par Inès'
-  );
 
   const imagined=await askMulti(
     'Avant de les découvrir, quels éléments avais-tu déjà imaginés ?',
