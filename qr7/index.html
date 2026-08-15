@@ -3,141 +3,191 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>QR7 - Sam</title>
+<title>QR7 — Le vestiaire</title>
+<link rel="preload" as="image" href="vestiaire_qr7.webp">
+<link rel="preload" as="image" href="mains_cadenas_qr7.webp">
 <style>
-html,body{margin:0;height:100%;background:#000;color:#fff;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;overflow:hidden}
-#start{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:clamp(20px,5vmin,26px);padding:20px 40px;background:#fff;color:#000;border:none;border-radius:10px;cursor:pointer;z-index:100}
-#restart{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);font-size:clamp(20px,5vmin,26px);padding:15px 30px;background:#fff;color:#000;border:none;border-radius:10px;cursor:pointer;z-index:100;display:none}
-#text{position:absolute;left:50%;transform:translateX(-50%);width:92%;text-align:center;font-size:clamp(20px,4.5vmin,28px);line-height:1.45;z-index:30;display:none;white-space:pre-line;text-shadow:0 0 6px #000}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;background:#000;color:#fff;overflow:hidden;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button{font-family:inherit}
+#start,#restart{position:fixed;left:50%;transform:translateX(-50%);z-index:100;background:#fff;color:#000;border:0;border-radius:8px;cursor:pointer;font-size:clamp(20px,5vmin,26px)}
+#start{top:50%;transform:translate(-50%,-50%);padding:20px 40px;white-space:nowrap}
+#restart{bottom:40px;padding:15px 30px;display:none}
+#text{position:fixed;left:50%;transform:translateX(-50%);width:min(92%,760px);text-align:center;font-size:clamp(20px,4.5vmin,28px);line-height:1.45;z-index:30;display:none;white-space:pre-line;text-shadow:0 0 6px #000}
 #text.center{top:8%}
-#text.bottom{bottom:6%;font-size:clamp(18px,3.8vmin,24px);background:rgba(0,0,0,.75);padding:1.8vmin 2.5vmin;border-radius:8px;max-width:85%}
-#choices{position:absolute;top:28%;left:50%;transform:translateX(-50%);display:none;flex-direction:column;gap:2.2vmin;width:88%;z-index:30}
-.btn{font-size:clamp(18px,4vmin,24px);padding:20px 28px;background:#111;color:#fff;border:1px solid #fff;border-radius:8px;cursor:pointer;text-align:center;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
-#image{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-width:96vw;max-height:85vh;z-index:10;display:none}
+#text.bottom{bottom:5%;font-size:clamp(17px,3.6vmin,23px);background:rgba(0,0,0,.82);padding:12px 18px;border-radius:8px;width:min(88%,700px)}
+#choices{position:fixed;top:27%;left:50%;transform:translateX(-50%);display:none;flex-direction:column;gap:15px;width:min(88%,360px);z-index:40}
+.choiceBtn{font-size:clamp(18px,4vmin,24px);padding:15px 25px;background:#111;color:#fff;border:1px solid #fff;border-radius:8px;cursor:pointer;text-align:center}
+.choiceBtn:active{transform:scale(.98)}
+#image{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);max-width:92vw;max-height:82vh;object-fit:contain;z-index:10;display:none}
+@media(max-height:620px){#choices{top:24%;gap:9px}.choiceBtn{padding:10px 18px}#text.center{top:4%}}
 </style>
 </head>
 <body>
-<button id="start">Touche pour commencer</button>
-<button id="restart">Recommencer</button>
+<button id="start" type="button">Touche pour commencer</button>
+<button id="restart" type="button">Revoir le parcours</button>
 
 <div id="text"></div>
 <div id="choices"></div>
 <img id="image" alt="">
 
-<audio id="aLavelot" src="audio_vidal.mp3" preload="auto"></audio>
+<audio id="aVidal" src="audio_vidal.mp3" preload="auto"></audio>
 <audio id="aCadenas" src="cadenas_troisfois.mp3" preload="auto"></audio>
-<audio id="aNarrateur" src="audio_inesnoe.mp3" preload="auto"></audio>
+<audio id="aInesNoe" src="audio_inesnoe.mp3" preload="auto"></audio>
 
 <script>
-function trackScan(id) {
-  try {
-    let usedSet = new Set(JSON.parse(localStorage.getItem('qr_used_set') || '[]'));
+function trackScan(id){
+  try{
+    const usedSet=new Set(JSON.parse(localStorage.getItem('qr_used_set')||'[]'));
     usedSet.add(id);
-    let arr = Array.from(usedSet);
-    localStorage.setItem('qr_used_set', JSON.stringify(arr));
-    localStorage.setItem('scans_used', arr.length);
-    localStorage.setItem('scans_total', '11'); 
-  } catch(e) { console.error('Storage error:', e); }
+    const arr=Array.from(usedSet);
+    localStorage.setItem('qr_used_set',JSON.stringify(arr));
+    localStorage.setItem('scans_used',arr.length);
+    localStorage.setItem('scans_total','11');
+  }catch(e){console.error('Storage error:',e)}
 }
 
-const $ = id => document.getElementById(id);
-const start = $('start'), restart = $('restart'), text = $('text'), choices = $('choices'), image = $('image');
-const aLavelot = $('aLavelot'), aCadenas = $('aCadenas'), aNarrateur = $('aNarrateur');
+const $=id=>document.getElementById(id);
+const start=$('start');
+const restart=$('restart');
+const text=$('text');
+const choices=$('choices');
+const image=$('image');
+const aVidal=$('aVidal');
+const aCadenas=$('aCadenas');
+const aInesNoe=$('aInesNoe');
+const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+const show=el=>el.style.display='block';
+const hide=el=>el.style.display='none';
 
-const show = el => el.style.display = 'block';
-const hide = el => el.style.display = 'none';
-const flex = el => el.style.display = 'flex';
-const sleep = ms => new Promise(r => setTimeout(r, ms));
-
-function showText(t, hold=3000, pos='center'){
-  text.className=''; text.classList.add(pos);
-  text.textContent=t; show(text);
-  return sleep(hold).then(()=>hide(text));
-}
-
-function askSingle(q, opts){
-  return new Promise(async res=>{
-    text.className='center'; text.textContent=q; show(text);
-    await sleep(500);
-    choices.innerHTML='';
-    opts.forEach(o=>{
-      const b=document.createElement('button'); b.className='btn'; b.textContent=o;
-      b.onclick=()=>{ hide(text); hide(choices); res(o); };
-      choices.appendChild(b);
-    });
-    flex(choices);
+function playToEnd(audio){
+  return new Promise(resolve=>{
+    let finished=false;
+    const done=()=>{
+      if(finished)return;
+      finished=true;
+      clearTimeout(safety);
+      audio.removeEventListener('ended',done);
+      audio.removeEventListener('error',done);
+      resolve();
+    };
+    const safety=setTimeout(done,30000);
+    audio.addEventListener('ended',done,{once:true});
+    audio.addEventListener('error',done,{once:true});
+    audio.currentTime=0;
+    audio.play().catch(done);
   });
 }
 
-async function play(a){ try{ await a.play(); }catch{} }
+async function showText(message,hold=3000,position='center'){
+  text.className=position;
+  text.textContent=message;
+  show(text);
+  await sleep(hold);
+  hide(text);
+}
+
+function askSingle(question,options){
+  return new Promise(async resolve=>{
+    text.className='center';
+    text.textContent=question;
+    show(text);
+    await sleep(350);
+    choices.innerHTML='';
+    options.forEach(option=>{
+      const button=document.createElement('button');
+      button.type='button';
+      button.className='choiceBtn';
+      button.textContent=option.label;
+      button.onclick=()=>{
+        hide(text);
+        hide(choices);
+        resolve(option.value);
+      };
+      choices.appendChild(button);
+    });
+    choices.style.display='flex';
+  });
+}
+
+async function showImage(src,alt,hold,message=''){
+  image.src=src;
+  image.alt=alt;
+  show(image);
+  if(message){
+    text.className='bottom';
+    text.textContent=message;
+    show(text);
+  }
+  await sleep(hold);
+  hide(image);
+  hide(text);
+}
+
+const normalize=value=>(value||'').trim().toLocaleLowerCase('fr');
 
 async function run(){
-  hide(start); hide(restart);
-
+  hide(start);
+  hide(restart);
   trackScan('qr7');
-  localStorage.setItem('qr7_done','1');
-  try{const s=new Set(JSON.parse(localStorage.getItem('qr_used_set')||'[]'));s.add('qr7');localStorage.setItem('qr_used_set',JSON.stringify([...s]));}catch(e){}
 
-  // Lecture Audio Vidal (aLavelot)
-  await play(aLavelot);
-  // Attend que l'audio se termine naturellement (événement 'ended') au lieu d'un sleep fixe trop court ou trop long
-  await new Promise(res => aLavelot.onended = res);
+  await playToEnd(aVidal);
+  await showText('Les élèves rentrent dans le vestiaire.',2200);
 
-  await showText('Les élèves rentrent dans le vestiaire.',2500,'center');
-   
-  const repVestiaire = await askSingle('Comment imagines-tu ce vestiaire ?', [
-    'Vestiaire propre et ordonné',
-    'Désordonné et sale',
-    'Petit étroit aux casiers serrés',
-    'Vaste et vide qui résonne',
-    'Rien de précis'
+  const repVestiaire=await askSingle('Comment imagines-tu ce vestiaire ?',[
+    {label:'Propre et ordonné',value:'propre et ordonné'},
+    {label:'Désordonné et sale',value:'désordonné et sale'},
+    {label:'Petit, aux casiers serrés',value:'petit, aux casiers serrés'},
+    {label:'Vaste et vide, avec de l’écho',value:'vaste et vide, avec de l’écho'},
+    {label:'Je ne vois rien de précis',value:'rien de précis'}
   ]);
-  localStorage.setItem('qr7_vestiaire', repVestiaire);
+  try{localStorage.setItem('qr7_vestiaire',repVestiaire)}catch(e){}
 
-  image.src='vestiaire.jpg'; show(image);
-  text.className='bottom'; text.textContent='voici un vestiaire'; show(text);
-  await sleep(4000);
-  hide(image); hide(text);
+  await showImage(
+    'vestiaire_qr7.webp',
+    'Vestiaire dessiné au fusain avec des rangées de casiers',
+    4200,
+    'Compare avec ce que tu avais imaginé.\nTon vestiaire peut être différent.'
+  );
 
-  // Lecture Audio Cadenas
-  await play(aCadenas);
-  await new Promise(res => aCadenas.onended = res);
-  
-  image.src='mains.webp'; show(image);
-  await sleep(2500);
-  hide(image);
+  await playToEnd(aCadenas);
+  await showImage(
+    'mains_cadenas_qr7.webp',
+    'Mains de Sam vérifiant un cadenas à chiffres sur un casier',
+    2800
+  );
 
-  const qr1 = localStorage.getItem('qr1_cadenas');
-   
-  const repCadenas = await askSingle('Le cadenas, tu l’avais imaginé comment ?', [
-    'Un cadenas à chiffres',
-    'Un cadenas à clé',
-    'Un autre type de cadenas'
+  let qr1='';
+  try{qr1=localStorage.getItem('qr1_cadenas')||''}catch(e){}
+  const repCadenas=await askSingle('Le cadenas, tu l’avais imaginé comment ?',[
+    {label:'À chiffres',value:'un cadenas à chiffres'},
+    {label:'À clé',value:'un cadenas à clé'},
+    {label:'Un autre type',value:'un autre type de cadenas'},
+    {label:'Je ne vois rien de précis',value:'rien de précis'}
   ]);
-  localStorage.setItem('qr7_cadenas', repCadenas);
+  try{localStorage.setItem('qr7_cadenas',repCadenas)}catch(e){}
 
   if(qr1){
-    if(qr1 === repCadenas){
-      // Correction du vouvoiement ici :
-      await showText("Bien joué, tu t'en es souvenu...",3500,'center');
+    if(normalize(qr1)===normalize(repCadenas)){
+      await showText('Tu avais gardé le même cadenas en tête.',3000);
     }else{
-      await showText(`Étonnant.\nLa dernière fois tu avais imaginé ${qr1}`,4000,'center');
+      await showText(`Ton image a changé depuis le début.\nTu imaginais d’abord ${qr1}.`,3800);
     }
+  }else{
+    await showText('Tu viens de préciser ton image.',2600);
   }
 
-  // Lecture Audio InesNoe (aNarrateur)
-  await play(aNarrateur);
-  // Attend que l'audio se termine entièrement pour ne pas couper la fin
-  await new Promise(res => aNarrateur.onended = res);
+  await playToEnd(aInesNoe);
+  await showText('Ton image a peut-être changé.\nElle continuera de se préciser avec l’histoire.',3500);
 
-  await showText("Garde bien cette image en tête, elle va t'être utile pour comprendre la suite...",4000,'center');
-
+  try{localStorage.setItem('qr7_done','1')}catch(e){}
   show(restart);
 }
 
-start.onclick = run;
-restart.onclick = ()=> location.reload();
+start.onclick=run;
+restart.onclick=()=>location.reload();
 </script>
 </body>
 </html>
+
 
