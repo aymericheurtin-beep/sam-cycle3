@@ -3,151 +3,235 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>QR8 - Sam</title>
+<title>QR8 — Chambre 214</title>
+<link rel="preload" as="image" href="portechambre.webp">
+<link rel="preload" as="image" href="winamax.webp">
+<link rel="preload" as="image" href="ittversement.webp">
 <style>
-html,body{margin:0;height:100%;background:#000;color:#fff;font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;overflow:hidden}
-#start{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:clamp(20px,5vmin,26px);padding:20px 40px;background:#fff;color:#000;border:none;border-radius:10px;cursor:pointer;z-index:100}
-#restart{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);font-size:clamp(20px,5vmin,26px);padding:15px 30px;background:#fff;color:#000;border:none;border-radius:10px;cursor:pointer;z-index:100;display:none}
-#text{position:absolute;left:50%;transform:translateX(-50%);width:92%;text-align:center;font-size:clamp(20px,4.5vmin,28px);line-height:1.45;z-index:30;display:none;white-space:pre-line;text-shadow:0 0 6px #000}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;background:#000;color:#fff;overflow:hidden;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button{font-family:inherit}
+#start,#restart{position:fixed;left:50%;transform:translateX(-50%);z-index:100;background:#fff;color:#000;border:0;border-radius:8px;cursor:pointer;font-size:clamp(20px,5vmin,26px)}
+#start{top:50%;transform:translate(-50%,-50%);padding:20px 40px;white-space:nowrap}
+#restart{bottom:40px;padding:15px 30px;display:none}
+#text{position:fixed;left:50%;transform:translateX(-50%);width:min(92%,760px);text-align:center;font-size:clamp(20px,4.5vmin,28px);line-height:1.45;z-index:30;display:none;white-space:pre-line;text-shadow:0 0 6px #000}
 #text.center{top:8%}
-#text.bottom{bottom:6%;font-size:clamp(18px,3.8vmin,24px);background:rgba(0,0,0,.75);padding:1.8vmin 2.5vmin;border-radius:8px;max-width:85%}
-#choices{position:absolute;top:28%;left:50%;transform:translateX(-50%);display:none;flex-direction:column;gap:2.2vmin;width:88%;z-index:30}
-.btn{font-size:clamp(18px,4vmin,24px);padding:20px 28px;background:#111;color:#fff;border:1px solid #fff;border-radius:8px;cursor:pointer;text-align:center;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
-.btn.validate{background:#fff;color:#000;margin-top:2vmin}
-.choice{display:flex;align-items:center;gap:2vmin;background:#111;border:1px solid #fff;border-radius:8px;padding:20px 28px;font-size:clamp(18px,4vmin,24px);cursor:pointer}
-.choice input{width:4vmin;height:4vmin}
-#image,#video{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-width:96vw;max-height:85vh;z-index:10;display:none}
-#count{position:absolute;bottom:5vmin;right:6vmin;font-size:8vmin;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;z-index:30;display:none;text-shadow:0 0 8px #000}
+#text.middle{top:50%;transform:translate(-50%,-50%)}
+#text.bottom{bottom:5%;font-size:clamp(17px,3.6vmin,23px);background:rgba(0,0,0,.82);padding:12px 18px;border-radius:8px;width:min(88%,700px)}
+#choices{position:fixed;top:24%;left:50%;transform:translateX(-50%);display:none;flex-direction:column;gap:12px;width:min(88%,420px);z-index:40}
+.choice{display:flex;align-items:center;gap:14px;background:#111;color:#fff;border:1px solid #fff;border-radius:8px;padding:14px 18px;font-size:clamp(17px,3.8vmin,23px);cursor:pointer}
+.choice input{width:22px;height:22px;flex:0 0 auto;accent-color:#fff}
+.validate{font-size:clamp(18px,4vmin,24px);padding:14px 25px;background:#fff;color:#000;border:0;border-radius:8px;cursor:pointer;margin-top:4px}
+#image,#video{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);max-width:92vw;max-height:82vh;object-fit:contain;z-index:10;display:none}
+#count{position:fixed;inset:0;display:none;place-items:center;font-size:clamp(68px,22vmin,150px);font-weight:700;z-index:35;text-shadow:0 0 12px #000}
+@media(max-height:680px){#choices{top:19%;gap:7px}.choice{padding:9px 14px}#text.center{top:4%}}
 </style>
 </head>
 <body>
-<button id="start">Touche pour entrer</button>
-<button id="restart">Recommencer</button>
+<button id="start" type="button">Touche pour commencer</button>
+<button id="restart" type="button">Revoir le parcours</button>
 
 <div id="text"></div>
 <div id="choices"></div>
 <img id="image" alt="">
-<video id="video" playsinline muted></video>
+<video id="video" src="montre_poche.mp4" playsinline muted preload="auto" aria-label="Inès découvre une montre dans les affaires de Rémy"></video>
 <div id="count"></div>
 
-<audio id="a2" src="Remy.mp3" preload="auto"></audio>
-<audio id="a3" src="vibreur.mp3" preload="auto"></audio>
+<audio id="aRemy" src="Remy.mp3" preload="auto"></audio>
+<audio id="aVibreur" src="vibreur.mp3" preload="auto"></audio>
 
 <script>
-function trackScan(id) {
-  try {
-    let usedSet = new Set(JSON.parse(localStorage.getItem('qr_used_set') || '[]'));
+function trackScan(id){
+  try{
+    const usedSet=new Set(JSON.parse(localStorage.getItem('qr_used_set')||'[]'));
     usedSet.add(id);
-    let arr = Array.from(usedSet);
-    localStorage.setItem('qr_used_set', JSON.stringify(arr));
-    localStorage.setItem('scans_used', arr.length);
-    localStorage.setItem('scans_total', '11'); 
-  } catch(e) { console.error('Storage error:', e); }
+    const arr=Array.from(usedSet);
+    localStorage.setItem('qr_used_set',JSON.stringify(arr));
+    localStorage.setItem('scans_used',arr.length);
+    localStorage.setItem('scans_total','11');
+  }catch(e){console.error('Storage error:',e)}
 }
 
-const $ = id => document.getElementById(id);
-const start = $('start'), restart = $('restart'), text = $('text'), choices = $('choices'), image = $('image'), video = $('video'), count = $('count');
-const a2 = $('a2'), a3 = $('a3');
+const $=id=>document.getElementById(id);
+const start=$('start');
+const restart=$('restart');
+const text=$('text');
+const choices=$('choices');
+const image=$('image');
+const video=$('video');
+const count=$('count');
+const aRemy=$('aRemy');
+const aVibreur=$('aVibreur');
+const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+const show=el=>el.style.display='block';
+const hide=el=>el.style.display='none';
 
-const show = el => el.style.display = 'block';
-const hide = el => el.style.display = 'none';
-const flex = el => el.style.display = 'flex';
-const sleep = ms => new Promise(r => setTimeout(r, ms));
-
-function showText(t, hold=3000, pos='center'){
-  text.className = ''; text.classList.add(pos);
-  text.textContent = t; show(text);
-  return sleep(hold).then(()=>hide(text));
-}
-
-function askSingle(q, opts){
-  return new Promise(async res=>{
-    text.className='center'; text.textContent=q; show(text);
-    await sleep(500);
-    choices.innerHTML='';
-    opts.forEach(o=>{
-      const b=document.createElement('button'); b.className='btn'; b.textContent=o;
-      b.onclick=()=>{ hide(text); hide(choices); res(o); };
-      choices.appendChild(b);
-    });
-    flex(choices);
+function playToEnd(media,timeout=30000){
+  return new Promise(resolve=>{
+    let finished=false;
+    const done=()=>{
+      if(finished)return;
+      finished=true;
+      clearTimeout(safety);
+      media.removeEventListener('ended',done);
+      media.removeEventListener('error',done);
+      resolve();
+    };
+    const safety=setTimeout(done,timeout);
+    media.addEventListener('ended',done,{once:true});
+    media.addEventListener('error',done,{once:true});
+    media.currentTime=0;
+    media.play().catch(done);
   });
 }
 
-function askMulti(q, opts){
-  return new Promise(async res=>{
-    text.className='center'; text.textContent=q; show(text);
-    await sleep(500);
+async function showText(message,hold=3000,position='center'){
+  text.className=position;
+  text.textContent=message;
+  show(text);
+  await sleep(hold);
+  hide(text);
+}
+
+async function showImage(src,alt,hold,message=''){
+  image.src=src;
+  image.alt=alt;
+  show(image);
+  if(message){
+    text.className='bottom';
+    text.textContent=message;
+    show(text);
+  }
+  await sleep(hold);
+  hide(image);
+  hide(text);
+}
+
+function askMulti(question,options){
+  return new Promise(async resolve=>{
+    text.className='center';
+    text.textContent=question;
+    show(text);
+    await sleep(350);
     choices.innerHTML='';
-    opts.forEach(o=>{
-      const lab=document.createElement('label'); lab.className='choice';
-      const cb=document.createElement('input'); cb.type='checkbox'; cb.value=o;
-      lab.appendChild(cb); lab.append(o); choices.appendChild(lab);
+
+    options.forEach(option=>{
+      const label=document.createElement('label');
+      label.className='choice';
+      const checkbox=document.createElement('input');
+      checkbox.type='checkbox';
+      checkbox.value=option.value;
+      checkbox.dataset.none=option.none?'1':'0';
+      checkbox.onchange=()=>{
+        const all=[...choices.querySelectorAll('input[type="checkbox"]')];
+        if(checkbox.dataset.none==='1'&&checkbox.checked){
+          all.filter(item=>item!==checkbox).forEach(item=>item.checked=false);
+        }else if(checkbox.checked){
+          all.filter(item=>item.dataset.none==='1').forEach(item=>item.checked=false);
+        }
+      };
+      label.appendChild(checkbox);
+      label.append(option.label);
+      choices.appendChild(label);
     });
-    const v=document.createElement('button'); v.className='btn validate'; v.textContent='Valider';
-    v.onclick=()=>{ const sel=[...choices.querySelectorAll('input:checked')].map(i=>i.value); hide(text); hide(choices); res(sel); };
-    choices.appendChild(v);
-    flex(choices);
+
+    const validate=document.createElement('button');
+    validate.type='button';
+    validate.className='validate';
+    validate.textContent='Valider';
+    validate.onclick=()=>{
+      let selected=[...choices.querySelectorAll('input:checked')].map(item=>item.value);
+      if(selected.length===0)selected=['rien de précis'];
+      hide(text);
+      hide(choices);
+      resolve(selected);
+    };
+    choices.appendChild(validate);
+    choices.style.display='flex';
   });
 }
 
-async function play(a){ try{ await a.play(); }catch{} }
+async function countdown(seconds){
+  count.style.display='grid';
+  for(let value=seconds;value>=1;value--){
+    count.textContent=value;
+    await sleep(1000);
+  }
+  hide(count);
+}
 
 async function run(){
-  hide(start); hide(restart);
-
+  hide(start);
+  hide(restart);
   trackScan('qr8');
-  localStorage.setItem('qr8_done','1');
-  try{const s=new Set(JSON.parse(localStorage.getItem('qr_used_set')||'[]'));s.add('qr8');localStorage.setItem('qr_used_set',JSON.stringify([...s]));}catch(e){}
 
-  image.src='portechambre.webp'; show(image);
-  await showText('Chambre 214. Inès et Sam entrent.',2500,'bottom');
+  await showImage(
+    'portechambre.webp',
+    'Porte entrouverte de la chambre 214 où repose Rémy',
+    3000,
+    'Chambre 214. Inès et Sam entrent.'
+  );
+
+  await showText(
+    'Avant d’aller plus loin, imagine ce qu’ils vont voir et découvrir dans cette chambre.',
+    4200,
+    'middle'
+  );
+  await countdown(10);
+
+  image.src='portechambre.webp';
+  image.alt='Porte de la chambre 214 et Rémy dans son lit';
+  show(image);
+  await playToEnd(aRemy);
   hide(image);
-  
-  await showText('Tu as 10 secondes pour imaginer ce qu’Inès et Sam vont voir et découvrir dans cette chambre',6500,'center');
-  show(image); show(count);
-  for(let i=10;i>=1;i--){ count.textContent=i; await sleep(1000); }
-  hide(count); hide(image);
 
-  // Lecture de l'audio Rémy
-  await play(a2); 
-  await new Promise(res => a2.onended = res);
+  show(video);
+  await playToEnd(video,15000);
+  hide(video);
 
-  video.src='montre_poche.mp4'; show(video);
-  try{ await video.play(); }catch{}
-  await sleep(4000); video.pause(); hide(video);
+  image.src='winamax.webp';
+  image.alt='Téléphone fissuré affichant un rappel de paiement de paris sportifs';
+  show(image);
+  text.className='bottom';
+  text.textContent='Message découvert par Sam et Inès';
+  show(text);
+  aVibreur.currentTime=0;
+  aVibreur.play().catch(()=>{});
+  await sleep(7500);
+  hide(image);
+  hide(text);
 
-  // Message 1 : Winamax (Sam et Inès)
-  image.src='winamax.webp'; show(image);
-  text.className='bottom'; text.textContent='Message lu par Sam et Inès'; show(text);
-  await play(a3); 
-  // Temps de lecture augmenté à 8 secondes pour cette image
-  await sleep(8000); 
-  hide(image); hide(text);
+  await showImage(
+    'ittversement.webp',
+    'Téléphone fissuré affichant une recherche sur l’indemnisation d’un accident du travail',
+    7500,
+    'Recherche remarquée par Inès'
+  );
 
-  await sleep(1000);
+  const imagined=await askMulti(
+    'Avant de les découvrir, quels éléments avais-tu déjà imaginés ?',
+    [
+      {label:'La montre dans les affaires de Rémy',value:'la montre'},
+      {label:'Le sweat montré par Rémy',value:'le sweat'},
+      {label:'Les messages du téléphone',value:'les messages'},
+      {label:'Un autre détail',value:'un autre détail'},
+      {label:'Rien de précis',value:'rien de précis',none:true}
+    ]
+  );
+  try{localStorage.setItem('qr8_anticipation',JSON.stringify(imagined))}catch(e){}
 
-  // Message 2 : Indemnité ITT (Inès uniquement)
-  image.src='ittversement.webp'; show(image);
-  text.className='bottom'; text.textContent='Message lu uniquement par Inès'; show(text);
-  // Temps de lecture augmenté à 8 secondes pour cette image également
-  await sleep(8000);
-  hide(image); hide(text);
+  await showText(
+    'Compare avec ton idée de départ.\nQuels détails t’ont surpris ?',
+    3800,
+    'middle'
+  );
 
-  const vu = await askMulti('Durant le décompte des 10 secondes, tu avais vu :', [
-    'La montre qu’Inès emporte',
-    'Le sweat que Rémy montre',
-    'Les messages du téléphone',
-    'Autre chose'
-  ]);
-  localStorage.setItem('qr8_vu_decompte', JSON.stringify(vu));
-
+  try{localStorage.setItem('qr8_done','1')}catch(e){}
   show(restart);
 }
 
-start.onclick = run;
-restart.onclick = ()=> location.reload();
+start.onclick=run;
+restart.onclick=()=>location.reload();
 </script>
 </body>
 </html>
-
