@@ -108,6 +108,15 @@ function trackScan(id){
   }catch(error){console.error("Storage error:",error)}
 }
 
+function saveScanReason(id,reason){
+  try{
+    const reasons=JSON.parse(localStorage.getItem("qr_scan_reasons")||"{}");
+    reasons[id]=reason;
+    localStorage.setItem("qr_scan_reasons",JSON.stringify(reasons));
+    localStorage.setItem(`${id}_scan_reason`,reason);
+  }catch(error){console.error("Storage error:",error)}
+}
+
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 const startBtn=document.getElementById("startBtn");
 const restartBtn=document.getElementById("restartBtn");
@@ -310,6 +319,18 @@ async function run(){
   trackScan("qr9");
   startBtn.style.display="none";
 
+  const scanReason=await askSingle("Pourquoi as-tu ouvert ce QR ?",[
+    "J’ai besoin d’un coup de pouce",
+    "Je veux comparer avec ce que j’ai imaginé",
+    "Je veux juste voir ce qui se cache ici"
+  ]);
+  const reasonCode=scanReason.startsWith("J’ai besoin")
+    ? "appui"
+    : scanReason.startsWith("Je veux comparer")
+      ? "comparaison"
+      : "curiosite";
+  saveScanReason("qr9",reasonCode);
+
   await showVisual(
     "crochetage_vidal.webp",
     "Inès tente d’ouvrir la porte du bureau de M. Vidal avec un trombone",
@@ -410,5 +431,3 @@ restartBtn.addEventListener("click",()=>location.reload());
 </script>
 </body>
 </html>
-
-
