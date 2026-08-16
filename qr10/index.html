@@ -2,257 +2,286 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>QR10</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=yes">
+<meta name="theme-color" content="#000000">
+<title>QR10 — La réunion</title>
 <style>
-html,body{margin:0;height:100%;background:#000;color:#fff;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;overflow:hidden}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;background:#000;color:#fff;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden}
+body{display:flex;align-items:center;justify-content:center}
+button{font:inherit}
 
-#start{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:clamp(20px,5vmin,26px);padding:20px 40px;background:#fff;color:#000;border:none;border-radius:10px;cursor:pointer;z-index:100;animation:blink 1.5s infinite}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.6}}
+.screen{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:18px;background:#000;opacity:0;transition:opacity .45s ease}
+.screen.active{display:flex;opacity:1}
+.screen.fading{opacity:0}
+.mainText{width:min(92vw,760px);font-size:clamp(20px,4.6vmin,29px);line-height:1.48;white-space:pre-line}
+.sub{display:block;margin-top:18px;color:#bbb;font-size:clamp(16px,3.3vmin,20px);line-height:1.4}
 
-#restart{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);font-size:clamp(18px,4vmin,22px);padding:15px 30px;background:#fff;color:#000;border:none;border-radius:10px;cursor:pointer;z-index:100;display:none}
+#startBtn{display:block;width:min(88vw,360px);padding:20px 28px;border:0;border-radius:8px;background:#fff;color:#000;font-size:clamp(20px,5vmin,26px);cursor:pointer;animation:pulse 1.5s infinite}
+#restartBtn{display:none;position:fixed;left:50%;bottom:32px;transform:translateX(-50%);z-index:100;width:min(82vw,320px);padding:15px 24px;border:0;border-radius:8px;background:#fff;color:#000;font-size:clamp(18px,4vmin,23px);cursor:pointer}
 
-#text{position:absolute;left:50%;transform:translateX(-50%);width:92%;text-align:center;font-size:clamp(18px,4.2vmin,26px);line-height:1.5;z-index:50;display:none;white-space:pre-line;text-shadow:0 0 8px #000}
-#text.center{top:50%;transform:translate(-50%,-50%)}
-#text.bottom{bottom:6%;font-size:clamp(16px,3.6vmin,22px);background:rgba(0,0,0,.82);padding:1.8vmin 2.5vmin;border-radius:8px;max-width:88%;top:auto;transform:translateX(-50%)}
+#countdown{font-family:"Courier New",monospace;font-size:clamp(72px,22vmin,140px);text-shadow:0 0 20px #fff}
 
-#countdown{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:clamp(60px,18vmin,120px);font-family:'Courier New',monospace;color:#fff;opacity:0;z-index:60;text-shadow:0 0 20px #fff;transition:opacity .3s;pointer-events:none}
+#sceneScreen{padding:0}
+#sceneWrap{position:relative;width:min(96vw,82vh);height:min(96vw,82vh);line-height:0}
+#sceneImg{display:block;width:100%;height:100%;object-fit:contain}
+.zone{position:absolute;border:2px solid transparent;border-radius:7px;background:transparent;cursor:pointer;color:#fff}
+.zone:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.zone.active{border-color:#fff;background:rgba(255,255,255,.10)}
+.zone.seen{border-color:rgba(255,255,255,.35)}
+.zoneLabel{position:absolute;left:50%;bottom:calc(100% + 4px);transform:translateX(-50%);padding:4px 8px;border:1px solid rgba(255,255,255,.35);border-radius:5px;background:rgba(0,0,0,.9);font-size:clamp(13px,2.8vmin,17px);line-height:1.15;white-space:nowrap;opacity:0;pointer-events:none}
+.zone.active .zoneLabel,.zone:focus-visible .zoneLabel{opacity:1}
 
-#sceneWrap{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);display:none;z-index:20;line-height:0}
-#sceneImg{display:block;max-width:96vw;max-height:82vh;width:auto;height:auto}
+#sceneHint{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:30;width:max-content;max-width:88vw;padding:9px 14px;border-radius:8px;background:rgba(0,0,0,.82);font-size:clamp(15px,3.2vmin,19px);line-height:1.25}
+#sceneProgress{position:fixed;left:12px;top:12px;z-index:35;padding:8px 11px;border:1px solid rgba(255,255,255,.4);border-radius:7px;background:rgba(0,0,0,.82);font-size:clamp(14px,3vmin,18px);line-height:1.2}
+#sceneContinue{display:none;position:fixed;right:12px;top:12px;z-index:35;padding:10px 14px;border:0;border-radius:7px;background:#fff;color:#000;font-size:clamp(15px,3.3vmin,19px);cursor:pointer}
 
-.zone{position:absolute;cursor:pointer;border-radius:4px;border:2px solid transparent;transition:border-color .15s,background .15s;box-sizing:border-box}
-.zone:hover,.zone.active {border-color:rgba(255,255,255,.6);background:rgba(255,255,255,.08)}
+#tooltip{display:none;position:fixed;left:0;right:0;bottom:0;z-index:80;padding:18px 18px 20px;border-top:1px solid rgba(255,255,255,.28);background:rgba(0,0,0,.96);text-align:center;line-height:1.45}
+#tooltipName{display:block;margin-bottom:7px;font-size:clamp(20px,4.7vmin,27px);letter-spacing:.04em;text-transform:uppercase}
+#tooltipDesc{font-size:clamp(17px,3.7vmin,22px)}
+#tooltipClose{display:block;margin:15px auto 0;padding:11px 22px;border:0;border-radius:7px;background:#fff;color:#000;font-size:clamp(16px,3.4vmin,20px);cursor:pointer}
 
-.zone-label{position:absolute;bottom:calc(100% + 5px);left:50%;transform:translateX(-50%);background:rgba(0,0,0,.9);color:#fff;font-size:clamp(13px,3vmin,17px);padding:4px 10px;border-radius:4px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;z-index:90;border:1px solid rgba(255,255,255,.3)}
-.zone:hover .zone-label,.zone.active .zone-label{opacity:1}
-
-#tooltip{position:fixed;bottom:0;left:0;right:0;background:rgba(0,0,0,.93);color:#fff;font-size:clamp(16px,3.8vmin,22px);line-height:1.55;text-align:center;padding:3vmin 4vmin 4vmin;z-index:80;display:none;border-top:1px solid rgba(255,255,255,.18)}
-#tooltip strong{display:block;font-size:clamp(18px,4.5vmin,26px);margin-bottom:1vmin;letter-spacing:.05em;text-transform:uppercase}
-#tooltipClose{display:inline-block;margin-top:2vmin;padding:1.5vmin 4vmin;background:#fff;color:#000;border:none;border-radius:6px;font-size:clamp(15px,3.5vmin,20px);cursor:pointer;font-family:inherit}
-
-#imageHint{position:absolute;bottom:2%;left:50%;transform:translateX(-50%);font-size:clamp(13px,2.8vmin,17px);color:rgba(255,255,255,.55);font-style:italic;text-align:center;z-index:30;pointer-events:none;white-space:nowrap;transition:opacity .5s}
-
-#inesCropWrap{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:45vmin;height:60vmin;overflow:hidden;display:none;z-index:25;border:2px solid #fff;border-radius:8px;background:#000}
-#inesCropWrap img{position:absolute;width:300%;height:200%;top:0;left:0}
-
-#stats{position:fixed;top:5vmin;right:5vmin;font-size:clamp(13px,3vmin,17px);z-index:30;display:none;text-align:right;line-height:1.6;background:rgba(0,0,0,.7);padding:1.5vmin 2vmin;border-radius:8px;border:1px solid rgba(255,255,255,.15)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.67}}
+@media (prefers-reduced-motion:reduce){.screen{transition:none}#startBtn{animation:none}}
 </style>
 </head>
 <body>
 
-<button id="start" onclick="run()">Touche pour entrer</button>
-<button id="restart" onclick="location.reload()">Recommencer</button>
-<div id="text"></div>
-<div id="countdown"></div>
+<button id="startBtn" type="button">Touche pour commencer</button>
+<button id="restartBtn" type="button">Recommencer</button>
 
-<div id="sceneWrap">
-  <img id="sceneImg" src="touslessuspects.webp" alt="La réunion">
-  <div class="zone" data-who="Rémy"  style="left:4.8%;  top:20.5%; width:16.8%; height:55.0%"><span class="zone-label">Rémy</span></div>
-  <div class="zone" data-who="Vidal" style="left:24.8%; top:14.5%; width:12.5%; height:23.0%"><span class="zone-label">Vidal</span></div>
-  <div class="zone" data-who="Inès"  style="left:60.0%; top:20.0%; width:13.5%; height:40.0%"><span class="zone-label">Inès</span></div>
-  <div class="zone" data-who="Sam"   style="left:72.5%; top:23.5%; width:10.5%; height:37.0%"><span class="zone-label">Sam</span></div>
-  <div class="zone" data-who="Noé"   style="left:30.0%; top:41.5%; width:23.5%; height:38.5%"><span class="zone-label">Noé</span></div>
-  <div class="zone" data-who="Chloé" style="left:76.8%; top:28.0%; width:20.5%; height:58.5%"><span class="zone-label">Chloé</span></div>
-  <div id="imageHint">Touche un personnage</div>
-</div>
+<section id="textScreen" class="screen" aria-live="polite">
+  <div id="mainText" class="mainText"></div>
+</section>
 
-<div id="tooltip">
+<section id="countdownScreen" class="screen" aria-live="polite">
+  <div id="countdown"></div>
+</section>
+
+<section id="sceneScreen" class="screen" aria-live="polite">
+  <div id="sceneWrap">
+    <img id="sceneImg" src="touslessuspects.webp" alt="Réunion dans le bureau de Mme Arnaud avec Rémy, M. Vidal, Noé, Inès, Sam et Chloé">
+
+    <button class="zone" type="button" data-who="Rémy" aria-label="Observer Rémy" style="left:4.8%;top:20.5%;width:16.8%;height:55%"><span class="zoneLabel">Rémy</span></button>
+    <button class="zone" type="button" data-who="Vidal" aria-label="Observer M. Vidal" style="left:24.8%;top:14.5%;width:12.5%;height:23%"><span class="zoneLabel">Vidal</span></button>
+    <button class="zone" type="button" data-who="Inès" aria-label="Observer Inès" style="left:60%;top:20%;width:13.5%;height:40%"><span class="zoneLabel">Inès</span></button>
+    <button class="zone" type="button" data-who="Sam" aria-label="Observer Sam" style="left:73%;top:23.5%;width:9%;height:37%"><span class="zoneLabel">Sam</span></button>
+    <button class="zone" type="button" data-who="Noé" aria-label="Observer Noé" style="left:30%;top:41.5%;width:23.5%;height:38.5%"><span class="zoneLabel">Noé</span></button>
+    <button class="zone" type="button" data-who="Chloé" aria-label="Observer Chloé" style="left:82%;top:28%;width:15.5%;height:58.5%"><span class="zoneLabel">Chloé</span></button>
+  </div>
+
+  <div id="sceneProgress">0/6 observés</div>
+  <button id="sceneContinue" type="button">Continuer</button>
+  <div id="sceneHint">Écoute…</div>
+</section>
+
+<aside id="tooltip" aria-live="polite">
   <strong id="tooltipName"></strong>
-  <span id="tooltipDesc"></span><br>
-  <button id="tooltipClose">Fermer</button>
-</div>
-
-<div id="inesCropWrap"><img id="inesCropImg" src="ines_5_choix.jpg" alt=""></div>
-<div id="stats"></div>
+  <div id="tooltipDesc"></div>
+  <button id="tooltipClose" type="button">Fermer</button>
+</aside>
 
 <audio id="narrateur" src="narrateur.mp3" preload="auto" playsinline></audio>
-<audio id="porte"     src="porte.mp3"      preload="auto" playsinline></audio>
+<audio id="porte" src="porte.mp3" preload="auto" playsinline></audio>
 
 <script>
-function trackScan(id) {
-  try {
-    let usedSet = new Set(JSON.parse(localStorage.getItem('qr_used_set') || '[]'));
+function trackScan(id){
+  try{
+    const usedSet=new Set(JSON.parse(localStorage.getItem("qr_used_set")||"[]"));
     usedSet.add(id);
-    let arr = Array.from(usedSet);
-    localStorage.setItem('qr_used_set', JSON.stringify(arr));
-    localStorage.setItem('scans_used', arr.length);
-    localStorage.setItem('scans_total', '11'); 
-    return arr.length;
-  } catch(e) { 
-    console.error('Storage error:', e); 
-    return 0;
-  }
+    const arr=Array.from(usedSet);
+    localStorage.setItem("qr_used_set",JSON.stringify(arr));
+    localStorage.setItem("scans_used",arr.length);
+    localStorage.setItem("scans_total","11");
+  }catch(error){console.error("Storage error:",error)}
 }
 
-const $=id=>document.getElementById(id);
-const start=$('start'),restart=$('restart'),text=$('text'),countdown=$('countdown');
-const sceneWrap=$('sceneWrap'),sceneImg=$('sceneImg');
-const tooltip=$('tooltip'),tooltipName=$('tooltipName'),tooltipDesc=$('tooltipDesc');
-const tooltipClose=$('tooltipClose'),imageHint=$('imageHint');
-const stats=$('stats');
-const cropWrap=$('inesCropWrap'),cropImg=$('inesCropImg');
-const narrateur=$('narrateur'),porte=$('porte');
+const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+const startBtn=document.getElementById("startBtn");
+const restartBtn=document.getElementById("restartBtn");
+const textScreen=document.getElementById("textScreen");
+const mainText=document.getElementById("mainText");
+const countdownScreen=document.getElementById("countdownScreen");
+const countdown=document.getElementById("countdown");
+const sceneScreen=document.getElementById("sceneScreen");
+const sceneHint=document.getElementById("sceneHint");
+const sceneProgress=document.getElementById("sceneProgress");
+const sceneContinue=document.getElementById("sceneContinue");
+const tooltip=document.getElementById("tooltip");
+const tooltipName=document.getElementById("tooltipName");
+const tooltipDesc=document.getElementById("tooltipDesc");
+const tooltipClose=document.getElementById("tooltipClose");
+const narrateur=document.getElementById("narrateur");
+const porte=document.getElementById("porte");
+const screens=[textScreen,countdownScreen,sceneScreen];
 
-const descriptions = {
-  'Rémy'  : "Bras bandé. préfèrerait être à l'hôpital que dans cette pièce.",
-  'Sam'   : "Ne se rappelle toujours pas de jeudi soir. Son avenir se joue là.",
-  'Vidal' : "Bras croisés. Sa montre Casio n'est plus à son poignet.",
-  'Inès'  : "Debout. Son carnet a tout consigné.",
-  'Chloé' : "Arrivée en dernier. Démarche stressée.",
-  'Noé'   : "Assis au centre. Posture des mauvais jours."
+const descriptions={
+  Rémy:"Le bras en écharpe. Il évite tous les regards.",
+  Vidal:"Bras croisés. Son poignet gauche est nu.",
+  Inès:"Debout. Son carnet ouvert entre les mains.",
+  Sam:"Il ne se souvient toujours pas de jeudi soir.",
+  Noé:"Assis près de Sam. Il ne dit rien.",
+  Chloé:"Arrivée la dernière. Elle fixe ses mains."
 };
 
-function show(el){el.style.display='block'}
-function hide(el){el.style.display='none'}
-function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
-function showText(t,pos='center'){text.className='';text.classList.add(pos);text.textContent=t;show(text)}
-function hideText(){hide(text)}
-async function play(a){try{await a.play()}catch{}}
+const carnetBridge={
+  LAVELOT:{entry:"LAVELOT S.",person:"Sam"},
+  MOREL:{entry:"MOREL N.",person:"Noé"},
+  DUBOIS:{entry:"DUBOIS C.",person:"Chloé"}
+};
 
-async function runCountdown(from){
-  countdown.style.opacity='1';
-  for(let i=from;i>=1;i--){
-    countdown.textContent=i;
-    await sleep(900);
-  }
-  countdown.style.opacity='0';
-  countdown.textContent='';
-  await sleep(300);
-}
-
-function calibrateZones(){
-  const rect=sceneImg.getBoundingClientRect();
-  const wrapRect=sceneWrap.getBoundingClientRect();
-  const offX=rect.left-wrapRect.left;
-  const offY=rect.top-wrapRect.top;
-  document.querySelectorAll('.zone').forEach(z=>{
-    const lPct=parseFloat(z.style.left);
-    const tPct=parseFloat(z.style.top);
-    const wPct=parseFloat(z.style.width);
-    const hPct=parseFloat(z.style.height);
-    z.style.left  =(offX+lPct/100*rect.width)+'px';
-    z.style.top   =(offY+tPct/100*rect.height)+'px';
-    z.style.width =(wPct/100*rect.width)+'px';
-    z.style.height=(hPct/100*rect.height)+'px';
-  });
-}
-
+const seen=new Set();
+const suspectOrder=[];
 let zonesUnlocked=false;
-let touchedCount=0;
-let lastWho='';
 
-function setupZones(){
-  document.querySelectorAll('.zone').forEach(z=>{
-    z.addEventListener('click',()=>{
-      if(!zonesUnlocked)return;
-      const who=z.dataset.who;
-      lastWho=who;
-      document.querySelectorAll('.zone').forEach(z2=>z2.classList.remove('active'));
-      z.classList.add('active');
-      tooltipName.textContent=who;
-      tooltipDesc.textContent=descriptions[who]||'';
-      show(tooltip);
-      touchedCount++;
-      if(touchedCount===1) imageHint.style.opacity='0';
-    });
-  });
-  tooltipClose.addEventListener('click',()=>{
-    hide(tooltip);
-    document.querySelectorAll('.zone').forEach(z=>z.classList.remove('active'));
+function activate(screen){
+  screens.forEach(item=>item.classList.remove("active","fading"));
+  screen.classList.add("active");
+}
+
+async function fade(screen){
+  screen.classList.add("fading");
+  await sleep(450);
+  screen.classList.remove("active","fading");
+}
+
+async function showText(content,hold){
+  mainText.textContent=content;
+  activate(textScreen);
+  await sleep(hold);
+  await fade(textScreen);
+}
+
+function playSafely(media){
+  try{
+    media.currentTime=0;
+    const promise=media.play();
+    if(promise)promise.catch(()=>{});
+  }catch(error){console.warn("Lecture audio impossible:",error)}
+}
+
+function waitForSound(media,maxMs){
+  return new Promise(resolve=>{
+    let finished=false;
+    const done=()=>{
+      if(finished)return;
+      finished=true;
+      media.removeEventListener("ended",done);
+      media.removeEventListener("error",done);
+      resolve();
+    };
+    media.addEventListener("ended",done,{once:true});
+    media.addEventListener("error",done,{once:true});
+    setTimeout(done,maxMs);
   });
 }
 
-async function showInesZoom(){
-  const choice=parseInt(localStorage.getItem('qr4_ines_choice')||'0',10);
-  if(choice>=1&&choice<=5){
-    const col=(choice-1)%3,row=Math.floor((choice-1)/3);
-    cropImg.style.left=`-${col*100}%`;
-    cropImg.style.top=`-${row*100}%`;
-    show(cropWrap);
-    showText("C'était votre Inès.",'bottom');
-    await sleep(4500);
-    hideText();
-    hide(cropWrap);
+async function runCountdown(){
+  activate(countdownScreen);
+  for(let value=3;value>=1;value--){
+    countdown.textContent=value;
+    await sleep(850);
   }
+  countdown.textContent="";
+  await fade(countdownScreen);
+}
+
+function updateProgress(){
+  sceneProgress.textContent=`${seen.size}/6 observés`;
+  if(seen.size>=1)sceneContinue.style.display="block";
+  if(seen.size===6)sceneContinue.textContent="J’ai tout observé";
+}
+
+function closeTooltip(){
+  tooltip.style.display="none";
+  document.querySelectorAll(".zone").forEach(zone=>zone.classList.remove("active"));
+}
+
+function openTooltip(zone){
+  if(!zonesUnlocked)return;
+  const who=zone.dataset.who;
+  document.querySelectorAll(".zone").forEach(item=>item.classList.remove("active"));
+  zone.classList.add("active","seen");
+
+  if(!seen.has(who)){
+    seen.add(who);
+    suspectOrder.push(who);
+    updateProgress();
+  }
+
+  tooltipName.textContent=who;
+  let description=descriptions[who];
+  if(who==="Inès"&&localStorage.getItem("qr4_ines_choice")){
+    description+=" Tu l’avais déjà imaginée : garde ton propre visage d’Inès.";
+  }
+  tooltipDesc.textContent=description;
+  tooltip.style.display="block";
+}
+
+function exploreScene(){
+  return new Promise(resolve=>{
+    document.querySelectorAll(".zone").forEach(zone=>{
+      zone.addEventListener("click",()=>openTooltip(zone));
+    });
+    tooltipClose.addEventListener("click",closeTooltip);
+    sceneContinue.addEventListener("click",()=>{
+      closeTooltip();
+      resolve();
+    },{once:true});
+  });
 }
 
 async function run(){
-  hide(start);
-  const used = trackScan('qr10');
+  trackScan("qr10");
+  startBtn.style.display="none";
 
-  // — PHASE 1 : pont carnet —
-  const firstCarnet=(localStorage.getItem('qr9_carnet_first')||'').toUpperCase();
-  if(firstCarnet==='LAVELOT'){
-    showText("Dans le carnet de Vidal, tu avais cliqué sur Lavelot en premier.\nIl est dans cette pièce.",'center');
-    await sleep(5000); hideText(); await sleep(400);
-  } else if(firstCarnet==='MOREL'){
-    showText("Dans le carnet de Vidal, tu avais cliqué sur Morel en premier.\nIl est dans cette pièce.",'center');
-    await sleep(5000); hideText(); await sleep(400);
-  } else if(firstCarnet==='DUBOIS'){
-    showText("Dans le carnet de Vidal, tu avais cliqué sur Dubois en premier.\nElle est dans cette pièce.",'center');
-    await sleep(5000); hideText(); await sleep(400);
+  const firstCarnet=(localStorage.getItem("qr9_carnet_first")||"").toUpperCase();
+  const bridge=carnetBridge[firstCarnet];
+  if(bridge){
+    await showText(`Dans le carnet de Vidal, tu avais commencé par ${bridge.entry}\n${bridge.person} est dans cette pièce.`,4400);
   }
 
-  // — PHASE 2 : tension montante —
-  showText('Mercredi. 8h31.\nBureau de Mme Arnaud.','center');
-  await sleep(3000); hideText(); await sleep(500);
+  await showText("Jeudi, 8 h 31.\nBureau de Mme Arnaud.",2600);
 
-  await play(porte);
-  await sleep(600);
-  await runCountdown(5);
+  playSafely(porte);
+  await showText("La porte se referme.",1100);
+  await runCountdown();
+  try{porte.pause();porte.currentTime=0}catch(error){}
 
-  // — PHASE 3 : image + zones —
-  show(sceneWrap);
-  sceneImg.style.opacity='0';
-  sceneImg.style.transition='opacity 1.2s';
-  await new Promise(res=>{ if(sceneImg.complete)res(); else sceneImg.onload=res; });
-  await sleep(50);
-  sceneImg.style.opacity='1';
-  calibrateZones();
-  await sleep(1200);
-
-  await play(narrateur);
-  await sleep(7000);
-  try{narrateur.pause();narrateur.currentTime=0}catch{}
+  sceneHint.textContent="Écoute…";
+  activate(sceneScreen);
+  playSafely(narrateur);
+  await waitForSound(narrateur,9000);
 
   zonesUnlocked=true;
-  imageHint.style.opacity='1';
+  sceneHint.textContent="Touche les personnages que tu veux observer.";
+  await exploreScene();
 
-  // Attendre premier tap (max 40 sec)
-  await new Promise(res=>{
-    let waited=0;
-    const check=setInterval(()=>{
-      waited+=500;
-      if(touchedCount>=1||waited>=40000){clearInterval(check);res();}
-    },500);
-  });
-  // Attendre fermeture du tooltip
-  await new Promise(res=>{
-    const check=setInterval(()=>{
-      if(touchedCount===0 || window.getComputedStyle(tooltip).display==='none'){clearInterval(check);res();}
-    },200);
-  });
+  try{
+    localStorage.setItem("qr10_suspect_order",JSON.stringify(suspectOrder));
+    localStorage.setItem("qr10_suspects_seen",JSON.stringify([...seen]));
+    if(suspectOrder[0])localStorage.setItem("qr10_first_suspect",suspectOrder[0]);
+  }catch(error){}
 
-  // Bonus Inès
-  if(lastWho==='Inès') await showInesZoom();
+  await fade(sceneScreen);
 
-  // — PHASE 4 : instruction de lecture —
-  hide(sceneWrap); hide(tooltip);
-  await sleep(400);
+  const firstLook=suspectOrder[0];
+  if(firstLook){
+    const firstLine=bridge?`Dans le carnet, tu avais commencé par ${bridge.entry}.\n`:"";
+    await showText(`${firstLine}Dans le bureau, ton regard s’est d’abord posé sur ${firstLook}.\n\nCe sont des choix de lecture. Pas des preuves.`,6000);
+  }
 
-  showText(`Dans quelques instants, tu vas lire la suite de ce roman.\nChaque personnage dans cette pièce a une raison d'être là.\nToi aussi, tu sais des choses sur eux.\nUtilise-les.`, 'center');
-  await sleep(12000);
-  hideText();
-
-  stats.innerHTML=`Scans proposés : 11<br>Scans utilisés : ${used}`;
-  show(stats);
-  show(restart);
+  mainText.innerHTML="Dans cette pièce, chacun cache quelque chose.<br><br>Mais ils ne cachent pas tous la même chose.<span class=\"sub\">La parole est à Inès.</span>";
+  activate(textScreen);
+  await sleep(6500);
+  restartBtn.style.display="block";
 }
 
-setupZones();
-window.addEventListener('resize',()=>{ if(sceneWrap.style.display!=='none') calibrateZones(); });
+startBtn.addEventListener("click",run,{once:true});
+restartBtn.addEventListener("click",()=>location.reload());
+
+const preload=new Image();
+preload.src="touslessuspects.webp";
 </script>
 </body>
 </html>
-
