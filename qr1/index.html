@@ -28,6 +28,15 @@ button,.choiceBtn{font-size:clamp(18px,4vmin,24px);font-family:system-ui,-apple-
 <button id="startBtn" type="button">Touche pour commencer</button>
 <button id="restartBtn" type="button">Revoir le parcours</button>
 
+<div id="scanReason" class="screen">
+  <p>Pourquoi as-tu ouvert ce QR&nbsp;?</p>
+  <div style="display:flex;flex-direction:column;gap:15px;margin-top:20px">
+    <button type="button" class="choiceBtn" data-reason="appui">J’ai besoin d’un coup de pouce</button>
+    <button type="button" class="choiceBtn" data-reason="comparaison">Je veux comparer avec ce que j’ai imaginé</button>
+    <button type="button" class="choiceBtn" data-reason="curiosite">Je veux juste voir ce qui se cache ici</button>
+  </div>
+</div>
+
 <div id="s0" class="screen">
   <video id="v0" src="audio/courir.mp4" playsinline muted loop preload="auto" aria-label="Sam en train de courir"></video>
 </div>
@@ -77,6 +86,7 @@ const s0=document.getElementById("s0");
 const s1=document.getElementById("s1");
 const s2=document.getElementById("s2");
 const s3=document.getElementById("s3");
+const scanReason=document.getElementById("scanReason");
 const qCadenas=document.getElementById("qCadenas");
 const v0=document.getElementById("v0");
 const v1=document.getElementById("v1");
@@ -91,8 +101,33 @@ const PAUSE=1200;
 startBtn.onclick=()=>{
   trackScan("qr1");
   startBtn.remove();
-  step0();
+  showScanReason();
 };
+
+function saveScanReason(reason){
+  try{
+    const reasons=JSON.parse(localStorage.getItem("qr_scan_reasons")||"{}");
+    reasons.qr1=reason;
+    localStorage.setItem("qr_scan_reasons",JSON.stringify(reasons));
+    localStorage.setItem("qr1_scan_reason",reason);
+  }catch(e){
+    console.error("Storage error:",e);
+  }
+}
+
+function showScanReason(){
+  scanReason.classList.add("active");
+  scanReason.querySelectorAll(".choiceBtn").forEach(btn=>{
+    btn.onclick=()=>{
+      saveScanReason(btn.dataset.reason);
+      scanReason.classList.add("fadeout");
+      setTimeout(()=>{
+        scanReason.classList.remove("active","fadeout");
+        step0();
+      },500);
+    };
+  });
+}
 
 function step0(){
   s0.classList.add("active");
