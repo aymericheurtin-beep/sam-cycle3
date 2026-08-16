@@ -3,246 +3,412 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=yes">
-<title>QR9 - Bureau Vidal</title>
+<meta name="theme-color" content="#000000">
+<title>QR9 — Le bureau de Vidal</title>
 <style>
-html,body{margin:0;height:100%;background:#000;color:#fff;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;overflow:hidden}
-#start{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:clamp(20px,5vmin,26px);padding:20px 40px;background:#fff;color:#000;border:none;border-radius:10px;cursor:pointer;z-index:100}
-#restart{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);font-size:clamp(20px,5vmin,26px);padding:15px 30px;background:#fff;color:#000;border:none;border-radius:10px;cursor:pointer;z-index:100;display:none}
-#text{position:absolute;left:50%;transform:translateX(-50%);width:92%;text-align:center;font-size:clamp(20px,4.5vmin,28px);line-height:1.45;z-index:30;display:none;white-space:pre-line;text-shadow:0 0 6px #000}
-#text.center{top:8%}
-#text.bottom{bottom:6%;font-size:clamp(18px,3.8vmin,24px);background:rgba(0,0,0,.75);padding:1.8vmin 2.5vmin;border-radius:8px;max-width:85%}
-#choices{position:absolute;bottom:8%;left:50%;transform:translateX(-50%);display:none;flex-direction:column;gap:2.2vmin;width:88%;max-height:45vh;overflow-y:auto;padding-bottom:2vmin;z-index:80;-webkit-overflow-scrolling:touch}
-.btn{font-size:clamp(18px,4vmin,24px);padding:20px 28px;background:rgba(17,17,17,.92);color:#fff;border:1px solid #fff;border-radius:8px;cursor:pointer;text-align:center;flex-shrink:0;backdrop-filter:blur(2px);font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
-.btn.sel{background:#fff;color:#000}
-#image{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);max-width:96vw;max-height:85vh;z-index:10;display:none;cursor:pointer;transition:transform .3s ease, opacity 1.2s;opacity:0}
-#image.zoomed{max-width:none;max-height:none;width:200vw;height:auto;top:60%;left:50%;transform:translate(-50%,-50%);z-index:60}
-#carnetBox{position:absolute;top:5%;left:50%;transform:translateX(-50%);width:92%;display:none;flex-direction:column;gap:1.2vmin;z-index:70;max-height:30vh;overflow-y:auto}
-.carnetBtn{font-size:clamp(18px,4vmin,24px);padding:18px 24px;background:rgba(0,0,0,.85);border:1px solid #fff;color:#fff;border-radius:6px;cursor:pointer;text-align:center;flex-shrink:0;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
-.carnetBtn.used{opacity:.4}
-#carnetLine{position:absolute;bottom:8%;left:50%;transform:translateX(-50%);width:90%;background:rgba(0,0,0,.9);padding:2.2vmin 2.2vmin 1vmin;border-radius:8px;font-size:clamp(16px,3.8vmin,22px);line-height:1.4;text-align:center;display:none;z-index:75}
-#carnetLine u{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px}
-#luBtn{display:block;margin:2vmin auto 0;padding:1.8vmin 4vmin;background:#fff;color:#000;border:none;border-radius:6px;font-size:clamp(15px,3.5vmin,20px);cursor:pointer;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
-#hint{position:absolute;bottom:2%;left:50%;transform:translateX(-50%);font-size:clamp(16px,3.2vmin,20px);color:#fff;background:rgba(0,0,0,.6);padding:1vmin 2vmin;border-radius:6px;z-index:65;display:none;pointer-events:none}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;background:#000;color:#fff;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden}
+body{display:flex;align-items:center;justify-content:center}
+button{font:inherit}
+
+.screen{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:18px;background:#000;opacity:0;transition:opacity .45s ease}
+.screen.active{display:flex;opacity:1}
+.screen.fading{opacity:0}
+
+.media{max-width:94vw;max-height:82vh;width:auto;height:auto;object-fit:contain}
+.caption{position:absolute;left:50%;bottom:4vh;transform:translateX(-50%);width:min(88vw,720px);padding:12px 16px;border-radius:8px;background:rgba(0,0,0,.82);font-size:clamp(18px,4vmin,24px);line-height:1.4}
+.question{width:min(92vw,760px);font-size:clamp(20px,4.5vmin,28px);line-height:1.4;margin-bottom:24px}
+.sub{font-size:clamp(16px,3.2vmin,20px);line-height:1.35;color:#bbb;margin-top:16px}
+.buttons{display:flex;flex-direction:column;gap:12px;width:min(88vw,420px);max-height:58vh;overflow-y:auto;padding:2px}
+.btn{width:100%;padding:15px 20px;border:1px solid #fff;border-radius:8px;background:#111;color:#fff;font-size:clamp(18px,4vmin,23px);cursor:pointer}
+.btn:active{transform:scale(.98)}
+.btn.selected{background:#fff;color:#000}
+.btn.primary{background:#fff;color:#000}
+.btn.used{opacity:.38;pointer-events:none}
+
+#startBtn{display:block;width:min(88vw,360px);padding:20px 28px;border:0;border-radius:8px;background:#fff;color:#000;font-size:clamp(20px,5vmin,26px);cursor:pointer;animation:pulse 1.5s infinite}
+#restartBtn{display:none;position:fixed;left:50%;bottom:34px;transform:translateX(-50%);z-index:50;width:min(82vw,320px);padding:15px 24px;border:0;border-radius:8px;background:#fff;color:#000;font-size:clamp(18px,4vmin,23px);cursor:pointer}
+
+#officeScene{position:relative;width:min(92vw,calc(82vh * .6667));aspect-ratio:2/3}
+#officeScene img{display:block;width:100%;height:100%;object-fit:contain}
+#notebookHotspot{position:absolute;left:45%;top:52%;width:20%;height:10%;border:2px solid rgba(255,255,255,.85);border-radius:8px;background:rgba(255,255,255,.06);cursor:pointer;animation:hotspot 1.4s infinite}
+#notebookHint{position:absolute;left:50%;bottom:3vh;transform:translateX(-50%);width:max-content;max-width:88vw;padding:10px 16px;border-radius:8px;background:rgba(0,0,0,.82);font-size:clamp(17px,3.6vmin,22px)}
+
+#entryCard{width:min(91vw,760px);padding:24px;border:1px solid #777;border-radius:10px;background:#111;text-align:left;font-family:Georgia,"Times New Roman",serif;font-size:clamp(17px,3.6vmin,22px);line-height:1.5;white-space:pre-line}
+#entryCard strong{display:block;margin-bottom:10px;text-decoration:underline;text-underline-offset:4px}
+#continueEntry{margin-top:24px;width:min(80vw,320px)}
+
+#clue{width:min(90vw,700px);padding:28px 22px;border:1px solid #666;border-radius:10px;background:#101010;font-family:Georgia,"Times New Roman",serif}
+#clue .lead{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#bbb;font-size:clamp(16px,3.2vmin,20px);margin-bottom:24px}
+#clue .name{font-size:clamp(25px,6vmin,38px);font-weight:700;letter-spacing:.02em}
+#clue .agreement{font-size:clamp(21px,5vmin,31px);margin-top:18px;font-style:italic}
+
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.67}}
+@keyframes hotspot{0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,.48)}50%{box-shadow:0 0 0 8px rgba(255,255,255,0)}}
+@media (prefers-reduced-motion:reduce){.screen{transition:none}#startBtn,#notebookHotspot{animation:none}}
 </style>
 </head>
 <body>
-<button id="start" type="button" onclick="run()">Touche pour commencer</button>
-<button id="restart" type="button" onclick="location.reload()">Recommencer</button>
 
-<div id="text"></div>
-<div id="choices"></div>
-<img id="image" alt="">
-<div id="carnetBox">
-  <button class="carnetBtn" data-id="LAVELOT">[ LAVELOT S. ]</button>
-  <button class="carnetBtn" data-id="MOREL">[ MOREL N. ]</button>
-  <button class="carnetBtn" data-id="DUBOIS">[ DUBOIS C. ]</button>
-</div>
-<div id="carnetLine"></div>
-<div id="hint"></div>
+<button id="startBtn" type="button">Touche pour commencer</button>
+<button id="restartBtn" type="button">Recommencer</button>
 
-<audio id="aKey" src="bruitkey.mp3" preload="auto" playsinline></audio>
-<audio id="aPage" src="bruit_pagephoto.mp3" preload="auto" playsinline></audio>
+<section id="visualScreen" class="screen" aria-live="polite">
+  <img id="visual" class="media" src="" alt="">
+  <div id="visualCaption" class="caption" hidden></div>
+</section>
+
+<section id="questionScreen" class="screen" aria-live="polite">
+  <div id="question" class="question"></div>
+  <div id="questionButtons" class="buttons"></div>
+</section>
+
+<section id="officeScreen" class="screen" aria-live="polite">
+  <div id="officeScene">
+    <img src="bureau_vidal.webp" alt="Le bureau sombre et ordonné de M. Vidal">
+    <button id="notebookHotspot" type="button" aria-label="Ouvrir le carnet noir"></button>
+  </div>
+  <div id="notebookHint">Touche le carnet noir.</div>
+</section>
+
+<section id="notebookScreen" class="screen" aria-live="polite">
+  <div id="notebookQuestion" class="question">Par quelle fiche commences-tu&nbsp;?</div>
+  <div id="notebookButtons" class="buttons">
+    <button class="btn notebookBtn" type="button" data-id="LAVELOT">LAVELOT S.</button>
+    <button class="btn notebookBtn" type="button" data-id="MOREL">MOREL N.</button>
+    <button class="btn notebookBtn" type="button" data-id="DUBOIS">DUBOIS C.</button>
+  </div>
+</section>
+
+<section id="entryScreen" class="screen" aria-live="polite">
+  <div id="entryCard"></div>
+  <button id="continueEntry" class="btn primary" type="button">J’ai lu</button>
+</section>
+
+<section id="clueScreen" class="screen" aria-live="polite">
+  <div id="clue">
+    <div class="lead">Sur la dernière photographie, Inès agrandit quelques mots.</div>
+    <div class="name">CASTEL R. — 19 h 42</div>
+    <div class="agreement">Accord silencieux.</div>
+  </div>
+</section>
+
+<audio id="pageSound" src="bruit_pagephoto.mp3" preload="auto" playsinline></audio>
+<audio id="keySound" src="bruitkey.mp3" preload="auto" playsinline></audio>
 
 <script>
-function trackScan(id) {
-  try {
-    let usedSet = new Set(JSON.parse(localStorage.getItem('qr_used_set') || '[]'));
+function trackScan(id){
+  try{
+    const usedSet=new Set(JSON.parse(localStorage.getItem("qr_used_set")||"[]"));
     usedSet.add(id);
-    let arr = Array.from(usedSet);
-    localStorage.setItem('qr_used_set', JSON.stringify(arr));
-    localStorage.setItem('scans_used', arr.length);
-    localStorage.setItem('scans_total', '11'); 
-  } catch(e) { console.error('Storage error:', e); }
+    const arr=Array.from(usedSet);
+    localStorage.setItem("qr_used_set",JSON.stringify(arr));
+    localStorage.setItem("scans_used",arr.length);
+    localStorage.setItem("scans_total","11");
+  }catch(error){console.error("Storage error:",error)}
 }
 
-const $ = id => document.getElementById(id);
-const start = $('start'), restart = $('restart'), text = $('text'), choices = $('choices'), image = $('image'), carnetBox = $('carnetBox'), carnetLine = $('carnetLine'), hint=$('hint');
-const aKey = $('aKey'), aPage = $('aPage');
+const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+const startBtn=document.getElementById("startBtn");
+const restartBtn=document.getElementById("restartBtn");
+const visualScreen=document.getElementById("visualScreen");
+const visual=document.getElementById("visual");
+const visualCaption=document.getElementById("visualCaption");
+const questionScreen=document.getElementById("questionScreen");
+const question=document.getElementById("question");
+const questionButtons=document.getElementById("questionButtons");
+const officeScreen=document.getElementById("officeScreen");
+const notebookHotspot=document.getElementById("notebookHotspot");
+const notebookScreen=document.getElementById("notebookScreen");
+const notebookQuestion=document.getElementById("notebookQuestion");
+const notebookButtons=document.getElementById("notebookButtons");
+const entryScreen=document.getElementById("entryScreen");
+const entryCard=document.getElementById("entryCard");
+const continueEntry=document.getElementById("continueEntry");
+const clueScreen=document.getElementById("clueScreen");
+const pageSound=document.getElementById("pageSound");
+const keySound=document.getElementById("keySound");
 
-const show = el => el.style.display = 'block';
-const hide = el => el.style.display = 'none';
-const flex = el => el.style.display = 'flex';
-const sleep = ms => new Promise(r => setTimeout(r, ms));
+const screens=[visualScreen,questionScreen,officeScreen,notebookScreen,entryScreen,clueScreen];
+const notebookEntries={
+  LAVELOT:{
+    title:"LAVELOT S.",
+    text:"Moteur exceptionnel. M’a coûté mon poste. Vingt-trois ans ici. Il n’ira pas au championnat si j’ai mon mot à dire. Trous noirs. Fragile. Exploitable si nécessaire."
+  },
+  MOREL:{
+    title:"MOREL N.",
+    text:"Potentiel solide. Père absent et indifférent — mobile émotionnel fort. Si Lavelot tombe, Morel prend sa place. Il veut son père dans les tribunes. Moi je veux partir en paix. Tout le monde est gagnant. Accord verbal confirmé."
+  },
+  DUBOIS:{
+    title:"DUBOIS C.",
+    text:"Court comme un frigo qui aurait oublié ses roulettes."
+  }
+};
 
-function showText(t, hold=3000, pos='center'){
-  text.className=''; text.classList.add(pos);
-  text.textContent=t; show(text);
-  return sleep(hold).then(()=>hide(text));
-}
-function showTextStay(t,pos='center'){
-  text.className=''; text.classList.add(pos);
-  text.textContent=t; show(text);
-}
-function showImage(src){
-  return new Promise(res=>{
-    let done=false;
-    const finish=()=>{
-      if(done) return;
-      done=true;
-      show(image);
-      requestAnimationFrame(()=>{ image.style.opacity='1'; });
-      res();
-    };
-    image.onload=finish;
-    image.onerror=()=>{ console.warn('Image manquante:',src); finish(); };
-    image.classList.remove('zoomed');
-    image.style.opacity='0';
-    image.src=src;
-    setTimeout(finish,2000);
-  });
-}
-function hideImage(){
-  return new Promise(async res=>{
-    image.style.opacity='0';
-    await sleep(1200);
-    hide(image);hide(hint);image.src='';image.classList.remove('zoomed');
-    res();
-  });
-}
-async function play(a){try{await a.play();}catch{}}
-function stopAudio(a){try{a.pause();a.currentTime=0;}catch{}}
+let notebookOrder=[];
+let currentEntry="";
 
-function askMulti(q,opts){
-  return new Promise(res=>{
-    showTextStay(q,'center');
-    choices.innerHTML='';
-    const sel=new Set();
-    opts.forEach(o=>{
-      const b=document.createElement('button');b.className='btn';b.textContent=o;
-      b.onclick=()=>{b.classList.toggle('sel'); sel.has(o)?sel.delete(o):sel.add(o); };
-      choices.appendChild(b);
+function activate(screen){
+  screens.forEach(item=>item.classList.remove("active","fading"));
+  screen.classList.add("active");
+}
+
+async function fade(screen){
+  screen.classList.add("fading");
+  await sleep(450);
+  screen.classList.remove("active","fading");
+}
+
+async function showVisual(src,alt,caption="",hold=3500){
+  visual.src=src;
+  visual.alt=alt;
+  visualCaption.textContent=caption;
+  visualCaption.hidden=!caption;
+  activate(visualScreen);
+  await sleep(hold);
+  await fade(visualScreen);
+}
+
+function askSingle(prompt,options){
+  return new Promise(resolve=>{
+    question.textContent=prompt;
+    questionButtons.replaceChildren();
+    options.forEach(option=>{
+      const button=document.createElement("button");
+      button.type="button";
+      button.className="btn";
+      button.textContent=option;
+      button.addEventListener("click",async()=>{
+        await fade(questionScreen);
+        resolve(option);
+      },{once:true});
+      questionButtons.appendChild(button);
     });
-    const ok=document.createElement('button');ok.className='btn';ok.textContent='Valider';ok.style.marginTop='1vmin';ok.style.background='#fff';ok.style.color='#000';
-    ok.onclick=()=>{hide(text);hide(choices);res([...sel]);};
-    choices.appendChild(ok);
-    flex(choices);
-    choices.scrollTop=0;
+    activate(questionScreen);
   });
 }
-function askSingle(q,opts){
-  return new Promise(res=>{
-    showTextStay(q,'center');
-    choices.innerHTML='';
-    opts.forEach(o=>{
-      const b=document.createElement('button');b.className='btn';b.textContent=o;
-      b.onclick=()=>{hide(text);hide(choices);res(o);};
-      choices.appendChild(b);
+
+function askOffice(prompt){
+  const options=["Ordonné","En bazar","Petit","Grand","Lumineux","Sombre","Rien de précis"];
+  return new Promise(resolve=>{
+    question.textContent=prompt;
+    questionButtons.replaceChildren();
+    const selected=new Set();
+    const buttons=[];
+
+    options.forEach(option=>{
+      const button=document.createElement("button");
+      button.type="button";
+      button.className="btn";
+      button.textContent=option;
+      button.addEventListener("click",()=>{
+        if(option==="Rien de précis"){
+          selected.clear();
+          buttons.forEach(item=>item.classList.remove("selected"));
+          selected.add(option);
+          button.classList.add("selected");
+          return;
+        }
+        selected.delete("Rien de précis");
+        buttons.forEach(item=>{
+          if(item.textContent==="Rien de précis") item.classList.remove("selected");
+        });
+        if(selected.has(option)){
+          selected.delete(option);
+          button.classList.remove("selected");
+        }else{
+          selected.add(option);
+          button.classList.add("selected");
+        }
+      });
+      buttons.push(button);
+      questionButtons.appendChild(button);
     });
-    flex(choices);
-    choices.scrollTop=0;
+
+    const validate=document.createElement("button");
+    validate.type="button";
+    validate.className="btn primary";
+    validate.textContent="Valider";
+    validate.addEventListener("click",async()=>{
+      const answer=selected.size?[...selected]:["Rien de précis"];
+      await fade(questionScreen);
+      resolve(answer);
+    },{once:true});
+    questionButtons.appendChild(validate);
+    activate(questionScreen);
   });
 }
-function waitImageTap(){
-  return new Promise(res=>{
-    const handler=()=>{
-      image.removeEventListener('click',handler);
-      image.removeEventListener('touchstart',handler);
-      res();
+
+function playSafely(media){
+  try{
+    media.currentTime=0;
+    const promise=media.play();
+    if(promise) promise.catch(()=>{});
+  }catch(error){console.warn("Lecture audio impossible:",error)}
+}
+
+function waitForSound(media,maxMs){
+  return new Promise(resolve=>{
+    let finished=false;
+    const done=()=>{
+      if(finished)return;
+      finished=true;
+      media.removeEventListener("ended",done);
+      media.removeEventListener("error",done);
+      resolve();
     };
-    image.addEventListener('click',handler);
-    image.addEventListener('touchstart',handler);
+    media.addEventListener("ended",done,{once:true});
+    media.addEventListener("error",done,{once:true});
+    setTimeout(done,maxMs);
   });
+}
+
+function waitForNotebookTap(){
+  return new Promise(resolve=>notebookHotspot.addEventListener("click",resolve,{once:true}));
+}
+
+function openNotebookMenu(){
+  notebookQuestion.textContent=notebookOrder.length===0
+    ? "Par quelle fiche commences-tu ?"
+    : "Quelle fiche lis-tu maintenant ?";
+  notebookButtons.querySelectorAll(".notebookBtn").forEach(button=>{
+    button.classList.toggle("used",notebookOrder.includes(button.dataset.id));
+  });
+  activate(notebookScreen);
+}
+
+function waitForEntryChoice(){
+  return new Promise(resolve=>{
+    const handler=event=>{
+      const button=event.target.closest(".notebookBtn");
+      if(!button||button.classList.contains("used"))return;
+      notebookButtons.removeEventListener("click",handler);
+      resolve(button.dataset.id);
+    };
+    notebookButtons.addEventListener("click",handler);
+  });
+}
+
+function showEntry(id){
+  currentEntry=id;
+  const entry=notebookEntries[id];
+  entryCard.replaceChildren();
+  const title=document.createElement("strong");
+  title.textContent=entry.title;
+  const body=document.createElement("span");
+  body.textContent=entry.text;
+  entryCard.append(title,body);
+  continueEntry.textContent=notebookOrder.length===2?"Continuer":"J’ai lu";
+  activate(entryScreen);
+}
+
+function waitForEntryContinue(){
+  return new Promise(resolve=>continueEntry.addEventListener("click",resolve,{once:true}));
 }
 
 async function run(){
-  hide(start);hide(restart);
-  trackScan('qr9');
+  trackScan("qr9");
+  startBtn.style.display="none";
 
-  await showImage('crochetage_vidal.jpg');
-  await sleep(4000);
-  showTextStay("Confinement. YouTube.\nC'est illégal.\nC'est pratique.",'bottom');
-  await sleep(3500);hide(text);await hideImage();
+  await showVisual(
+    "crochetage_vidal.webp",
+    "Inès tente d’ouvrir la porte du bureau de M. Vidal avec un trombone",
+    "Confinement. YouTube. C’est illégal. C’est pratique.",
+    4300
+  );
 
-  const vidalImagined = localStorage.getItem('qr5_vidal_imagined');
-  const bureauQuestion = vidalImagined
-    ? `Tu avais imaginé Vidal comme ${vidalImagined}.\nEt son bureau, un samedi matin, vous l'imaginez comment ?`
-    : `Son bureau, un samedi matin, tu l'imaginais comment ?`;
-  await askMulti(bureauQuestion,[
-    'Ordonné','en bazar','petit','grand','lumineux','sombre','Rien de précis'
+  const vidalImagined=localStorage.getItem("qr5_vidal_imagined");
+  const reminder=vidalImagined
+    ? `Tu avais imaginé Vidal comme ${vidalImagined.charAt(0).toLocaleLowerCase("fr-FR")+vidalImagined.slice(1)}. `
+    : "";
+  const officeAnswer=await askOffice(`${reminder}Et son bureau, pendant la pause de midi, tu l’imagines comment ?`);
+  try{localStorage.setItem("qr9_bureau_imagined",JSON.stringify(officeAnswer))}catch(error){}
+
+  await showVisual(
+    "bureau_vidal.webp",
+    "Le bureau sombre et ordonné de M. Vidal",
+    "Compare avec ce que tu avais imaginé. Ton propre film peut être différent.",
+    4600
+  );
+
+  activate(officeScreen);
+  await waitForNotebookTap();
+  await fade(officeScreen);
+
+  while(notebookOrder.length<3){
+    openNotebookMenu();
+    const id=await waitForEntryChoice();
+    await fade(notebookScreen);
+    showEntry(id);
+    await waitForEntryContinue();
+    await fade(entryScreen);
+    notebookOrder.push(id);
+
+    if(notebookOrder.length===1){
+      try{
+        localStorage.setItem("qr9_carnet_first",id);
+        localStorage.setItem("qr9_pont_qr12",id.toLowerCase()+"_first");
+      }catch(error){}
+    }
+  }
+  try{localStorage.setItem("qr9_carnet_order",JSON.stringify(notebookOrder))}catch(error){}
+
+  await showVisual(
+    "vidal_jeune.webp",
+    "Photographies et article montrant M. Vidal adolescent lors d’une ancienne compétition",
+    "Sur le mur : Vidal, quinze ans peut-être. Dossard 14.",
+    5200
+  );
+
+  const vidalMatch=await askSingle("Tu l’avais imaginé comme ça ?",[
+    "Oui, à peu près",
+    "Non, rien à voir",
+    "Je ne l’avais pas imaginé"
   ]);
+  try{localStorage.setItem("qr9_vidal_match",vidalMatch)}catch(error){}
 
-  await showImage('bureau_vidal.jpg');
-  await showText('Voici un bureau',3000,'bottom');
-  await hideImage();
+  playSafely(pageSound);
+  await showVisual(
+    "phot_carnet.webp",
+    "Inès photographie rapidement les pages du carnet de M. Vidal",
+    "Inès photographie les pages.",
+    4300
+  );
+  try{pageSound.pause();pageSound.currentTime=0}catch(error){}
 
-  await showImage('bureau_vidal.jpg');
-  hint.textContent='Appuie sur le carnet';
-  show(hint);
-  await waitImageTap();
-  hide(hint);
-  image.classList.add('zoomed');
+  playSafely(keySound);
+  const keyEnding=waitForSound(keySound,14000);
+  const emotion=await askSingle("Des pas se rapprochent. Un trousseau de clés tinte dans le couloir. Que ressens-tu ?",[
+    "De la peur",
+    "De l’excitation",
+    "Autre chose"
+  ]);
+  try{localStorage.setItem("qr9_emotion",emotion)}catch(error){}
+
+  visual.src="souslatable.webp";
+  visual.alt="Sam et Inès cachés sous le bureau pendant que M. Vidal entre dans la pièce";
+  visualCaption.textContent="M. Vidal est là.";
+  visualCaption.hidden=false;
+  activate(visualScreen);
+  await Promise.race([keyEnding,sleep(6500)]);
   await sleep(1000);
-  flex(carnetBox);
+  await fade(visualScreen);
+  try{keySound.pause();keySound.currentTime=0}catch(error){}
 
-  const carnetTexts={
-    LAVELOT:"<u>LAVELOT S.</u> : Moteur exceptionnel. M'a coûté mon poste. Vingt-trois ans ici. Il n'ira pas au championnat si j'ai mon mot à dire. Trous noirs. Fragile. Exploitable si nécessaire..",
-    MOREL:"MOREL N. : Père absent et indifférent — mobile émotionnel fort. Si Lavelot tombe, Morel prend sa place. Il veut son père dans les tribunes. Moi je veux partir en paix.Tout le monde est gagnant.",
-    DUBOIS:"DUBOIS C. : Court comme un frigo qui aurait oublié ses roulettes."
-  };
-  let opened=0;
-  const carnetOrder=[];
-  await new Promise(res=>{
-    carnetBox.querySelectorAll('.carnetBtn').forEach(btn=>{
-      btn.onclick=()=>{
-        if(btn.classList.contains('used'))return;
-        btn.classList.add('used');
-        const id=btn.dataset.id;
-        if(carnetOrder.length===0){
-          try{
-            localStorage.setItem('qr9_carnet_first', id);
-            localStorage.setItem('qr9_pont_qr12', id.toLowerCase()+'_first');
-          }catch(e){}
-        }
-        carnetOrder.push(id);
-        opened++;
-        const estDernier = opened===3;
-        carnetLine.innerHTML = carnetTexts[id] +
-          `<button id="luBtn">${estDernier ? 'Continuer' : 'J\'ai lu'}</button>`;
-        show(carnetLine);
-        document.getElementById('luBtn').onclick=()=>{
-          hide(carnetLine);
-          if(estDernier){
-            hide(carnetBox);
-            hideImage().then(()=>res());
-          }
-        };
-      };
-    });
-  });
-  try{ localStorage.setItem('qr9_carnet_order', JSON.stringify(carnetOrder)); }catch(e){}
-
-  await showImage('vidal_jeune.webp');
-  await sleep(5000);
-  await hideImage();
-
-  const vidalMatch = await askSingle("Tu l'avais imaginé comme ça ?",['Oui, à peu près','Non, rien à voir',"Je ne l'avais pas imaginé"]);
-  try{ localStorage.setItem('qr9_vidal_match', vidalMatch); }catch(e){}
-
-  await showImage('vidal_jeune.webp');
-  await sleep(5000);
-  play(aKey);
-  const feelPromise = askSingle('Là, maintenant — Tu ressens quelque chose ?',['La peur',"l'excitation",'autre chose']);
-  await sleep(1500);
-  await hideImage();
-  await showImage('phot_carnet.webp');
-  play(aPage);
-  await feelPromise;
-  await Promise.all([
-    new Promise(r=>{aKey.onended=r; setTimeout(r,4000);}),
-    new Promise(r=>{aPage.onended=r; setTimeout(r,4000);})
-  ]);
-  stopAudio(aKey); stopAudio(aPage);
-  await hideImage();
-
-  await showImage('souslatable.jpg');
-  await sleep(4000);
-  await hideImage();
-
-  show(restart);
+  activate(clueScreen);
+  await sleep(6500);
+  restartBtn.style.display="block";
 }
+
+startBtn.addEventListener("click",run,{once:true});
+restartBtn.addEventListener("click",()=>location.reload());
+
+["crochetage_vidal.webp","bureau_vidal.webp","phot_carnet.webp","souslatable.webp","vidal_jeune.webp"].forEach(src=>{
+  const preload=new Image();
+  preload.src=src;
+});
 </script>
 </body>
 </html>
-
 
 
