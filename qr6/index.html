@@ -29,6 +29,12 @@ body{background:#000;color:#fff;font-family:system-ui,-apple-system,'Segoe UI',R
 #overlay{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none;z-index:9996;transition:opacity .3s}
 #overlay.show{opacity:1;pointer-events:auto}
 
+#scanReason{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:18px;z-index:9998;background:#000}
+#scanReason p{font-size:clamp(20px,4.5vmin,28px);line-height:1.45;margin-bottom:22px}
+.reasonChoices{display:flex;flex-direction:column;gap:14px;width:min(88vw,420px)}
+.reasonBtn{width:100%;padding:15px 20px;border:1px solid #fff;border-radius:8px;background:#111;color:#fff;font:inherit;font-size:clamp(18px,4vmin,23px);cursor:pointer}
+.reasonBtn:active{transform:scale(.98)}
+
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.6}}
 @media (prefers-reduced-motion:reduce){#start{animation:none}#text,#image,#restart,#overlay{transition:none}}
 </style>
@@ -36,6 +42,14 @@ body{background:#000;color:#fff;font-family:system-ui,-apple-system,'Segoe UI',R
 <body>
 
 <button id="start" class="btn" type="button">Touche pour commencer</button>
+<div id="scanReason" class="hidden">
+  <p>Pourquoi as-tu ouvert ce QR&nbsp;?</p>
+  <div class="reasonChoices">
+    <button type="button" class="reasonBtn" data-reason="appui">J’ai besoin d’un coup de pouce</button>
+    <button type="button" class="reasonBtn" data-reason="comparaison">Je veux comparer avec ce que j’ai imaginé</button>
+    <button type="button" class="reasonBtn" data-reason="curiosite">Je veux juste voir ce qui se cache ici</button>
+  </div>
+</div>
 <div id="text"></div>
 <img id="image" src="" alt="">
 <div id="overlay"></div>
@@ -65,6 +79,7 @@ function trackScan(id){
 }
 
 const start=document.getElementById('start');
+const scanReason=document.getElementById('scanReason');
 const text=document.getElementById('text');
 const image=document.getElementById('image');
 const restart=document.getElementById('restart');
@@ -79,8 +94,30 @@ const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 start.onclick=()=>{
   trackScan('qr6');
   start.classList.add('hidden');
-  sequence();
+  showScanReason();
 };
+
+function saveScanReason(reason){
+  try{
+    const reasons=JSON.parse(localStorage.getItem('qr_scan_reasons')||'{}');
+    reasons.qr6=reason;
+    localStorage.setItem('qr_scan_reasons',JSON.stringify(reasons));
+    localStorage.setItem('qr6_scan_reason',reason);
+  }catch(e){
+    console.error('Storage error:',e);
+  }
+}
+
+function showScanReason(){
+  scanReason.classList.remove('hidden');
+  scanReason.querySelectorAll('.reasonBtn').forEach(button=>{
+    button.onclick=()=>{
+      saveScanReason(button.dataset.reason);
+      scanReason.classList.add('hidden');
+      sequence();
+    };
+  });
+}
 
 restart.onclick=()=>location.reload();
 
