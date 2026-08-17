@@ -116,11 +116,11 @@ const porte=document.getElementById("porte");
 const screens=[textScreen,countdownScreen,sceneScreen];
 
 const descriptions={
-  Rémy:"Le bras en écharpe. Il évite tous les regards.",
+  Rémy:"Le bras en écharpe, il préférerait même l'hôpital à cet endroit..",
   Vidal:"Bras croisés. Son poignet gauche est nu.",
-  Inès:"Debout. Son carnet ouvert entre les mains.",
-  Sam:"Il ne se souvient toujours pas de jeudi soir.",
-  Noé:"Assis près de Sam. Il ne dit rien.",
+  Inès:"Debout. Prête à faire émerger la vérité.",
+  Sam:"Tendu, son avenir se joue maintenant.",
+  Noé:"Assis près de Sam. Il s'en veut.",
   Chloé:"Arrivée la dernière. Elle fixe ses mains."
 };
 
@@ -244,7 +244,6 @@ async function run(){
   await showText("Jeudi, 8 h 31.\nBureau de Mme Arnaud.",2600);
 
   playSafely(porte);
-  await showText("La porte se referme.",1100);
   await runCountdown();
   try{porte.pause();porte.currentTime=0}catch(error){}
 
