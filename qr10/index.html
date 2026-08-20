@@ -93,7 +93,7 @@ button{font:inherit}
   </div>
 </section>
 
-<aside id="tooltip aria-live="polite">
+<aside id="tooltip" aria-live="polite">
   <strong id="tooltipName"></strong>
   <div id="tooltipDesc"></div>
   <button id="tooltipClose" type="button">Fermer</button>
@@ -245,7 +245,10 @@ function exploreScene(){
     document.querySelectorAll(".zone").forEach(zone=>{
       zone.addEventListener("click",()=>openTooltip(zone));
     });
-    tooltipClose.addEventListener("click",closeTooltip);
+    tooltipClose.addEventListener("click",()=>{
+      closeTooltip();
+      if(seen.size===6)sceneContinue.click();
+    });
     sceneContinue.addEventListener("click",()=>{
       closeTooltip();
       resolve();
@@ -367,5 +370,6 @@ const preload=new Image();
 preload.src="touslessuspects.webp";
 </script>
 </body>
+</html>
 </html>
 
