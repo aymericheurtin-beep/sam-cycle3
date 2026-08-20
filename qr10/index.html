@@ -40,6 +40,14 @@ button{font:inherit}
 #tooltipName{display:block;margin-bottom:7px;font-size:clamp(20px,4.7vmin,27px);letter-spacing:.04em;text-transform:uppercase}
 #tooltipDesc{font-size:clamp(17px,3.7vmin,22px)}
 #tooltipClose{display:block;margin:15px auto 0;padding:11px 22px;border:0;border-radius:7px;background:#fff;color:#000;font-size:clamp(16px,3.4vmin,20px);cursor:pointer}
+#journeyScreen{overflow-y:auto;justify-content:flex-start;padding:5vh 18px}
+#journeyCard{width:min(92vw,720px);margin:auto;padding:24px;border:1px solid #555;border-radius:12px;background:#101010;text-align:left}
+#journeyCard h1{font-size:clamp(25px,5.5vmin,34px);margin-bottom:18px;text-align:center}
+#journeyCard p{font-size:clamp(17px,3.7vmin,22px);line-height:1.45;margin:10px 0}
+#journeyList{margin:14px 0 4px;padding-left:22px}
+#journeyList li{font-size:clamp(16px,3.4vmin,20px);line-height:1.4;margin:9px 0}
+#journeyNote{color:#bbb;font-size:clamp(15px,3.1vmin,18px)!important;margin-top:18px!important}
+#backToBook{display:block;margin:22px auto 0;padding:14px 22px;border:0;border-radius:8px;background:#fff;color:#000;font-size:clamp(18px,4vmin,23px);cursor:pointer}
 
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.67}}
 @media (prefers-reduced-motion:reduce){.screen{transition:none}#startBtn{animation:none}}
@@ -75,7 +83,17 @@ button{font:inherit}
   <div id="sceneHint">Écoute…</div>
 </section>
 
-<aside id="tooltip" aria-live="polite">
+<section id="journeyScreen" class="screen" aria-live="polite">
+  <div id="journeyCard">
+    <h1>Ton parcours de lecteur</h1>
+    <p id="journeyCount"></p>
+    <ul id="journeyList"></ul>
+    <p id="journeyNote">Ce n’est ni une note ni un test. C’est le chemin que tu as suivi dans l’histoire.</p>
+    <button id="backToBook" type="button">Reprendre le roman</button>
+  </div>
+</section>
+
+<aside id="tooltip aria-live="polite">
   <strong id="tooltipName"></strong>
   <div id="tooltipDesc"></div>
   <button id="tooltipClose" type="button">Fermer</button>
@@ -111,12 +129,16 @@ const tooltip=document.getElementById("tooltip");
 const tooltipName=document.getElementById("tooltipName");
 const tooltipDesc=document.getElementById("tooltipDesc");
 const tooltipClose=document.getElementById("tooltipClose");
+const journeyScreen=document.getElementById("journeyScreen");
+const journeyCount=document.getElementById("journeyCount");
+const journeyList=document.getElementById("journeyList");
+const backToBook=document.getElementById("backToBook");
 const narrateur=document.getElementById("narrateur");
 const porte=document.getElementById("porte");
-const screens=[textScreen,countdownScreen,sceneScreen];
+const screens=[textScreen,countdownScreen,sceneScreen,journeyScreen];
 
 const descriptions={
-  Rémy:"Le bras en écharpe, il préférerait même l'hôpital à cet endroit..",
+  Rémy:"Le bras en écharpe, il préférerait même l’hôpital à cet endroit.",
   Vidal:"Bras croisés. Son poignet gauche est nu.",
   Inès:"Debout. Prête à faire émerger la vérité.",
   Sam:"Tendu, son avenir se joue maintenant.",
@@ -231,6 +253,60 @@ function exploreScene(){
   });
 }
 
+function readJSON(key,fallback){
+  try{return JSON.parse(localStorage.getItem(key)||JSON.stringify(fallback))}catch(error){return fallback}
+}
+
+function reasonText(code){
+  if(code==="appui")return "avoir un coup de pouce";
+  if(code==="comparaison")return "comparer avec ton propre film";
+  if(code==="curiosite")return "découvrir ce qui se cachait derrière le QR";
+  return "";
+}
+
+function articleFor(value){
+  if(value==="caméra")return "la caméra";
+  if(value==="fumée")return "la fumée";
+  if(value==="carnet")return "le carnet";
+  return value;
+}
+
+function carnetLabel(value){
+  const labels={LAVELOT:"LAVELOT S.",MOREL:"MOREL N.",DUBOIS:"DUBOIS C."};
+  return labels[(value||"").toUpperCase()]||value;
+}
+
+function addJourneyLine(content){
+  const item=document.createElement("li");
+  item.textContent=content;
+  journeyList.appendChild(item);
+}
+
+function buildJourney(firstLook){
+  journeyList.replaceChildren();
+  const used=new Set(readJSON("qr_used_set",[]));
+  const total=Number(localStorage.getItem("scans_total")||11);
+  journeyCount.textContent=`Sur cet appareil, tu as ouvert ${used.size} rendez-vous sur ${total}.`;
+
+  const reasons=readJSON("qr_scan_reasons",{});
+  const moments=[
+    ["Au début",reasons.qr1||localStorage.getItem("qr1_scan_reason")],
+    ["Dans le bureau de Mme Arnaud",reasons.qr6||localStorage.getItem("qr6_scan_reason")],
+    ["Avant d’entrer chez Vidal",reasons.qr9||localStorage.getItem("qr9_scan_reason")]
+  ].filter(([,reason])=>reasonText(reason));
+  moments.forEach(([label,reason])=>addJourneyLine(`${label}, tu as scanné pour ${reasonText(reason)}.`));
+
+  const firstEvidence=localStorage.getItem("qr6_first");
+  if(firstEvidence)addJourneyLine(`Tu as regardé ${articleFor(firstEvidence)} en premier dans le bureau de Mme Arnaud.`);
+  const firstEntry=localStorage.getItem("qr9_carnet_first");
+  if(firstEntry)addJourneyLine(`Dans le carnet de Vidal, tu as commencé par ${carnetLabel(firstEntry)}.`);
+  if(firstLook)addJourneyLine(`Pendant la réunion, ton regard s’est d’abord posé sur ${firstLook}.`);
+
+  if(journeyList.children.length===0){
+    addJourneyLine("Tes choix précédents ne sont pas enregistrés sur cet appareil.");
+  }
+}
+
 async function run(){
   trackScan("qr10");
   startBtn.style.display="none";
@@ -270,17 +346,26 @@ async function run(){
     await showText(`${firstLine}Dans le bureau, ton regard s’est d’abord posé sur ${firstLook}.\n\nCe sont des choix de lecture. Pas des preuves.`,6000);
   }
 
-  mainText.innerHTML="Dans quelques instants tu vas lire le suite de ce roman.<br><br>Chaque personnage a une raison d'être dans cette pièce.<span class=\"sub\">Toi aussi tu sais des choses. Utilise les.</span>";
+  mainText.innerHTML=`Dans quelques instants, tu vas lire la suite de ce roman.<br><br>Chaque personnage a une raison d’être dans cette pièce.<span class="sub">Toi aussi, tu sais des choses. Utilise-les.</span>`;
   activate(textScreen);
-  await sleep(6500);
-  restartBtn.style.display="block";
+  await sleep(5200);
+  await fade(textScreen);
+
+  buildJourney(firstLook);
+  activate(journeyScreen);
 }
 
 startBtn.addEventListener("click",run,{once:true});
 restartBtn.addEventListener("click",()=>location.reload());
+backToBook.addEventListener("click",()=>{
+  mainText.innerHTML="Fais-toi confiance.<span class=\"sub\">Tu peux maintenant reprendre ta lecture.</span>";
+  activate(textScreen);
+  restartBtn.style.display="block";
+});
 
 const preload=new Image();
 preload.src="touslessuspects.webp";
 </script>
 </body>
 </html>
+
