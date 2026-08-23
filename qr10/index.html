@@ -47,7 +47,6 @@ button{font:inherit}
 #journeyList{margin:14px 0 4px;padding-left:22px}
 #journeyList li{font-size:clamp(16px,3.4vmin,20px);line-height:1.4;margin:9px 0}
 #journeyNote{color:#bbb;font-size:clamp(15px,3.1vmin,18px)!important;margin-top:18px!important}
-#backToBook{display:block;margin:22px auto 0;padding:14px 22px;border:0;border-radius:8px;background:#fff;color:#000;font-size:clamp(18px,4vmin,23px);cursor:pointer}
 
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.67}}
 @media (prefers-reduced-motion:reduce){.screen{transition:none}#startBtn{animation:none}}
@@ -89,7 +88,6 @@ button{font:inherit}
     <p id="journeyCount"></p>
     <ul id="journeyList"></ul>
     <p id="journeyNote">Ce n’est ni une note ni un test. C’est le chemin que tu as suivi dans l’histoire.</p>
-    <button id="backToBook" type="button">Reprendre le roman</button>
   </div>
 </section>
 
@@ -103,15 +101,58 @@ button{font:inherit}
 <audio id="porte" src="porte.mp3" preload="auto" playsinline></audio>
 
 <script>
+const VALID_QR_IDS=new Set([
+  "qr0","qr1","qr2","qr3","qr4","qr5",
+  "qr6","qr7","qr8","qr9","qr10"
+]);
+
+function getValidScans(){
+  let stored=[];
+
+  try{
+    stored=JSON.parse(localStorage.getItem("qr_used_set")||"[]");
+  }catch(error){
+    stored=[];
+  }
+
+  const validIds=Array.isArray(stored)
+    ? stored
+        .map(id=>String(id).trim().toLowerCase())
+        .filter(id=>VALID_QR_IDS.has(id))
+    : [];
+
+  return new Set(validIds);
+}
+
+function repairStoredScans(){
+  try{
+    const repaired=Array.from(getValidScans()).slice(0,VALID_QR_IDS.size);
+    localStorage.setItem("qr_used_set",JSON.stringify(repaired));
+    localStorage.setItem("scans_used",String(repaired.length));
+    localStorage.setItem("scans_total",String(VALID_QR_IDS.size));
+    return new Set(repaired);
+  }catch(error){
+    console.error("Storage repair error:",error);
+    return new Set();
+  }
+}
+
 function trackScan(id){
   try{
-    const usedSet=new Set(JSON.parse(localStorage.getItem("qr_used_set")||"[]"));
-    usedSet.add(id);
+    const normalizedId=String(id).trim().toLowerCase();
+    const usedSet=getValidScans();
+
+    if(VALID_QR_IDS.has(normalizedId)){
+      usedSet.add(normalizedId);
+    }
+
     const arr=Array.from(usedSet);
     localStorage.setItem("qr_used_set",JSON.stringify(arr));
-    localStorage.setItem("scans_used",arr.length);
+    localStorage.setItem("scans_used",String(arr.length));
     localStorage.setItem("scans_total","11");
-  }catch(error){console.error("Storage error:",error)}
+  }catch(error){
+    console.error("Storage error:",error);
+  }
 }
 
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
@@ -132,7 +173,6 @@ const tooltipClose=document.getElementById("tooltipClose");
 const journeyScreen=document.getElementById("journeyScreen");
 const journeyCount=document.getElementById("journeyCount");
 const journeyList=document.getElementById("journeyList");
-const backToBook=document.getElementById("backToBook");
 const narrateur=document.getElementById("narrateur");
 const porte=document.getElementById("porte");
 const screens=[textScreen,countdownScreen,sceneScreen,journeyScreen];
@@ -287,9 +327,10 @@ function addJourneyLine(content){
 
 function buildJourney(firstLook){
   journeyList.replaceChildren();
-  const used=new Set(readJSON("qr_used_set",[]));
-  const total=Number(localStorage.getItem("scans_total")||11);
-  journeyCount.textContent=`Sur cet appareil, tu as ouvert ${used.size} rendez-vous sur ${total}.`;
+  const used=repairStoredScans();
+  const total=VALID_QR_IDS.size;
+  const opened=Math.min(used.size,total);
+  journeyCount.textContent=`Sur cet appareil, tu as ouvert ${opened} rendez-vous sur ${total}.`;
 
   const reasons=readJSON("qr_scan_reasons",{});
   const moments=[
@@ -360,11 +401,8 @@ async function run(){
 
 startBtn.addEventListener("click",run,{once:true});
 restartBtn.addEventListener("click",()=>location.reload());
-backToBook.addEventListener("click",()=>{
-  mainText.innerHTML="Fais-toi confiance.<span class=\"sub\">Tu peux maintenant reprendre ta lecture.</span>";
-  activate(textScreen);
-  restartBtn.style.display="block";
-});
+
+repairStoredScans();
 
 const preload=new Image();
 preload.src="touslessuspects.webp";
