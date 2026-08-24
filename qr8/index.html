@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>QR8 — Chambre 214</title>
 <link rel="preload" as="image" href="portechambre.webp">
-<link rel="preload" as="image" href="winamax.webp">
-<link rel="preload" as="image" href="ittversement.webp">
+<link rel="preload" as="image" href="winamax_proche.webp">
+<link rel="preload" as="image" href="ittversement_proche.webp">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{width:100%;height:100%;background:#000;color:#fff;overflow:hidden;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
@@ -196,13 +196,13 @@ async function run(){
   );
 
   await showImage(
-    'ittversement.webp',
+    'ittversement_proche.webp',
     'Téléphone fissuré affichant un onglet sur l’indemnisation d’un accident du travail',
     7500,
     'Un onglet est resté ouvert sur le téléphone de Rémy'
   );
 
-  image.src='winamax.webp';
+  image.src='winamax_proche.webp';
   image.alt='Téléphone fissuré affichant un rappel de paiement de paris sportifs';
   show(image);
   text.className='bottom';
@@ -241,3 +241,4 @@ restart.onclick=()=>location.reload();
 </script>
 </body>
 </html>
+
