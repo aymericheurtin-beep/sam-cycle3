@@ -100,100 +100,81 @@ function trackScan(id) {
     usedSet.add(id);
     let arr = Array.from(usedSet);
     localStorage.setItem('qr_used_set', JSON.stringify(arr));
-    localS<!DOCTYPE html>
-<html lang="fr">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>QR4</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
-
-#btn,#restart{background:#fff;color:#000;border:none;padding:20px 40px;font-size:clamp(20px,5vmin,26px);border-radius:8px;position:fixed;left:50%;transform:translateX(-50%);cursor:pointer;z-index:100}
-#btn{top:50%;transform:translate(-50%,-50%)}
-#restart{bottom:40px;display:none}
-
-#questionInes{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px}
-#questionInes p{font-size:clamp(20px,4.5vmin,28px);line-height:1.45;max-width:650px}
-#decouvrir{background:#fff;color:#000;border:none;padding:15px 30px;font-size:clamp(18px,4vmin,24px);border-radius:8px;cursor:pointer;margin-top:30px;font-family:inherit}
-
-/* Dimensions et positionnement d’origine conservés pour ne pas modifier le calibrage. */
-#conteneurQCM {
-  position:fixed;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  max-width:100vw;
-  max-height:85vh;
-  display:none;
+    localStorage.setItem('scans_used', arr.length);
+    localStorage.setItem('scans_total', '11');
+  } catch(e) { console.error('Storage error:', e); }
 }
 
-#qcm {
-  display:block;
-  width:100%;
-  height:auto;
-  max-height:85vh;
-  object-fit:contain;
+const btn = document.getElementById('btn');
+const restart = document.getElementById('restart');
+const questionInes = document.getElementById('questionInes');
+const decouvrir = document.getElementById('decouvrir');
+const conteneurQCM = document.getElementById('conteneurQCM');
+const audioUnique = document.getElementById('audioUnique');
+const messageFin = document.getElementById('messageFin');
+let started = false;
+
+function addUsed(id){
+  const set = new Set(JSON.parse(localStorage.getItem('qr_used_set')||'[]'));
+  set.add(id);
+  localStorage.setItem('qr_used_set', JSON.stringify([...set]));
 }
 
-/* Grille d’origine : 3 colonnes × 2 lignes. */
-#grilleZones {
-  position:absolute;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
-  display:grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(2, 1fr);
+function afficherQuestion(){
+  if(!started) return;
+  questionInes.style.display = 'flex';
 }
 
-.zone{cursor:pointer;border:3px solid transparent;transition:.2s;z-index:20}
-.zone:hover{border-color:#fff;background:rgba(255,255,255,.15)}
+btn.onclick = () => {
+  started = true;
+  trackScan('qr4');
+  addUsed('qr4');
+  btn.style.display = 'none';
 
-#messageFin{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:clamp(20px,4.5vmin,28px);text-align:center;display:none;z-index:10;padding:20px;max-width:650px;line-height:1.45}
+  // Sécurité : si le son met plus de 1 seconde ou échoue, on affiche directement la question
+  let audioTimeout = setTimeout(() => {
+    afficherQuestion();
+  }, 1000);
 
-/* Sur téléphone en mode portrait, on agrandit tout le bloc d’un seul geste.
-   L’image et la grille cliquable subissent exactement la même transformation :
-   le calibrage des six zones reste donc strictement inchangé. */
-@media (max-width:600px) and (orientation:portrait) {
-  #conteneurQCM {
-    transform:translate(-50%,-50%) scale(1.25);
+  audioUnique.currentTime = 0;
+  audioUnique.play().then(() => {
+    clearTimeout(audioTimeout); // Le son a réussi à démarrer
+  }).catch((err) => {
+    clearTimeout(audioTimeout);
+    console.warn("Lecture audio bloquée ou fichier introuvable :", err);
+    afficherQuestion();
+  });
+};
+
+audioUnique.onended = afficherQuestion;
+audioUnique.onerror = () => {
+  if(started) afficherQuestion();
+};
+
+decouvrir.onclick = () => {
+  questionInes.style.display = 'none';
+  conteneurQCM.style.display = 'block';
+};
+
+function validerChoix(idx){
+  try { audioUnique.pause(); } catch(e){}
+  conteneurQCM.style.display = 'none';
+
+  localStorage.setItem('qr4_ines_choice', String(idx));
+  localStorage.setItem('qr4_ines', 'ines_5_choix.webp');
+
+  if (idx === 6) {
+    messageFin.innerHTML = "Toi, tu l'as imaginée autrement.<br>C'est <strong>TON</strong> Inès à toi, garde-la bien en mémoire.";
+  } else {
+    messageFin.innerHTML = "Bien vu.<br>C'est <strong>TON</strong> Inès, garde-la bien en mémoire.";
   }
+
+  messageFin.style.display = 'block';
+  restart.style.display = 'block';
 }
-</style>
-<style>
-html,body,button,input,select,textarea{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
-p,#messageFin{font-size:clamp(20px,4.5vmin,28px)!important;line-height:1.45!important}
-#btn,#restart{font-size:clamp(20px,5vmin,26px)!important}
-</style>
-</head>
-<body>
 
-<button id="btn">Touche pour commencer</button>
-<button id="restart">Recommencer</button>
-
-<div id="questionInes">
-  <p>Dans ta tête, à quoi ressemble Inès&nbsp;?</p>
-  <button id="decouvrir" type="button">Découvrir les propositions</button>
-</div>
-
-<div id="conteneurQCM">
-  <img id="qcm" src="./ines_5_choix.webp" alt="Choisissez votre Inès">
-  <div id="grilleZones">
-    <div class="zone" onclick="validerChoix(1)"></div>
-    <div class="zone" onclick="validerChoix(2)"></div>
-    <div class="zone" onclick="validerChoix(3)"></div>
-    <div class="zone" onclick="validerChoix(4)"></div>
-    <div class="zone" onclick="validerChoix(5)"></div>
-    <div class="zone" onclick="validerChoix(6)"></div>
-  </div>
-</div>
-
-<div id="messageFin"></div>
-
-<audio id="audioUnique" src="./qrcode4ines.mp3" preload="auto"></audio>
+restart.onclick = () => location.reload();
+</script>
 
 <script>
 function trackScan(id) {
