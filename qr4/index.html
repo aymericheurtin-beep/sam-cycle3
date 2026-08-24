@@ -16,7 +16,6 @@ body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-fam
 #questionInes p{font-size:clamp(20px,4.5vmin,28px);line-height:1.45;max-width:650px}
 #decouvrir{background:#fff;color:#000;border:none;padding:15px 30px;font-size:clamp(18px,4vmin,24px);border-radius:8px;cursor:pointer;margin-top:30px;font-family:inherit}
 
-/* Dimensions et positionnement d’origine conservés pour ne pas modifier le calibrage. */
 #conteneurQCM {
   position:fixed;
   top:50%;
@@ -35,7 +34,6 @@ body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-fam
   object-fit:contain;
 }
 
-/* Grille d’origine : 3 colonnes × 2 lignes. */
 #grilleZones {
   position:absolute;
   top:0;
@@ -52,9 +50,6 @@ body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-fam
 
 #messageFin{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:clamp(20px,4.5vmin,28px);text-align:center;display:none;z-index:10;padding:20px;max-width:650px;line-height:1.45}
 
-/* Sur téléphone en mode portrait, on agrandit tout le bloc d’un seul geste.
-   L’image et la grille cliquable subissent exactement la même transformation :
-   le calibrage des six zones reste donc strictement inchangé. */
 @media (max-width:600px) and (orientation:portrait) {
   #conteneurQCM {
     transform:translate(-50%,-50%) scale(1.25);
@@ -91,7 +86,7 @@ p,#messageFin{font-size:clamp(20px,4.5vmin,28px)!important;line-height:1.45!impo
 
 <div id="messageFin"></div>
 
-<audio id="audioUnique" src="./qrcode4ines.mp3" preload="auto"></audio>
+<audio id="audioUnique" src="./qrcode4ines.mp3" playsinline></audio>
 
 <script>
 function trackScan(id) {
@@ -131,19 +126,27 @@ btn.onclick = () => {
   addUsed('qr4');
   btn.style.display = 'none';
 
-  // Sécurité : si le son met plus de 1 seconde ou échoue, on affiche directement la question
+  // Sécurité Android : si le son ne répond pas sous 800ms, on force l'affichage
   let audioTimeout = setTimeout(() => {
     afficherQuestion();
-  }, 1000);
+  }, 800);
 
-  audioUnique.currentTime = 0;
-  audioUnique.play().then(() => {
-    clearTimeout(audioTimeout); // Le son a réussi à démarrer
-  }).catch((err) => {
+  try {
+    audioUnique.load();
+    let playPromise = audioUnique.play();
+
+    if (playPromise !== undefined) {
+      playPromise.then(() => {
+        // L'audio a démarré
+      }).catch((err) => {
+        clearTimeout(audioTimeout);
+        afficherQuestion();
+      });
+    }
+  } catch(e) {
     clearTimeout(audioTimeout);
-    console.warn("Lecture audio bloquée ou fichier introuvable :", err);
     afficherQuestion();
-  });
+  }
 };
 
 audioUnique.onended = afficherQuestion;
@@ -175,82 +178,5 @@ function validerChoix(idx){
 
 restart.onclick = () => location.reload();
 </script>
-
-<script>
-function trackScan(id) {
-  try {
-    let usedSet = new Set(JSON.parse(localStorage.getItem('qr_used_set') || '[]'));
-    usedSet.add(id);
-    let arr = Array.from(usedSet);
-    localStorage.setItem('qr_used_set', JSON.stringify(arr));
-    localStorage.setItem('scans_used', arr.length);
-    localStorage.setItem('scans_total', '11');
-  } catch(e) { console.error('Storage error:', e); }
-}
-
-const btn=document.getElementById('btn');
-const restart=document.getElementById('restart');
-const questionInes=document.getElementById('questionInes');
-const decouvrir=document.getElementById('decouvrir');
-const conteneurQCM=document.getElementById('conteneurQCM');
-const audioUnique=document.getElementById('audioUnique');
-const messageFin=document.getElementById('messageFin');
-let started=false;
-
-function addUsed(id){
-  const set=new Set(JSON.parse(localStorage.getItem('qr_used_set')||'[]'));
-  set.add(id);
-  localStorage.setItem('qr_used_set',JSON.stringify([...set]));
-}
-
-function afficherQuestion(){
-  if(!started) return;
-  questionInes.style.display='flex';
-}
-
-btn.onclick=()=>{
-  started=true;
-  trackScan('qr4');
-  addUsed('qr4');
-  btn.style.display='none';
-
-  try {
-    audioUnique.currentTime=0;
-    audioUnique.play().catch(()=>afficherQuestion());
-  } catch(err) {
-    afficherQuestion();
-  }
-};
-
-audioUnique.onended=afficherQuestion;
-audioUnique.onerror=()=>{
-  if(started) afficherQuestion();
-};
-
-decouvrir.onclick=()=>{
-  questionInes.style.display='none';
-  conteneurQCM.style.display='block';
-};
-
-function validerChoix(idx){
-  try { audioUnique.pause(); } catch(e){}
-  conteneurQCM.style.display='none';
-
-  localStorage.setItem('qr4_ines_choice', String(idx));
-  localStorage.setItem('qr4_ines', 'ines_5_choix.webp');
-
-  if (idx === 6) {
-    messageFin.innerHTML = "Toi, tu l'as imaginée autrement.<br>C'est <strong>TON</strong> Inès à toi, garde-la bien en mémoire.";
-  } else {
-    messageFin.innerHTML = "Bien vu.<br>C'est <strong>TON</strong> Inès, garde-la bien en mémoire.";
-  }
-
-  messageFin.style.display='block';
-  restart.style.display='block';
-}
-
-restart.onclick=()=>location.reload();
-</script>
 </body>
 </html>
-
