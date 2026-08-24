@@ -16,7 +16,6 @@ body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-fam
 #questionInes p{font-size:clamp(20px,4.5vmin,28px);line-height:1.45;max-width:650px}
 #decouvrir{background:#fff;color:#000;border:none;padding:15px 30px;font-size:clamp(18px,4vmin,24px);border-radius:8px;cursor:pointer;margin-top:30px;font-family:inherit}
 
-/* Taille maximale augmentée (de 85vh à 95vh/95vw) tout en gardant le même conteneur relatif */
 #conteneurQCM {
   position:fixed;
   top:50%;
@@ -52,10 +51,10 @@ body{background:#000;color:#fff;width:100%;height:100vh;overflow:hidden;font-fam
 
 #messageFin{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:clamp(20px,4.5vmin,28px);text-align:center;display:none;z-index:10;padding:20px;max-width:650px;line-height:1.45}
 
-/* Maintien de l'agrandissement spécifique aux mobiles en mode portrait */
+/* Ajustement pour mobile portrait : échelle ajustée à 1.15 */
 @media (max-width:600px) and (orientation:portrait) {
   #conteneurQCM {
-    transform:translate(-50%,-50%) scale(1.35);
+    transform:translate(-50%,-50%) scale(1.15);
   }
 }
 </style>
