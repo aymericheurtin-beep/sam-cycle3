@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>QR7 — Le vestiaire</title>
 <link rel="preload" as="image" href="vestiaire_qr7.webp">
-<link rel="preload" as="image" href="mains_cadenas_qr7.webp">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{width:100%;height:100%;background:#000;color:#fff;overflow:hidden;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
@@ -32,7 +31,6 @@ button{font-family:inherit}
 <img id="image" alt="">
 
 <audio id="aVidal" src="audio_vidal.mp3" preload="auto"></audio>
-<audio id="aCadenas" src="cadenas_troisfois.mp3" preload="auto"></audio>
 <audio id="aInesNoe" src="audio_inesnoe.mp3" preload="auto"></audio>
 
 <script>
@@ -54,7 +52,6 @@ const text=$('text');
 const choices=$('choices');
 const image=$('image');
 const aVidal=$('aVidal');
-const aCadenas=$('aCadenas');
 const aInesNoe=$('aInesNoe');
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 const show=el=>el.style.display='block';
@@ -124,8 +121,6 @@ async function showImage(src,alt,hold,message=''){
   hide(text);
 }
 
-const normalize=value=>(value||'').trim().toLocaleLowerCase('fr');
-
 async function run(){
   hide(start);
   hide(restart);
@@ -150,33 +145,6 @@ async function run(){
     'Compare avec ce que tu avais imaginé.\nTon vestiaire peut être différent.'
   );
 
-  await playToEnd(aCadenas);
-  await showImage(
-    'mains_cadenas_qr7.webp',
-    'Mains de Sam vérifiant un cadenas à chiffres sur un casier',
-    2800
-  );
-
-  let qr1='';
-  try{qr1=localStorage.getItem('qr1_cadenas')||''}catch(e){}
-  const repCadenas=await askSingle('Le cadenas, tu l’avais imaginé comment ?',[
-    {label:'À chiffres',value:'un cadenas à chiffres'},
-    {label:'À clé',value:'un cadenas à clé'},
-    {label:'Un autre type',value:'un autre type de cadenas'},
-    {label:'Je ne vois rien de précis',value:'rien de précis'}
-  ]);
-  try{localStorage.setItem('qr7_cadenas',repCadenas)}catch(e){}
-
-  if(qr1){
-    if(normalize(qr1)===normalize(repCadenas)){
-      await showText('Tu avais gardé le même cadenas en tête.',3000);
-    }else{
-      await showText(`Ton image a changé depuis le début.\nTu imaginais d’abord ${qr1}.`,3800);
-    }
-  }else{
-    await showText('Tu viens de préciser ton image.',2600);
-  }
-
   await playToEnd(aInesNoe);
   await showText('Ton image a peut-être changé.\nElle continuera de se préciser avec l’histoire.',3500);
 
@@ -189,5 +157,4 @@ restart.onclick=()=>location.reload();
 </script>
 </body>
 </html>
-
 
