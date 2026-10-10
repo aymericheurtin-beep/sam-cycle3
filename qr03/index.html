@@ -1,1 +1,229 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=yes">
+<meta name="theme-color" content="#000000">
+<title>QR3 — La photo du Challenge</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;background:#000;color:#fff;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden}
+body{display:flex;align-items:center;justify-content:center}
+button{font:inherit}
+
+.screen{
+  position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:18px;background:#000;opacity:0;transition:opacity .45s ease
+}
+.screen.active{display:flex;opacity:1}
+.screen.fading{opacity:0}
+
+.mainText{
+  width:min(92vw,760px);
+  font-size:clamp(20px,4.6vmin,29px);
+  line-height:1.48;
+  white-space:pre-line
+}
+.sub{
+  display:block;
+  margin-top:18px;
+  color:#bbb;
+  font-size:clamp(16px,3.3vmin,20px);
+  line-height:1.4
+}
+
+.continueBtn{
+  display:block;
+  width:min(88vw,360px);
+  margin-top:28px;
+  padding:18px 24px;
+  border:0;
+  border-radius:8px;
+  background:#fff;
+  color:#000;
+  font-size:clamp(18px,4.4vmin,24px);
+  cursor:pointer;
+  animation:pulse 1.5s infinite
+}
+
+#imageScreen{padding:0}
+#imageWrap{
+  position:relative;
+  width:100%;
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#000
+}
+#challengeImg{
+  display:block;
+  max-width:100%;
+  max-height:100%;
+  width:auto;
+  height:auto;
+  object-fit:contain
+}
+#imageContinue{
+  position:fixed;
+  left:50%;
+  bottom:24px;
+  transform:translateX(-50%);
+  z-index:20;
+  width:min(84vw,340px);
+  margin:0;
+  background:rgba(255,255,255,.96)
+}
+#imageLabel{
+  position:fixed;
+  left:50%;
+  top:18px;
+  transform:translateX(-50%);
+  z-index:20;
+  width:max-content;
+  max-width:88vw;
+  padding:8px 13px;
+  border-radius:8px;
+  background:rgba(0,0,0,.78);
+  color:#ddd;
+  font-size:clamp(14px,3vmin,18px);
+  line-height:1.3
+}
+
+#finalScreen .mainText{font-size:clamp(24px,5.2vmin,34px)}
+#restartBtn{
+  display:none;
+  position:fixed;
+  left:50%;
+  bottom:28px;
+  transform:translateX(-50%);
+  z-index:100;
+  width:min(82vw,320px);
+  padding:15px 24px;
+  border:0;
+  border-radius:8px;
+  background:#fff;
+  color:#000;
+  font-size:clamp(18px,4vmin,23px);
+  cursor:pointer
+}
+
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.67}}
+@media (prefers-reduced-motion:reduce){
+  .screen{transition:none}
+  .continueBtn{animation:none}
+}
+</style>
+</head>
+
+<body>
+
+<section id="imagineScreen" class="screen active" aria-live="polite">
+  <div class="mainText">Avant de continuer, prends quelques secondes pour fabriquer cette photo dans ta tête.
+
+Sam vient de gagner la course.
+Il a remis son sweat.
+Son dossard est épinglé dessus.
+Derrière lui, le chrono affiche 10’14.
+
+À quoi ressemble cette photo dans ta tête ?<span class="sub">Garde ton image. Il n’y a pas de bonne réponse.</span></div>
+  <button id="imagineContinue" class="continueBtn" type="button">Touche pour continuer…</button>
+</section>
+
+<section id="imageScreen" class="screen" aria-live="polite">
+  <div id="imageWrap">
+    <img id="challengeImg"
+         src="sam_challenge_1014.webp"
+         alt="Proposition visuelle de la photographie de Sam après la course du Challenge des collèges">
+  </div>
+  <div id="imageLabel">Une proposition d’image</div>
+  <button id="imageContinue" class="continueBtn" type="button">Touche pour continuer…</button>
+</section>
+
+<section id="compareScreen" class="screen" aria-live="polite">
+  <div class="mainText">Qu’avais-tu imaginé pareil ?
+
+Qu’est-ce qui était différent dans ton propre film ?<span class="sub">Cette image n’est qu’une proposition. Tu peux garder la tienne si elle te convient mieux.</span></div>
+  <button id="compareContinue" class="continueBtn" type="button">Touche pour continuer…</button>
+</section>
+
+<section id="finalScreen" class="screen" aria-live="polite">
+  <div class="mainText">Fais-toi confiance.<span class="sub">Tu peux maintenant reprendre ta lecture.</span></div>
+</section>
+
+<button id="restartBtn" type="button">Recommencer</button>
+
+<script>
+const QR_ID="qr3";
+const SCANS_TOTAL=10; // 11 anciens - QR Noé - QR Vidal + ce nouveau QR Sam
+
+function trackScan(id){
+  try{
+    const usedSet=new Set(JSON.parse(localStorage.getItem("qr_used_set")||"[]"));
+    usedSet.add(id);
+    const arr=Array.from(usedSet);
+    localStorage.setItem("qr_used_set",JSON.stringify(arr));
+    localStorage.setItem("scans_used",arr.length);
+    localStorage.setItem("scans_total",String(SCANS_TOTAL));
+  }catch(error){
+    console.error("Storage error:",error);
+  }
+}
+
+const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+
+const imagineScreen=document.getElementById("imagineScreen");
+const imageScreen=document.getElementById("imageScreen");
+const compareScreen=document.getElementById("compareScreen");
+const finalScreen=document.getElementById("finalScreen");
+const imagineContinue=document.getElementById("imagineContinue");
+const imageContinue=document.getElementById("imageContinue");
+const compareContinue=document.getElementById("compareContinue");
+const restartBtn=document.getElementById("restartBtn");
+const challengeImg=document.getElementById("challengeImg");
+
+const screens=[imagineScreen,imageScreen,compareScreen,finalScreen];
+
+function activate(screen){
+  screens.forEach(item=>item.classList.remove("active","fading"));
+  screen.classList.add("active");
+}
+
+async function goTo(from,to){
+  from.classList.add("fading");
+  await sleep(450);
+  from.classList.remove("active","fading");
+  to.classList.add("active");
+}
+
+trackScan(QR_ID);
+
+imagineContinue.addEventListener("click",async()=>{
+  imagineContinue.disabled=true;
+  await goTo(imagineScreen,imageScreen);
+},{once:true});
+
+imageContinue.addEventListener("click",async()=>{
+  imageContinue.disabled=true;
+  await goTo(imageScreen,compareScreen);
+},{once:true});
+
+compareContinue.addEventListener("click",async()=>{
+  compareContinue.disabled=true;
+  await goTo(compareScreen,finalScreen);
+  restartBtn.style.display="block";
+},{once:true});
+
+restartBtn.addEventListener("click",()=>location.reload());
+
+challengeImg.addEventListener("error",()=>{
+  document.getElementById("imageLabel").textContent="Image introuvable : vérifie le nom « sam_challenge_1014.webp »";
+});
+
+const preload=new Image();
+preload.src="sam_challenge_1014.webp";
+</script>
+
+</body>
+</html>
 
