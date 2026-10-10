@@ -6,29 +6,15 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=yes">
 <meta name="theme-color" content="#000000">
 <title>QR — Regarde encore</title>
-
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{
-  width:100%;height:100%;
-  background:#000;color:#fff;
-  font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-  overflow:hidden
-}
+html,body{width:100%;height:100%;background:#000;color:#fff;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden}
 body{display:flex;align-items:center;justify-content:center}
 button{font:inherit}
 
 .screen{
-  position:fixed;inset:0;
-  display:none;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  text-align:center;
-  padding:18px;
-  background:#000;
-  opacity:0;
-  transition:opacity .45s ease
+  position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:18px;background:#000;opacity:0;transition:opacity .45s ease
 }
 .screen.active{display:flex;opacity:1}
 .screen.fading{opacity:0}
@@ -51,36 +37,22 @@ button{font:inherit}
   width:min(88vw,360px);
   margin-top:28px;
   padding:18px 24px;
-  border:0;
-  border-radius:8px;
-  background:#fff;
-  color:#000;
+  border:0;border-radius:8px;
+  background:#fff;color:#000;
   font-size:clamp(18px,4.4vmin,24px);
-  cursor:pointer;
-  animation:pulse 1.5s infinite
+  cursor:pointer;animation:pulse 1.5s infinite
 }
 
-/* IMAGE */
 #imageScreen{padding:0}
 #imageWrap{
   position:relative;
   width:min(100vw,1050px);
   height:min(100vh,840px);
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  display:flex;align-items:center;justify-content:center;
   line-height:0
 }
-#sceneImg{
-  display:block;
-  max-width:100%;
-  max-height:100%;
-  width:auto;
-  height:auto;
-  object-fit:contain
-}
+#sceneImg{display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain}
 
-/* couche cliquable : les zones restent invisibles jusqu'au premier toucher */
 .zone{
   position:absolute;
   border:2px solid transparent;
@@ -88,76 +60,39 @@ button{font:inherit}
   background:transparent;
   cursor:pointer
 }
-.zone:focus-visible{
-  outline:3px solid #fff;
-  outline-offset:2px
-}
-.zone.selected{
-  border-color:rgba(255,255,255,.78);
-  background:rgba(255,255,255,.08)
-}
+.zone:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.zone.selected{border-color:rgba(255,255,255,.78);background:rgba(255,255,255,.08)}
 
 #sceneHint{
-  position:fixed;
-  left:50%;
-  top:16px;
-  transform:translateX(-50%);
-  z-index:30;
-  width:max-content;
-  max-width:90vw;
-  padding:9px 14px;
-  border-radius:8px;
-  background:rgba(0,0,0,.84);
-  font-size:clamp(15px,3.2vmin,19px);
-  line-height:1.3
+  position:fixed;left:50%;top:16px;transform:translateX(-50%);z-index:30;
+  width:max-content;max-width:90vw;padding:9px 14px;border-radius:8px;
+  background:rgba(0,0,0,.84);font-size:clamp(15px,3.2vmin,19px);line-height:1.3
 }
 
-/* retour après le premier regard */
-#choicePanel{
-  display:none;
-  position:fixed;
-  left:0;right:0;bottom:0;
-  z-index:60;
-  padding:18px 18px 22px;
-  border-top:1px solid rgba(255,255,255,.28);
-  background:rgba(0,0,0,.96);
-  text-align:center
-}
-#choiceText{
-  width:min(92vw,720px);
-  margin:0 auto;
-  font-size:clamp(18px,4vmin,24px);
-  line-height:1.45
-}
-#choiceContinue{
-  margin:16px auto 0
+#focusArt{
+  width:min(88vw,900px);
+  aspect-ratio: 16 / 10;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,.25);
+  box-shadow:0 0 0 1px rgba(255,255,255,.08) inset;
+  background-color:#111;
+  background-image:url('camera_fuite_1942_lacet.webp');
+  background-repeat:no-repeat;
+  background-size:180%;
+  background-position:center center;
+  margin:22px auto 0
 }
 
-/* FIN */
 #restartBtn{
-  display:none;
-  position:fixed;
-  left:50%;bottom:28px;
-  transform:translateX(-50%);
-  z-index:100;
-  width:min(82vw,320px);
-  padding:15px 24px;
-  border:0;
-  border-radius:8px;
-  background:#fff;
-  color:#000;
-  font-size:clamp(18px,4vmin,23px);
-  cursor:pointer
+  display:none;position:fixed;left:50%;bottom:28px;transform:translateX(-50%);z-index:100;
+  width:min(82vw,320px);padding:15px 24px;border:0;border-radius:8px;
+  background:#fff;color:#000;font-size:clamp(18px,4vmin,23px);cursor:pointer
 }
 
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.67}}
-@media (prefers-reduced-motion:reduce){
-  .screen{transition:none}
-  .continueBtn{animation:none}
-}
+@media (prefers-reduced-motion:reduce){.screen{transition:none}.continueBtn{animation:none}}
 </style>
 </head>
-
 <body>
 
 <section id="introScreen" class="screen active" aria-live="polite">
@@ -165,44 +100,34 @@ button{font:inherit}
 
 Cette fois, prends quelques secondes pour l’observer vraiment.
 
-Quel détail attire ton attention en premier ?<span class="sub">Ne cherche pas forcément un indice. Regarde simplement où ton œil va d’abord.</span></div>
+Quel détail attire ton attention en premier ?<span class="sub">Touche l’endroit où ton regard se pose d’abord.</span></div>
   <button id="introContinue" class="continueBtn" type="button">Touche pour continuer…</button>
 </section>
 
 <section id="imageScreen" class="screen" aria-live="polite">
   <div id="imageWrap">
-    <img id="sceneImg"
-         src="camera_fuite_1942_lacet.webp"
-         alt="Image de vidéosurveillance du couloir de l’aile C à 19 h 42">
+    <img id="sceneImg" src="camera_fuite_1942_lacet.webp" alt="Image de vidéosurveillance du couloir de l’aile C à 19 h 42">
 
-    <!-- Zones larges, pensées pour un écran de téléphone -->
-    <button class="zone" type="button" data-look="heure"
-            aria-label="Observer l’heure"
-            style="left:0%;top:82%;width:34%;height:18%"></button>
+    <button class="zone" type="button" data-look="heure" aria-label="Observer l’heure"
+            style="left:0%;top:82%;width:30%;height:16%"></button>
 
-    <button class="zone" type="button" data-look="silhouette"
-            aria-label="Observer la silhouette"
-            style="left:31%;top:39%;width:31%;height:40%"></button>
+    <button class="zone" type="button" data-look="silhouette" aria-label="Observer la silhouette"
+            style="left:34%;top:38%;width:27%;height:41%"></button>
 
-    <button class="zone" type="button" data-look="chaussure"
-            aria-label="Observer les jambes et la chaussure"
-            style="left:35%;top:69%;width:28%;height:23%"></button>
+    <button class="zone" type="button" data-look="sweat" aria-label="Observer le sweat"
+            style="left:39%;top:49%;width:18%;height:18%"></button>
 
-    <button class="zone" type="button" data-look="couloir"
-            aria-label="Observer le couloir"
-            style="left:58%;top:10%;width:42%;height:72%"></button>
-
-    <button class="zone" type="button" data-look="casiers"
-            aria-label="Observer les casiers"
-            style="left:0%;top:12%;width:34%;height:68%"></button>
+    <button class="zone" type="button" data-look="chaussure" aria-label="Observer la chaussure et le lacet"
+            style="left:41%;top:74%;width:18%;height:14%"></button>
   </div>
 
   <div id="sceneHint">Touche l’endroit qui attire ton regard en premier.</div>
+</section>
 
-  <div id="choicePanel" aria-live="polite">
-    <div id="choiceText"></div>
-    <button id="choiceContinue" class="continueBtn" type="button">Touche pour continuer…</button>
-  </div>
+<section id="focusScreen" class="screen" aria-live="polite">
+  <div id="focusText" class="mainText"></div>
+  <div id="focusArt" aria-hidden="true"></div>
+  <button id="focusContinue" class="continueBtn" type="button">Touche pour continuer…</button>
 </section>
 
 <section id="finalScreen" class="screen" aria-live="polite">
@@ -212,103 +137,108 @@ Quel détail attire ton attention en premier ?<span class="sub">Ne cherche pas f
 <button id="restartBtn" type="button">Recommencer</button>
 
 <script>
-const QR_ID="qr_lacet";
-const SCANS_TOTAL=11;
+const QR_ID = "qr_lacet";
+const SCANS_TOTAL = 11;
 
 function trackScan(id){
   try{
-    const usedSet=new Set(JSON.parse(localStorage.getItem("qr_used_set")||"[]"));
+    const usedSet = new Set(JSON.parse(localStorage.getItem("qr_used_set") || "[]"));
     usedSet.add(id);
-    const arr=Array.from(usedSet);
-    localStorage.setItem("qr_used_set",JSON.stringify(arr));
-    localStorage.setItem("scans_used",arr.length);
-    localStorage.setItem("scans_total",String(SCANS_TOTAL));
-  }catch(error){
-    console.error("Storage error:",error);
-  }
+    const arr = Array.from(usedSet);
+    localStorage.setItem("qr_used_set", JSON.stringify(arr));
+    localStorage.setItem("scans_used", arr.length);
+    localStorage.setItem("scans_total", String(SCANS_TOTAL));
+  }catch(error){ console.error("Storage error:", error); }
 }
 
-const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-const introScreen=document.getElementById("introScreen");
-const imageScreen=document.getElementById("imageScreen");
-const finalScreen=document.getElementById("finalScreen");
-const introContinue=document.getElementById("introContinue");
-const choicePanel=document.getElementById("choicePanel");
-const choiceText=document.getElementById("choiceText");
-const choiceContinue=document.getElementById("choiceContinue");
-const restartBtn=document.getElementById("restartBtn");
-const sceneImg=document.getElementById("sceneImg");
-const sceneHint=document.getElementById("sceneHint");
-const zones=[...document.querySelectorAll(".zone")];
-const screens=[introScreen,imageScreen,finalScreen];
+const introScreen = document.getElementById("introScreen");
+const imageScreen = document.getElementById("imageScreen");
+const focusScreen = document.getElementById("focusScreen");
+const finalScreen = document.getElementById("finalScreen");
+const introContinue = document.getElementById("introContinue");
+const focusContinue = document.getElementById("focusContinue");
+const restartBtn = document.getElementById("restartBtn");
+const sceneHint = document.getElementById("sceneHint");
+const focusText = document.getElementById("focusText");
+const focusArt = document.getElementById("focusArt");
+const sceneImg = document.getElementById("sceneImg");
+const zones = [...document.querySelectorAll('.zone')];
+const screens = [introScreen, imageScreen, focusScreen, finalScreen];
 
-let firstLook=null;
+let firstLook = null;
 
-const labels={
-  heure:"l’heure",
-  silhouette:"la silhouette",
-  chaussure:"la chaussure",
-  couloir:"le couloir",
-  casiers:"les casiers"
+const focusContent = {
+  chaussure: {
+    text: "Ton regard s’est d’abord posé sur la chaussure.\n\nRegarde bien ce détail.",
+    size: "330%",
+    position: "46% 94%"
+  },
+  sweat: {
+    text: "Ton regard s’est d’abord posé sur le sweat.\n\nObserve ce que tu remarques en premier.",
+    size: "250%",
+    position: "48% 60%"
+  },
+  silhouette: {
+    text: "Ton regard s’est d’abord posé sur la silhouette entière.\n\nGarde cette première impression en tête.",
+    size: "175%",
+    position: "48% 56%"
+  },
+  heure: {
+    text: "Ton regard s’est d’abord posé sur l’heure.\n\nCe repère compte lui aussi.",
+    size: "290%",
+    position: "10% 97%"
+  }
 };
 
-function activate(screen){
-  screens.forEach(item=>item.classList.remove("active","fading"));
-  screen.classList.add("active");
-}
-
-async function goTo(from,to){
-  from.classList.add("fading");
+async function goTo(from, to){
+  from.classList.add('fading');
   await sleep(450);
-  from.classList.remove("active","fading");
-  to.classList.add("active");
+  from.classList.remove('active', 'fading');
+  to.classList.add('active');
 }
 
 function choose(zone){
-  if(firstLook)return;
+  if(firstLook) return;
+  firstLook = zone.dataset.look;
+  zone.classList.add('selected');
+  zones.forEach(z => z.disabled = true);
 
-  firstLook=zone.dataset.look;
-  zone.classList.add("selected");
-  zones.forEach(z=>z.disabled=true);
+  try{ localStorage.setItem('qr_lacet_first', firstLook); }catch(error){}
 
-  try{
-    localStorage.setItem("qr_lacet_first",firstLook);
-  }catch(error){}
+  const cfg = focusContent[firstLook];
+  focusText.textContent = cfg.text;
+  focusArt.style.backgroundSize = cfg.size;
+  focusArt.style.backgroundPosition = cfg.position;
+  sceneHint.textContent = 'Ton premier regard est enregistré sur cet appareil.';
 
-  sceneHint.textContent="Ton premier regard est enregistré sur cet appareil.";
-  choiceText.textContent=`Ton regard s’est d’abord posé sur ${labels[firstLook]}.`;
-
-  choicePanel.style.display="block";
+  setTimeout(async()=>{
+    await goTo(imageScreen, focusScreen);
+  }, 180);
 }
 
 trackScan(QR_ID);
 
-introContinue.addEventListener("click",async()=>{
-  introContinue.disabled=true;
-  await goTo(introScreen,imageScreen);
-},{once:true});
+introContinue.addEventListener('click', async()=>{
+  introContinue.disabled = true;
+  await goTo(introScreen, imageScreen);
+}, {once:true});
 
-zones.forEach(zone=>{
-  zone.addEventListener("click",()=>choose(zone));
+zones.forEach(zone => zone.addEventListener('click', ()=>choose(zone)));
+
+focusContinue.addEventListener('click', async()=>{
+  focusContinue.disabled = true;
+  await goTo(focusScreen, finalScreen);
+  restartBtn.style.display = 'block';
+}, {once:true});
+
+restartBtn.addEventListener('click', ()=>location.reload());
+
+sceneImg.addEventListener('error', ()=>{
+  sceneHint.textContent = 'Image introuvable : vérifie le nom « camera_fuite_1942_lacet.webp »';
 });
-
-choiceContinue.addEventListener("click",async()=>{
-  choiceContinue.disabled=true;
-  choicePanel.style.display="none";
-  await goTo(imageScreen,finalScreen);
-  restartBtn.style.display="block";
-},{once:true});
-
-restartBtn.addEventListener("click",()=>location.reload());
-
-sceneImg.addEventListener("error",()=>{
-  sceneHint.textContent="Image introuvable : vérifie le nom « camera_fuite_1942_lacet.webp »";
-});
-
-const preload=new Image();
-preload.src="camera_fuite_1942_lacet.webp";
 </script>
-
 </body>
 </html>
+
